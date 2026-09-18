@@ -1,0 +1,25 @@
+import { routes } from '@/app/routes';
+import type { IconName } from '../ui/icon';
+import type { Capability } from '@/shared/guards/require-capability';
+
+export interface NavItem {
+  to: string;
+  label: string;
+  icon: IconName;
+  /**
+   * Capacidad que hace visible la entrada. Se declara junto a la ruta y no dentro del
+   * componente de navegacion para que agregar una seccion sea tocar esta lista y nada mas.
+   */
+  requires?: Capability;
+}
+
+/**
+ * Secciones de la aplicacion, en el orden en que se muestran arriba y abajo.
+ *
+ * Una sola lista para las dos barras: si la de escritorio y la del movil se escribieran por
+ * separado, acabarian diciendo cosas distintas.
+ */
+export const NAV_ITEMS: NavItem[] = [
+  { to: routes.items, label: 'Catálogo', icon: 'grid' },
+  { to: routes.rooms, label: 'Salas', icon: 'live', requires: 'canBid' },
+];

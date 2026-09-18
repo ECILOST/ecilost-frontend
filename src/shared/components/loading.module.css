@@ -1,0 +1,48 @@
+.loading {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4) 0;
+  color: var(--eci-text-soft);
+  font-size: var(--text-sm);
+}
+
+.dots {
+  display: inline-flex;
+  gap: 5px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--eci-mint);
+  animation: pulse 1s var(--ease-out) infinite;
+}
+
+/*
+ * Tres puntos desfasados en vez de una barra indeterminada: ocupa menos, no promete un
+ * porcentaje que nadie puede calcular y deja claro que el sistema sigue trabajando.
+ */
+.dot:nth-child(2) {
+  animation-delay: 0.12s;
+  background: var(--eci-blue);
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.24s;
+  background: var(--eci-violet);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8);
+  }
+
+  45% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

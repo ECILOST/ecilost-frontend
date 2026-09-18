@@ -1,0 +1,44 @@
+/*
+ * Logotipo: ECI · marca · LOST.
+ *
+ * La marca del medio es una cruz girada, no un simbolo tipografico: es lo unico que
+ * distingue el logotipo de dos palabras en mayusculas, y ademas funciona como pieza suelta
+ * en el resto de la interfaz.
+ */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  color: var(--eci-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.sm {
+  font-size: var(--text-lg);
+}
+
+.lg {
+  font-size: clamp(2.25rem, 9vw, 3.25rem);
+}
+
+.mark {
+  color: var(--eci-coral);
+  transform: rotate(-12deg);
+  transition: transform var(--t-med) var(--ease-spring);
+}
+
+.brand:hover .mark {
+  transform: rotate(12deg) scale(1.08);
+}
+
+.lost {
+  color: var(--eci-mint);
+}

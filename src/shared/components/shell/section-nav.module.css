@@ -1,0 +1,84 @@
+.nav {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  border-radius: var(--r-chip);
+  color: var(--eci-text-soft);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition:
+    color var(--t-fast) linear,
+    background-color var(--t-fast) linear;
+}
+
+.link:hover {
+  color: var(--eci-text);
+  text-decoration: none;
+}
+
+/* --- Barra superior (escritorio) ------------------------------------------- */
+.top .link {
+  padding: 8px 16px;
+}
+
+.top .active {
+  background: var(--eci-neutral-soft);
+  color: var(--eci-text);
+}
+
+/* --- Barra inferior (movil) ------------------------------------------------- */
+.bottom {
+  position: fixed;
+  right: var(--page-gutter);
+  bottom: var(--s-4);
+  left: var(--page-gutter);
+  z-index: 20;
+  justify-content: space-around;
+  padding: var(--s-2);
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-chip);
+  /* Translucida y con desenfoque: la pantalla sigue viendose debajo, como en una emision. */
+  background: rgb(13 18 28 / 82%);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-float);
+}
+
+.bottom .link {
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  padding: var(--s-2) 0;
+  font-size: var(--text-xs);
+}
+
+.bottom .active {
+  color: var(--eci-mint);
+}
+
+/* La seccion activa se marca con color y con un punto: nunca con el color a secas. */
+.bottom .active::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+@media (width >= 768px) {
+  .bottom {
+    display: none;
+  }
+}
+
+@media (width < 768px) {
+  .top {
+    display: none;
+  }
+}

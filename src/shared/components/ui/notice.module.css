@@ -1,0 +1,72 @@
+/*
+ * Panel de aviso: vacio, error, permiso denegado, pantalla inexistente.
+ *
+ * Todos comparten componente porque todos responden a la misma pregunta: que pasó y qué
+ * puedo hacer ahora. Lo que cambia es el tono, no la forma.
+ */
+.notice {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  max-width: 560px;
+  padding: var(--s-5);
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-lg);
+  background: var(--eci-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+  color: var(--eci-text);
+}
+
+.body {
+  color: var(--eci-text-soft);
+  font-size: var(--text-sm);
+}
+
+.list {
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--text-sm);
+  color: var(--eci-text-soft);
+}
+
+.list li::before {
+  content: '— ';
+  color: var(--eci-coral);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-1);
+}
+
+.neutral {
+  border-style: dashed;
+  background: rgb(255 255 255 / 2%);
+}
+
+.alert {
+  border-color: rgb(255 77 109 / 35%);
+  background: linear-gradient(180deg, var(--eci-coral-soft), var(--eci-surface) 60%);
+}
+
+.alert .title {
+  color: var(--eci-coral);
+}
+
+.mint {
+  border-color: rgb(59 232 176 / 30%);
+  background: linear-gradient(180deg, var(--eci-mint-soft), var(--eci-surface) 60%);
+}
+
+.mint .title {
+  color: var(--eci-mint);
+}

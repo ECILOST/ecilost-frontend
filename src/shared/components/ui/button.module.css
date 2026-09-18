@@ -1,0 +1,84 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform var(--t-fast) var(--ease-out),
+    filter var(--t-fast) linear,
+    border-color var(--t-fast) linear,
+    color var(--t-fast) linear,
+    background-color var(--t-fast) linear;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  text-decoration: none;
+}
+
+/* El boton se hunde al pulsarlo: es el acuse de recibo mas barato que existe. */
+.button:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.md {
+  padding: 10px 18px;
+  font-size: var(--text-sm);
+}
+
+.lg {
+  padding: 15px 28px;
+  font-size: var(--text-md);
+}
+
+.primary {
+  background: var(--eci-mint);
+  color: var(--eci-on-accent);
+  box-shadow: var(--glow-mint);
+}
+
+.primary:hover {
+  filter: brightness(1.08);
+}
+
+.secondary {
+  background: transparent;
+  border-color: var(--eci-line-strong);
+  color: var(--eci-text);
+}
+
+.secondary:hover {
+  border-color: var(--eci-mint);
+  color: var(--eci-mint);
+}
+
+.quiet {
+  background: var(--eci-neutral-soft);
+  color: var(--eci-text-soft);
+}
+
+.quiet:hover {
+  background: rgb(255 255 255 / 12%);
+  color: var(--eci-text);
+}
+
+.icon {
+  display: inline-flex;
+  font-size: 1.1em;
+  line-height: 1;
+}

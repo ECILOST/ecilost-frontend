@@ -1,0 +1,79 @@
+/*
+ * La ficha se abre con el objeto grande a un lado y sus datos al otro. En el movil el objeto
+ * va primero: es lo que la persona vino a ver.
+ */
+.hero {
+  display: grid;
+  gap: var(--s-5);
+  align-items: center;
+  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
+  padding: var(--s-5);
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-xl);
+  background: linear-gradient(160deg, var(--eci-surface-high), var(--eci-surface) 60%);
+  box-shadow: var(--shadow-card);
+}
+
+@media (width < 720px) {
+  .hero {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .facts {
+    justify-content: center;
+  }
+}
+
+.plate {
+  justify-self: center;
+}
+
+.summary {
+  display: grid;
+  gap: var(--s-3);
+  min-width: 0;
+}
+
+.name {
+  font-size: var(--text-2xl);
+}
+
+.description {
+  color: var(--eci-text-soft);
+  white-space: pre-wrap;
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
+
+/*
+ * Datos secundarios: se leen despues de la fotografia y de la descripcion, asi que van en
+ * tamaño pequeño y con la etiqueta encima del valor.
+ */
+.detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4) var(--s-6);
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-lg);
+  background: rgb(255 255 255 / 2%);
+}
+
+.detail dt {
+  color: var(--eci-text-dim);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+}
+
+.detail dd {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

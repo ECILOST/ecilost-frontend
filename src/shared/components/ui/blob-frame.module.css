@@ -1,0 +1,133 @@
+/*
+ * Marco organico para los objetos. Es el gesto que hace que un objeto perdido no parezca
+ * una miniatura de catalogo: el color no esta dentro de una caja, esta detras de la cosa.
+ */
+.frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  isolation: isolate;
+}
+
+.sm {
+  width: 92px;
+}
+
+.md {
+  width: 100%;
+  max-width: 220px;
+}
+
+.lg {
+  width: 100%;
+  max-width: 340px;
+}
+
+/*
+ * El halo difuso: la luz de color.
+ *
+ * Se queda dentro del marco (`inset: 0`) y se derrama solo con el desenfoque. Sacarlo con
+ * un inset negativo ensancharia la pagina unos pixeles y, en el movil, eso es scroll
+ * horizontal en una ficha.
+ */
+.halo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 45%, var(--tone) 0%, transparent 68%);
+  opacity: 0.55;
+  filter: blur(22px);
+}
+
+/* La mancha solida: la forma irregular sobre la que se apoya el objeto. */
+.blob {
+  position: absolute;
+  inset: 8%;
+  z-index: 1;
+  background: linear-gradient(150deg, var(--tone), transparent 80%);
+  opacity: 0.85;
+  transform: rotate(-6deg);
+}
+
+.frame[data-shape='a'] .blob {
+  border-radius: var(--blob-a);
+}
+
+.frame[data-shape='b'] .blob {
+  border-radius: var(--blob-b);
+  transform: rotate(8deg);
+}
+
+.frame[data-shape='c'] .blob {
+  border-radius: var(--blob-c);
+  transform: rotate(-14deg);
+}
+
+.image {
+  position: relative;
+  z-index: 2;
+  width: 86%;
+  height: 86%;
+  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 55%));
+}
+
+/* Objetos recortados: se apoyan en la mancha y la desbordan un poco. */
+.contain {
+  object-fit: contain;
+}
+
+/*
+ * Fotografias reales: la mancha deja de ser fondo y pasa a ser el recorte, para que una foto
+ * rectangular con su propio fondo no rompa el lenguaje de formas.
+ */
+.cover {
+  width: 92%;
+  height: 92%;
+  object-fit: cover;
+}
+
+.frame[data-shape='a'] .cover {
+  border-radius: var(--blob-a);
+}
+
+.frame[data-shape='b'] .cover {
+  border-radius: var(--blob-b);
+}
+
+.frame[data-shape='c'] .cover {
+  border-radius: var(--blob-c);
+}
+
+/* Sin fotografia: el listado del catalogo no trae multimedia, y aun asi debe verse algo. */
+.fallback {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--eci-on-accent);
+  opacity: 0.75;
+  mix-blend-mode: luminosity;
+}
+
+.tone-mint {
+  --tone: var(--eci-mint);
+}
+
+.tone-coral {
+  --tone: var(--eci-coral);
+}
+
+.tone-amber {
+  --tone: var(--eci-amber);
+}
+
+.tone-blue {
+  --tone: var(--eci-blue);
+}
+
+.tone-violet {
+  --tone: var(--eci-violet);
+}

@@ -1,0 +1,79 @@
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-chip);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Tonos: el color es el mismo del texto, el fondo es su version translucida. */
+.neutral {
+  background: var(--eci-neutral-soft);
+  color: var(--eci-text-soft);
+}
+
+.mint {
+  background: var(--eci-mint-soft);
+  color: var(--eci-mint);
+}
+
+.coral {
+  background: var(--eci-coral-soft);
+  color: var(--eci-coral);
+}
+
+.amber {
+  background: var(--eci-amber-soft);
+  color: var(--eci-amber);
+}
+
+.blue {
+  background: var(--eci-blue-soft);
+  color: var(--eci-blue-text);
+}
+
+.violet {
+  background: var(--eci-violet-soft);
+  color: var(--eci-violet-text);
+}
+
+/* Variante pulsable: filtros y pestañas. */
+.interactive {
+  cursor: pointer;
+  padding: 8px 16px;
+  font-size: var(--text-sm);
+  border-color: var(--eci-line);
+  transition:
+    transform var(--t-fast) var(--ease-out),
+    border-color var(--t-fast) linear,
+    background-color var(--t-fast) linear,
+    color var(--t-fast) linear;
+}
+
+.interactive:hover {
+  transform: translateY(-1px);
+  border-color: var(--eci-line-strong);
+  color: var(--eci-text);
+}
+
+.selected {
+  background: var(--eci-text);
+  border-color: var(--eci-text);
+  color: var(--eci-on-accent);
+}
+
+.selected:hover {
+  color: var(--eci-on-accent);
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentcolor;
+}

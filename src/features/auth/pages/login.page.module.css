@@ -1,0 +1,51 @@
+/*
+ * Pantalla de entrada. Es la unica sin datos que mostrar, asi que aqui el color y la forma
+ * hacen todo el trabajo: es la primera impresion de la plataforma.
+ */
+.login {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: var(--s-5);
+  width: 100%;
+  max-width: 560px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: var(--s-7) var(--page-gutter);
+  animation: enter var(--t-slow) var(--ease-out) both;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.tagline {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-tight);
+  color: var(--eci-text);
+}
+
+/* La segunda linea en menta: el giro de la frase es lo que cuenta de que va la plataforma. */
+.taglineAccent {
+  color: var(--eci-mint);
+}
+
+.lead {
+  color: var(--eci-text-soft);
+  max-width: 42ch;
+}
+
+/* Que va a pasar al pulsar: se dice antes, no despues de salir de la pagina. */
+.note {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  color: var(--eci-text-dim);
+  font-size: var(--text-xs);
+}

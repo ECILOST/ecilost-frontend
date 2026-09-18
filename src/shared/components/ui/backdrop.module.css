@@ -1,0 +1,61 @@
+/*
+ * Fondo de la aplicacion: tres manchas de color muy difuminadas y fijas.
+ *
+ * Van detras de todo y no se mueven con el scroll, para que el color sea atmosfera y no
+ * decoracion que compite con el contenido. Es lo que evita que la pantalla oscura se lea
+ * como un panel de administracion.
+ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(60% 45% at 85% 8%, rgb(76 111 255 / 18%), transparent 70%),
+    radial-gradient(50% 40% at 8% 18%, rgb(155 107 255 / 16%), transparent 72%),
+    var(--eci-void);
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: var(--blob-a);
+  filter: blur(70px);
+  opacity: 0.4;
+}
+
+.one {
+  top: -12%;
+  left: -8%;
+  width: 46vw;
+  height: 46vw;
+  background: var(--eci-violet);
+}
+
+.two {
+  top: 6%;
+  right: -14%;
+  width: 40vw;
+  height: 40vw;
+  border-radius: var(--blob-b);
+  background: var(--eci-blue);
+}
+
+.three {
+  bottom: -20%;
+  left: 24%;
+  width: 52vw;
+  height: 40vw;
+  border-radius: var(--blob-c);
+  background: var(--eci-mint);
+  opacity: 0.18;
+}
+
+/* En la entrada el color manda: es la unica pantalla sin contenido que proteger. */
+.splash .blob {
+  opacity: 0.58;
+}
+
+.splash .three {
+  opacity: 0.3;
+}

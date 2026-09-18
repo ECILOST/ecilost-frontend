@@ -1,0 +1,43 @@
+/*
+ * El `<fieldset>` se queda solo con la semantica de grupo. La fila que se desliza es un
+ * `<div>` dentro, porque el navegador dibuja el contenido del fieldset en una caja anonima y
+ * el `overflow` declarado sobre el no llega a recortarla: la fila estiraba la pagina entera
+ * y sacaba scroll horizontal en el movil.
+ */
+.filter {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+.row {
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Espacio para que el anillo de foco de la primera y la ultima capsula no se corte. */
+  padding: 3px;
+  margin: -3px;
+}
+
+.row::-webkit-scrollbar {
+  display: none;
+}
+
+/*
+ * El radio esta oculto pero sigue siendo el control real: recibe el foco, responde a las
+ * flechas y se anuncia como grupo. La capsula solo dibuja su estado, incluido el foco.
+ */
+.option {
+  /*
+   * El radio oculto se posiciona en absoluto. Sin un ancestro posicionado aqui, su bloque
+   * contenedor es la pagina entera: escapa del recorte de la fila y la ensancha.
+   */
+  position: relative;
+}
+
+.option:has(:focus-visible) {
+  outline: 2px solid var(--eci-mint);
+  outline-offset: 3px;
+}

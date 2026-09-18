@@ -1,0 +1,129 @@
+/*
+ * Tokens de ECILOST. Es la unica capa que declara valores crudos: ningun componente
+ * escribe un hexadecimal, un radio ni una duracion a mano.
+ *
+ * La interfaz es oscura a proposito y no ofrece tema claro. La sala de subasta es el centro
+ * del producto y funciona como una transmision en vivo: sobre fondo oscuro, la fotografia
+ * del objeto, el precio y el reloj son lo unico que brilla. Un tema claro obligaria a
+ * repintar esa jerarquia entera para ganar muy poco.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* --- Base: noche de campus ------------------------------------------------ */
+  --eci-void: #080b12;
+  --eci-night: #0d121c;
+  --eci-surface: #141b27;
+  --eci-surface-high: #1b2433;
+  --eci-line: rgb(255 255 255 / 8%);
+  --eci-line-strong: rgb(255 255 255 / 18%);
+
+  /* --- Texto ---------------------------------------------------------------- */
+  --eci-text: #f2f5fa;
+  --eci-text-soft: #a7b1c2;
+  /* Aclarado hasta 4.99:1 sobre `--eci-surface`: en #6D7A8C se quedaba en 3.95:1 y lo usan
+     los metadatos de la tarjeta, que ademas van a 0.75rem. */
+  --eci-text-dim: #7e8b9e;
+  --eci-on-accent: #0a0e16;
+
+  /*
+   * --- Acentos ---------------------------------------------------------------
+   * Cinco colores con un trabajo asignado cada uno. La referencia usa el color como
+   * energia; aqui ademas significa algo, porque en una subasta en vivo el color es la via
+   * mas rapida para saber si vas ganando.
+   */
+  --eci-mint: #3be8b0; /* marca, confirmacion, "vas ganando" */
+  --eci-coral: #ff4d6d; /* accion de pujar, "en vivo", "te superaron" */
+  --eci-amber: #ffc53d; /* ECICoin y tiempo */
+  --eci-blue: #4c6fff; /* informacion, lo que viene despues */
+  --eci-violet: #9b6bff; /* celebracion y decoracion */
+
+  /*
+   * Azul y violeta puros no llegan a 4.5:1 sobre el fondo oscuro cuando son texto, asi que
+   * el tono de relleno y el de texto no son el mismo color.
+   */
+  --eci-blue-text: #a7baff;
+  --eci-violet-text: #c3a6ff;
+
+  /* Tintes translucidos: mismo color, fondo de chip. */
+  --eci-mint-soft: rgb(59 232 176 / 14%);
+  --eci-coral-soft: rgb(255 77 109 / 14%);
+  --eci-amber-soft: rgb(255 197 61 / 14%);
+  --eci-blue-soft: rgb(76 111 255 / 16%);
+  --eci-violet-soft: rgb(155 107 255 / 16%);
+  --eci-neutral-soft: rgb(255 255 255 / 7%);
+
+  /* --- Tipografia ----------------------------------------------------------- */
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-text: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  /* Para cifras protagonistas: precio, reloj, saldo. */
+  --text-hero: clamp(2.5rem, 8vw, 3.5rem);
+
+  --tracking-tight: -0.02em;
+  --tracking-caps: 0.08em;
+
+  /* --- Forma ---------------------------------------------------------------- */
+  --r-chip: 999px;
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 34px;
+
+  /*
+   * Radios irregulares. Son lo que evita que todo sea el mismo rectangulo redondeado:
+   * el objeto se recorta con una forma organica y el resto de la tarjeta sigue recto.
+   */
+  --blob-a: 63% 37% 44% 56% / 36% 59% 41% 64%;
+  --blob-b: 37% 63% 65% 35% / 62% 34% 66% 38%;
+  --blob-c: 70% 30% 33% 67% / 44% 70% 30% 56%;
+
+  /* --- Espacio -------------------------------------------------------------- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --page-max: 1080px;
+  --page-gutter: clamp(16px, 4vw, 32px);
+
+  /* --- Profundidad ---------------------------------------------------------- */
+  --shadow-card: 0 18px 40px -28px rgb(0 0 0 / 90%);
+  --shadow-float: 0 24px 60px -30px rgb(0 0 0 / 100%);
+  --glow-coral: 0 14px 34px -16px rgb(255 77 109 / 70%);
+  --glow-mint: 0 14px 34px -16px rgb(59 232 176 / 60%);
+
+  /* --- Movimiento ----------------------------------------------------------- */
+  --t-fast: 140ms;
+  --t-med: 260ms;
+  --t-slow: 480ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/*
+ * Quien pide menos movimiento recibe la misma interfaz sin transiciones ni entradas. No se
+ * desactiva solo la animacion decorativa: tambien la de estado, porque un cambio brusco es
+ * preferible a un movimiento que la persona pidio no ver.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

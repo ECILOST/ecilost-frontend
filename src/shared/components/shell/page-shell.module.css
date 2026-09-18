@@ -1,0 +1,37 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-3) var(--page-gutter);
+  border-bottom: 1px solid var(--eci-line);
+  /* Translucida: el color del fondo sigue pasando por debajo al desplazar. */
+  background: rgb(8 11 18 / 78%);
+  backdrop-filter: blur(16px);
+}
+
+.session {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-left: auto;
+}
+
+.main {
+  flex: 1;
+}
+
+@media (width < 768px) {
+  /* Hueco para la barra inferior flotante: sin el, tapa el ultimo elemento de la lista. */
+  .main {
+    padding-bottom: 88px;
+  }
+}

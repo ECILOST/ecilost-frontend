@@ -1,0 +1,3 @@
+/* Punto de entrada de los estilos globales. Lo importa `src/main.tsx` y nadie mas. */
+@import './tokens.css';
+@import './base.css';
