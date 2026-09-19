@@ -16,7 +16,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--eci-mint);
+  background: var(--eci-cyan);
   animation: pulse 1s var(--ease-out) infinite;
 }
 
@@ -31,7 +31,7 @@
 
 .dot:nth-child(3) {
   animation-delay: 0.24s;
-  background: var(--eci-violet);
+  background: var(--eci-purple);
 }
 
 @keyframes pulse {

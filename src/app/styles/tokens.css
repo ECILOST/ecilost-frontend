@@ -1,62 +1,73 @@
 /*
- * Tokens de ECILOST. Es la unica capa que declara valores crudos: ningun componente
- * escribe un hexadecimal, un radio ni una duracion a mano.
+ * Tokens de ECILOST, tomados de la referencia visual del equipo.
  *
- * La interfaz es oscura a proposito y no ofrece tema claro. La sala de subasta es el centro
- * del producto y funciona como una transmision en vivo: sobre fondo oscuro, la fotografia
- * del objeto, el precio y el reloj son lo unico que brilla. Un tema claro obligaria a
- * repintar esa jerarquia entera para ganar muy poco.
+ * Es la unica capa que declara valores crudos: ningun componente escribe un hexadecimal, un
+ * radio ni una duracion a mano. Cambiar la paleta entera es cambiar este archivo.
+ *
+ * La interfaz es oscura, sin tema claro. Sobre el azul casi negro de la referencia, lo unico
+ * que brilla es el objeto, el precio y el estado, que es exactamente la jerarquia que pide
+ * una subasta en vivo.
  */
 
 :root {
   color-scheme: dark;
 
-  /* --- Base: noche de campus ------------------------------------------------ */
-  --eci-void: #080b12;
-  --eci-night: #0d121c;
-  --eci-surface: #141b27;
-  --eci-surface-high: #1b2433;
-  --eci-line: rgb(255 255 255 / 8%);
-  --eci-line-strong: rgb(255 255 255 / 18%);
+  /* --- Base ----------------------------------------------------------------- */
+  --eci-void: #080b15;
+  --eci-night: #0d1322;
+  --eci-surface: #141b2b;
+  --eci-surface-high: #1c2438;
+  --eci-line: rgb(255 255 255 / 7%);
+  --eci-line-strong: rgb(255 255 255 / 16%);
 
   /* --- Texto ---------------------------------------------------------------- */
-  --eci-text: #f2f5fa;
-  --eci-text-soft: #a7b1c2;
-  /* Aclarado hasta 4.99:1 sobre `--eci-surface`: en #6D7A8C se quedaba en 3.95:1 y lo usan
-     los metadatos de la tarjeta, que ademas van a 0.75rem. */
-  --eci-text-dim: #7e8b9e;
-  --eci-on-accent: #0a0e16;
+  --eci-text: #ffffff;
+  --eci-text-soft: #a3adc2;
+  /* Sube de #7b869c: sobre --eci-surface-high se quedaba en 4,2:1 y no llegaba a 4,5. */
+  --eci-text-dim: #8b95a9;
+  /* Tinta sobre relleno claro (cian, amarillo, blanco). */
+  --eci-on-accent: #071019;
 
   /*
    * --- Acentos ---------------------------------------------------------------
-   * Cinco colores con un trabajo asignado cada uno. La referencia usa el color como
-   * energia; aqui ademas significa algo, porque en una subasta en vivo el color es la via
-   * mas rapida para saber si vas ganando.
+   * Los seis colores de la referencia, cada uno con un trabajo. El color aqui no decora:
+   * en una sala en vivo es la via mas rapida para saber si vas ganando.
    */
-  --eci-mint: #3be8b0; /* marca, confirmacion, "vas ganando" */
-  --eci-coral: #ff4d6d; /* accion de pujar, "en vivo", "te superaron" */
-  --eci-amber: #ffc53d; /* ECICoin y tiempo */
-  --eci-blue: #4c6fff; /* informacion, lo que viene despues */
-  --eci-violet: #9b6bff; /* celebracion y decoracion */
+  --eci-cyan: #35e0d0; /* accion principal, navegacion activa, marca */
+  --eci-pink: #ff3d71; /* pujar, "en vivo", "te superaron" */
+  --eci-yellow: #ffc93c; /* ECICoin y tiempo */
+  --eci-blue: #3b5bff; /* informacion y lo que viene despues */
+  --eci-purple: #8a4fff; /* decoracion y celebracion */
+  --eci-green: #2fe39a; /* confirmacion, "vas ganando", "ganaste" */
 
   /*
-   * Azul y violeta puros no llegan a 4.5:1 sobre el fondo oscuro cuando son texto, asi que
-   * el tono de relleno y el de texto no son el mismo color.
+   * Rosa un punto mas oscuro, solo para capsulas rellenas con texto blanco: sobre el rosa
+   * puro, el blanco se queda en 3.4:1 y estas capsulas van a 12 px.
    */
-  --eci-blue-text: #a7baff;
-  --eci-violet-text: #c3a6ff;
+  --eci-pink-deep: #e0295c;
 
-  /* Tintes translucidos: mismo color, fondo de chip. */
-  --eci-mint-soft: rgb(59 232 176 / 14%);
-  --eci-coral-soft: rgb(255 77 109 / 14%);
-  --eci-amber-soft: rgb(255 197 61 / 14%);
-  --eci-blue-soft: rgb(76 111 255 / 16%);
-  --eci-violet-soft: rgb(155 107 255 / 16%);
+  /* Tintes translucidos: mismo color, fondo de capsula. */
+  --eci-cyan-soft: rgb(53 224 208 / 15%);
+  /* El rosa va al 10 % y no al 15 %: con mas tinte, el texto rosa encima baja de 4.5:1. */
+  --eci-pink-soft: rgb(255 61 113 / 10%);
+  --eci-yellow-soft: rgb(255 201 60 / 15%);
+  --eci-blue-soft: rgb(59 91 255 / 22%);
+  --eci-purple-soft: rgb(138 79 255 / 20%);
+  --eci-green-soft: rgb(47 227 154 / 15%);
   --eci-neutral-soft: rgb(255 255 255 / 7%);
 
+  /*
+   * Azul y violeta puros no llegan a 4.5:1 como texto sobre el fondo oscuro, asi que el
+   * tono de relleno y el de texto no son el mismo color.
+   */
+  --eci-blue-text: #9fb0ff;
+  --eci-purple-text: #c0a3ff;
+
   /* --- Tipografia ----------------------------------------------------------- */
-  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
-  --font-text: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --font-text: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Manuscrita de la referencia: solo para el lema de la portada. */
+  --font-script: 'Caveat', 'Segoe Script', cursive;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -65,7 +76,7 @@
   --text-xl: 1.375rem;
   --text-2xl: 1.75rem;
   --text-3xl: 2.25rem;
-  /* Para cifras protagonistas: precio, reloj, saldo. */
+  /* Cifras protagonistas: precio, reloj, saldo. */
   --text-hero: clamp(2.5rem, 8vw, 3.5rem);
 
   --tracking-tight: -0.02em;
@@ -73,14 +84,14 @@
 
   /* --- Forma ---------------------------------------------------------------- */
   --r-chip: 999px;
-  --r-sm: 12px;
-  --r-md: 18px;
-  --r-lg: 26px;
-  --r-xl: 34px;
+  --r-sm: 14px;
+  --r-md: 20px;
+  --r-lg: 28px;
+  --r-xl: 36px;
 
   /*
-   * Radios irregulares. Son lo que evita que todo sea el mismo rectangulo redondeado:
-   * el objeto se recorta con una forma organica y el resto de la tarjeta sigue recto.
+   * Radios irregulares para las manchas de color. Son lo que evita que la pantalla sea una
+   * sucesion del mismo rectangulo redondeado.
    */
   --blob-a: 63% 37% 44% 56% / 36% 59% 41% 64%;
   --blob-b: 37% 63% 65% 35% / 62% 34% 66% 38%;
@@ -99,10 +110,10 @@
   --page-gutter: clamp(16px, 4vw, 32px);
 
   /* --- Profundidad ---------------------------------------------------------- */
-  --shadow-card: 0 18px 40px -28px rgb(0 0 0 / 90%);
-  --shadow-float: 0 24px 60px -30px rgb(0 0 0 / 100%);
-  --glow-coral: 0 14px 34px -16px rgb(255 77 109 / 70%);
-  --glow-mint: 0 14px 34px -16px rgb(59 232 176 / 60%);
+  --shadow-card: 0 20px 44px -30px rgb(0 0 0 / 95%);
+  --shadow-float: 0 24px 60px -28px rgb(0 0 0 / 100%);
+  --glow-cyan: 0 14px 34px -14px rgb(53 224 208 / 60%);
+  --glow-pink: 0 14px 34px -14px rgb(255 61 113 / 65%);
 
   /* --- Movimiento ----------------------------------------------------------- */
   --t-fast: 140ms;

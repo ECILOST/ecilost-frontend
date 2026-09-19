@@ -1,0 +1,20 @@
+/*
+ * La capsula del saldo. Amarillo, que es el color que la direccion visual le reserva a
+ * ECICoin y al tiempo: las dos cosas que en una subasta se miran de reojo.
+ */
+.balance {
+  gap: 5px;
+}
+
+/* La unidad acompaña a la cifra, no compite con ella. */
+.unit {
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+/* En el movil la cabecera ya va justa: queda la cifra, que es lo que se consulta. */
+@media (width < 480px) {
+  .unit {
+    display: none;
+  }
+}

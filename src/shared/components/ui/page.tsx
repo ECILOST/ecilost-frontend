@@ -17,11 +17,23 @@ export function Page({
   );
 }
 
+/**
+ * Enlace de vuelta. Es un enlace y no un `history.back()`: la vuelta debe llevar siempre al
+ * mismo sitio, tanto si se llego navegando como si se abrio el enlace directo.
+ */
+export function BackLink({ to, label }: { to: string; label: string }) {
+  return (
+    <Link className={styles.back} to={to}>
+      <span aria-hidden="true">←</span>
+      {label}
+    </Link>
+  );
+}
+
 export interface PageHeaderProps {
   title: string;
   /** Rotulo pequeño encima del titulo: dice donde esta la persona. */
   eyebrow?: string;
-  /** Enlace de vuelta. Es un enlace y no un `history.back()`: la vuelta debe ser predecible. */
   back?: { to: string; label: string };
   actions?: ReactNode;
 }
@@ -30,12 +42,7 @@ export function PageHeader({ title, eyebrow, back, actions }: PageHeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.titleGroup}>
-        {back ? (
-          <Link className={styles.back} to={back.to}>
-            <span aria-hidden="true">←</span>
-            {back.label}
-          </Link>
-        ) : null}
+        {back ? <BackLink to={back.to} label={back.label} /> : null}
         {eyebrow ? <span className={styles.eyebrow}>{eyebrow}</span> : null}
         <h1>{title}</h1>
       </div>

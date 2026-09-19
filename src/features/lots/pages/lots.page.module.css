@@ -1,0 +1,5 @@
+/* Una columna: un lote es una fila ancha con nombres dentro, no una pieza de rejilla. */
+.list {
+  display: grid;
+  gap: var(--s-3);
+}

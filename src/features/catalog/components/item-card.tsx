@@ -2,51 +2,81 @@ import { Link } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { BlobFrame, blobSeed } from '@/shared/components/ui/blob-frame';
 import { Pill } from '@/shared/components/ui/pill';
-import { formatDate } from '@/shared/format/date';
 import { ITEM_CONDITION_LABELS } from '../domain/item-condition';
 import type { ItemSummary } from '../model/item';
 import { ItemStatusBadge } from './item-status-badge';
 import styles from './item-card.module.css';
 
 /**
- * Fila del catalogo.
+ * Tarjeta del catalogo.
  *
- * El listado del servicio no trae multimedia a proposito (firmar las URL de cada objeto de
- * la pagina costaria una ronda por objeto), asi que la tarjeta no puede apoyarse en una
- * fotografia. En su lugar cada objeto recibe una mancha de color y una inicial, estables
- * por identificador: el catalogo se ve como una coleccion de piezas distintas y no como una
- * lista de texto, y al abrir la ficha el color coincide.
+ * Enseña la portada que firma el servicio, que es la primera fotografia del objeto. Un
+ * objeto perdido se reconoce mirandolo, no leyendo su nombre.
+ *
+ * Cuando todavia no tiene ninguna, en su lugar va el collage de color con la inicial,
+ * estable por identificador: asi el catalogo sigue viendose como una coleccion de piezas y
+ * no como una lista de texto con huecos, y al abrir la ficha los colores coinciden.
  */
 export function ItemCard({ item }: { item: ItemSummary }) {
-  const { tone, shape } = blobSeed(item.id);
+  const { palette, shape } = blobSeed(item.id);
 
   return (
     <li className={styles.card}>
       <Link className={styles.link} to={routes.item(item.id)}>
-        <BlobFrame
-          className={styles.plate}
-          size="sm"
-          tone={tone}
-          shape={shape}
-          fallback={item.name.charAt(0).toUpperCase()}
-        />
+        <div className={styles.media}>
+          <span className={styles.badge}>
+            <ItemStatusBadge status={item.status} solid />
+          </span>
+          <BlobFrame
+            className={styles.plate}
+            size="sm"
+            palette={palette}
+            shape={shape}
+            src={item.coverUrl}
+            // Decorativa a proposito: el nombre del objeto va justo debajo, en texto. Con
+            // texto alternativo, un lector de pantalla anunciaria el mismo objeto dos veces.
+            alt=""
+            fit="cover"
+            fallback={item.name.charAt(0).toUpperCase()}
+          />
+        </div>
 
         <div className={styles.body}>
-          <div className={styles.top}>
-            <h2 className={styles.title}>{item.name}</h2>
-            <ItemStatusBadge status={item.status} />
-          </div>
-
+          <h2 className={styles.title}>{item.name}</h2>
           <p className={styles.description}>{item.description}</p>
 
+          {/*
+            Categoria y estado fisico y nada mas: en una rejilla de dos columnas, la fecha
+            de registro alargaba la tarjeta tres lineas para un dato que solo importa en la
+            ficha.
+          */}
           <div className={styles.meta}>
             <Pill tone="blue">{item.category}</Pill>
             <span>{ITEM_CONDITION_LABELS[item.condition]}</span>
-            <span className={styles.dot} aria-hidden="true" />
-            <span>Registrado el {formatDate(item.registeredAt)}</span>
           </div>
         </div>
       </Link>
+    </li>
+  );
+}
+
+/**
+ * Hueco con la forma de una tarjeta, para mientras llega el catalogo.
+ *
+ * Reserva el sitio que van a ocupar las tarjetas de verdad, asi que la rejilla no da un
+ * salto al llegar los datos. Se oculta a los lectores de pantalla: no es contenido, y quien
+ * escucha ya recibe el aviso de carga por otro lado.
+ */
+export function ItemCardSkeleton() {
+  return (
+    <li className={`${styles.card} ${styles.skeleton}`} aria-hidden="true">
+      <div className={styles.link}>
+        <div className={styles.media} />
+        <div className={styles.body}>
+          <span className={styles.ghost} />
+          <span className={`${styles.ghost} ${styles.ghostShort}`} />
+        </div>
+      </div>
     </li>
   );
 }

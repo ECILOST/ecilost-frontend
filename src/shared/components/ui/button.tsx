@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import styles from './button.module.css';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'quiet';
+export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'quiet';
 export type ButtonSize = 'md' | 'lg';
 
 /**

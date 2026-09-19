@@ -30,7 +30,7 @@
 }
 
 .mark {
-  color: var(--eci-coral);
+  color: var(--eci-pink);
   transform: rotate(-12deg);
   transition: transform var(--t-med) var(--ease-spring);
 }
@@ -40,5 +40,5 @@
 }
 
 .lost {
-  color: var(--eci-mint);
+  color: var(--eci-cyan);
 }

@@ -1,0 +1,45 @@
+/*
+ * Formulario de alta y de edicion. Una sola columna y ancho de lectura: un formulario que
+ * ocupa los 1080 px de la pagina obliga a barrer la pantalla de lado a lado entre la
+ * etiqueta y su casilla.
+ */
+.form {
+  display: grid;
+  gap: var(--s-5);
+  width: 100%;
+  max-width: 620px;
+}
+
+/*
+ * Estado fisico y categoria comparten fila en cuanto hay sitio: son los dos campos cortos y
+ * juntos se leen como lo que son, la clasificacion del objeto.
+ */
+.row {
+  display: grid;
+  gap: var(--s-5);
+}
+
+@media (width >= 560px) {
+  .row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* El resumen no dibuja nada: solo es el sitio al que vuelve el foco tras un envio fallido. */
+.summary {
+  max-width: 620px;
+}
+
+.summary:focus {
+  outline: none;
+}
+
+.note {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+}
+
+.note strong {
+  color: var(--eci-green);
+  font-weight: 600;
+}

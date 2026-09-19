@@ -38,7 +38,7 @@
 
 .list li::before {
   content: '— ';
-  color: var(--eci-coral);
+  color: var(--eci-pink);
 }
 
 .actions {
@@ -54,19 +54,19 @@
 }
 
 .alert {
-  border-color: rgb(255 77 109 / 35%);
-  background: linear-gradient(180deg, var(--eci-coral-soft), var(--eci-surface) 60%);
+  border-color: rgb(255 61 113 / 35%);
+  background: linear-gradient(180deg, var(--eci-pink-soft), var(--eci-surface) 60%);
 }
 
 .alert .title {
-  color: var(--eci-coral);
+  color: var(--eci-pink);
 }
 
-.mint {
-  border-color: rgb(59 232 176 / 30%);
-  background: linear-gradient(180deg, var(--eci-mint-soft), var(--eci-surface) 60%);
+.success {
+  border-color: rgb(47 227 154 / 30%);
+  background: linear-gradient(180deg, var(--eci-cyan-soft), var(--eci-surface) 60%);
 }
 
-.mint .title {
-  color: var(--eci-mint);
+.success .title {
+  color: var(--eci-cyan);
 }

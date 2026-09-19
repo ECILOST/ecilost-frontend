@@ -6,19 +6,27 @@ import {
 } from '../domain/item-status';
 
 /**
- * El dominio decide el tono ('ok', 'info', ...) y aqui se traduce al color del sistema. Asi
+ * El dominio decide el tono ('ok', 'live', ...) y aqui se traduce al color del sistema. Asi
  * `item-status.ts` no depende de la paleta, y cambiar el color de "disponible" es una linea.
  */
 const TONE_TO_PILL: Record<(typeof ITEM_STATUS_TONE)[ItemStatus], PillTone> = {
-  ok: 'mint',
+  ok: 'green',
   info: 'blue',
-  warn: 'amber',
+  live: 'pink',
+  warn: 'yellow',
   muted: 'neutral',
 };
 
-export function ItemStatusBadge({ status }: { status: ItemStatus }) {
+export function ItemStatusBadge({
+  status,
+  solid,
+}: {
+  status: ItemStatus;
+  /** Sobre una fotografia, la capsula va opaca para que no se pierda en el fondo. */
+  solid?: boolean;
+}) {
   return (
-    <Pill tone={TONE_TO_PILL[ITEM_STATUS_TONE[status]]} dot>
+    <Pill tone={TONE_TO_PILL[ITEM_STATUS_TONE[status]]} solid={solid} dot>
       {ITEM_STATUS_LABELS[status]}
     </Pill>
   );

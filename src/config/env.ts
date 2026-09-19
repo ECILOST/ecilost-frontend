@@ -11,6 +11,8 @@ export interface AppConfig {
     readonly auth: string;
     /** ecilost-catalog-service. Objetos, lotes y multimedia. */
     readonly catalog: string;
+    /** ecilost-wallet-service. Saldo en ECICoin y recargas. */
+    readonly wallet: string;
   };
 }
 
@@ -25,5 +27,6 @@ export const config: AppConfig = {
   services: {
     auth: import.meta.env.VITE_AUTH_BASE_URL ?? '/auth',
     catalog: import.meta.env.VITE_CATALOG_BASE_URL ?? '/api/catalog',
+    wallet: import.meta.env.VITE_WALLET_BASE_URL ?? '/api/wallet',
   },
 };

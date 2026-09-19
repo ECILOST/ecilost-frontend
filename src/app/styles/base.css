@@ -15,6 +15,15 @@ body,
   min-height: 100%;
 }
 
+/*
+ * Hueco para la cabecera pegajosa y para la barra inferior del movil. Sin esto, tabular
+ * hacia un elemento cercano a un borde lo deja debajo de una de las dos: el foco esta
+ * puesto, pero no se ve donde.
+ */
+html {
+  scroll-padding-block: 80px 104px;
+}
+
 body {
   margin: 0;
   background: var(--eci-void);
@@ -49,7 +58,7 @@ p {
 }
 
 a {
-  color: var(--eci-mint);
+  color: var(--eci-cyan);
   text-decoration: none;
 }
 
@@ -85,7 +94,7 @@ button {
  * con el teclado.
  */
 :focus-visible {
-  outline: 2px solid var(--eci-mint);
+  outline: 2px solid var(--eci-cyan);
   outline-offset: 3px;
   border-radius: var(--r-sm);
 }

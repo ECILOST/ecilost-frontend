@@ -1,0 +1,95 @@
+.picker {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+/*
+ * La leyenda de un fieldset no participa en el grid del padre, asi que se maqueta sola. Se
+ * deja visible y no oculta como en los filtros: aqui el titulo tambien lleva la cuenta de
+ * cuantos van elegidos, que es la respuesta a "¿ya puedo crear el lote?".
+ */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--eci-text);
+}
+
+.count {
+  padding: 2px 10px;
+  border-radius: var(--r-chip);
+  background: var(--eci-neutral-soft);
+  color: var(--eci-text-soft);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.list {
+  display: grid;
+  gap: var(--s-2);
+  width: 100%;
+}
+
+/*
+ * La fila entera es la etiqueta del control, asi que se puede pulsar en cualquier parte: en
+ * el movil, acertarle a una casilla de 18 px es un objetivo mucho peor que la fila completa.
+ */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  /* 48 px de alto, el mismo minimo tactil que los botones. */
+  padding: 13px var(--s-4);
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-sm);
+  background: var(--eci-surface);
+  cursor: pointer;
+  transition:
+    border-color var(--t-fast) linear,
+    background-color var(--t-fast) linear;
+}
+
+.row:hover {
+  border-color: var(--eci-line-strong);
+  background: var(--eci-surface-high);
+}
+
+/* El elegido se marca con el borde y no solo con la casilla: se ve de un vistazo cuantos van. */
+.row:has(:checked) {
+  border-color: var(--eci-cyan);
+  background: var(--eci-cyan-soft);
+}
+
+.row:has(:focus-visible) {
+  outline: 2px solid var(--eci-cyan);
+  outline-offset: 3px;
+}
+
+.check {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  /* La casilla del sistema, teñida: una propia de divs perderia el teclado y el lector. */
+  accent-color: var(--eci-cyan);
+  cursor: pointer;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}

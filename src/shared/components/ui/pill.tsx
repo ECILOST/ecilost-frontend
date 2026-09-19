@@ -2,18 +2,20 @@ import type { ReactNode } from 'react';
 import styles from './pill.module.css';
 
 export type PillTone =
-  'neutral' | 'mint' | 'coral' | 'amber' | 'blue' | 'violet';
+  'neutral' | 'cyan' | 'pink' | 'yellow' | 'blue' | 'purple' | 'green';
 
 export interface PillOptions {
+  /** Relleno opaco, para cuando la capsula va encima de una fotografia. */
+  solid?: boolean;
   /** Version pulsable: filtros y pestañas. */
   interactive?: boolean;
   selected?: boolean;
 }
 
 /**
- * La capsula es la pieza que mas se repite en la interfaz: etiqueta de estado, filtro,
- * categoria, indicador de ronda. Las clases se exponen sueltas para que un `<label>` de
- * filtro use exactamente el mismo estilo que una etiqueta, sin copiarlo.
+ * La capsula es la pieza que mas se repite en la interfaz. Las clases se exponen sueltas
+ * para que un `<label>` de filtro use exactamente el mismo estilo que una etiqueta, sin
+ * copiarlo.
  */
 export function pillClass(
   tone: PillTone = 'neutral',
@@ -22,6 +24,7 @@ export function pillClass(
   return [
     styles.pill,
     styles[tone],
+    options.solid ? styles.solid : '',
     options.interactive ? styles.interactive : '',
     options.selected ? styles.selected : '',
   ]

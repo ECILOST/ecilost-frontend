@@ -16,11 +16,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Rejilla de tarjetas verticales, como el catalogo de la referencia: dos columnas en el
+ * movil y hasta cuatro en escritorio. El `min(...)` es lo que consigue las dos columnas en
+ * pantalla estrecha sin desbordar.
+ */
 .grid {
   display: grid;
   gap: var(--s-4);
-  /* `min(...)` evita que la columna minima de 360 px desborde una pantalla de 375. */
-  grid-template-columns: repeat(auto-fill, minmax(min(360px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 45%), 1fr));
 }
 
 /*
@@ -60,4 +64,20 @@
     opacity: 0;
     transform: translateY(10px);
   }
+}
+
+/*
+ * Los dos grupos de filtros, uno debajo del otro en el movil y en fila cuando cabe. Van
+ * juntos en su propio bloque para que el contador no se meta entre ellos al envolverse.
+ */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2) var(--s-4);
+  min-width: 0;
+}
+
+.more {
+  display: flex;
+  justify-content: center;
 }

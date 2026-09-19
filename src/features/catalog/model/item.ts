@@ -38,11 +38,27 @@ export interface ItemAdminTrail {
 }
 
 /**
- * Fila del listado (`GET /items`). El listado no recorta por rol ni firma multimedia:
- * firmar las URL de cada objeto de la pagina costaria una ronda por objeto para algo que la
- * lista no muestra.
+ * El objeto tal como lo devuelven las escrituras (`POST /items`, `PATCH /items/:id`): sus
+ * datos y su rastro administrativo, sin nada derivado de la multimedia.
  */
-export type ItemSummary = ItemBase & ItemAdminTrail;
+export type ItemRecord = ItemBase & ItemAdminTrail;
+
+/**
+ * Fila del listado (`GET /items`): el objeto mas su portada.
+ *
+ * El listado sigue sin traer la galeria. Lleva una sola fotografia, la primera, porque una
+ * rejilla de objetos perdidos existe para reconocerlos de un vistazo, y eso no se hace con
+ * texto. Inspeccionarlos es la ficha.
+ */
+export interface ItemSummary extends ItemRecord {
+  /**
+   * Enlace firmado de la primera fotografia, o `null` si el objeto no tiene ninguna.
+   *
+   * Caduca a los quince minutos, igual que los de la ficha: no sirve guardarlo en estado
+   * propio, y por eso la consulta del catalogo tampoco lo cachea mas alla de esa ventana.
+   */
+  coverUrl: string | null;
+}
 
 /** Ficha del objeto (`GET /items/:id`) tal como la ve un estudiante (HU-08). */
 export interface ItemFicha extends ItemBase {
@@ -76,6 +92,16 @@ export interface ListItemsQuery {
   limit?: number;
   offset?: number;
 }
+
+/**
+ * Longitudes que aplica el servicio. Duplicarlas aqui permite que el propio control corte
+ * antes de escribir de mas, en vez de gastar una peticion para que la rechacen.
+ */
+export const ITEM_LIMITS = {
+  name: 120,
+  description: 2000,
+  category: 60,
+} as const;
 
 /** Cuerpo de `POST /items`. Operacion de funcionario. */
 export interface CreateItemRequest {

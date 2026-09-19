@@ -1,0 +1,103 @@
+/*
+ * Visor de multimedia de la ficha, con el reparto de la referencia: el objeto grande sobre
+ * su panel de color y, debajo, la fila de miniaturas con la que se cambia de fotografia.
+ */
+.viewer {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: var(--s-6);
+  border-radius: var(--r-xl);
+  background: var(--eci-night);
+  overflow: hidden;
+}
+
+.badge {
+  position: absolute;
+  top: var(--s-4);
+  right: var(--s-4);
+  z-index: 3;
+}
+
+.empty {
+  position: absolute;
+  bottom: var(--s-4);
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--eci-text-dim);
+  font-size: var(--text-xs);
+}
+
+.thumbs {
+  display: flex;
+  gap: var(--s-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 3px;
+  margin: -3px;
+}
+
+.thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.thumb {
+  flex: 0 0 auto;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: var(--r-sm);
+  background: var(--eci-night);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    border-color var(--t-fast) linear,
+    transform var(--t-fast) var(--ease-out);
+}
+
+.thumb:hover {
+  transform: translateY(-2px);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.65;
+  transition: opacity var(--t-fast) linear;
+}
+
+/* La miniatura activa se marca con borde y con opacidad plena, no solo con color. */
+.selected {
+  border-color: var(--eci-cyan);
+}
+
+.selected img {
+  opacity: 1;
+}
+
+.video {
+  position: relative;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--eci-night);
+}
+
+.video video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+.videoTag {
+  position: absolute;
+  top: var(--s-3);
+  left: var(--s-3);
+  z-index: 1;
+}

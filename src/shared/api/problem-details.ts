@@ -36,6 +36,23 @@ export const ProblemType = {
   UNAUTHENTICATED: '/problems/sin-sesion',
   FORBIDDEN: '/problems/rol-insuficiente',
   INTERNAL: '/problems/error-interno',
+  /**
+   * Alguno de los objetos que se querian agrupar ya no estaba disponible (HU-05).
+   *
+   * Es el unico tipo del servicio escrito como URL absoluta; los otros doce son rutas. Se
+   * copia tal cual, con la URL entera, porque lo que hay que comparar es lo que el servicio
+   * manda y no lo que convendria que mandara. Si alla lo unifican, aqui se cambia esta
+   * linea.
+   */
+  LOT_EXCLUSIVITY: 'https://ecilost.dev/problems/objeto-en-lote',
+  /**
+   * Se pidio recargar una billetera que no existe (wallet).
+   *
+   * Tiene salida concreta y por eso se distingue del 404 corriente: la billetera nace
+   * cuando la persona entra por primera vez, asi que lo que hay que hacer es pedirle que
+   * entre, no reintentar.
+   */
+  WALLET_NOT_FOUND: '/problems/billetera-no-encontrada',
 } as const;
 
 /** Lo que lanza el cliente HTTP cuando el servicio responde con un codigo de error. */
@@ -79,6 +96,19 @@ export async function toProblem(response: Response): Promise<ProblemDetails> {
   }
 
   if (isProblemDetails(payload)) return payload;
+  if (isNestError(payload)) {
+    const messages = Array.isArray(payload.message)
+      ? payload.message.map(String)
+      : [];
+
+    return {
+      type: NEST_TYPE_BY_STATUS[response.status] ?? ProblemType.INTERNAL,
+      title: payload.error ?? response.statusText ?? 'Error inesperado',
+      status: response.status,
+      detail: typeof payload.message === 'string' ? payload.message : undefined,
+      ...(messages.length > 0 ? { errors: messages } : {}),
+    };
+  }
   if (isOAuthError(payload)) {
     return {
       type: `/problems/${payload.error}`,
@@ -95,6 +125,38 @@ function isProblemDetails(value: unknown): value is ProblemDetails {
   const candidate = value as Record<string, unknown>;
   return (
     typeof candidate.type === 'string' && typeof candidate.status === 'number'
+  );
+}
+
+/**
+ * Los codigos de estado que significan lo mismo en cualquier servicio. El resto no se
+ * traduce a un tipo del catalogo: un 409 de la billetera no es un conflicto de version.
+ */
+const NEST_TYPE_BY_STATUS: Record<number, string> = {
+  400: ProblemType.VALIDATION,
+  401: ProblemType.UNAUTHENTICATED,
+  403: ProblemType.FORBIDDEN,
+  404: ProblemType.NOT_FOUND,
+};
+
+/**
+ * Forma por defecto de Nest, `{ statusCode, message, error }`.
+ *
+ * La responde ecilost-wallet-service, que todavia no instala un filtro de Problem Details
+ * como el de catalog. Se reconoce por `statusCode`, que es lo unico que no comparte con el
+ * `{ error, message }` de auth: si se mirara solo `error`, los dos formatos se confundirian.
+ *
+ * `message` viene como cadena cuando el error es uno, y como arreglo cuando ValidationPipe
+ * rechaza varios campos a la vez. Cada caso va donde las pantallas ya saben buscarlo: la
+ * cadena en `detail` y el arreglo en `errors`.
+ */
+function isNestError(
+  value: unknown,
+): value is { statusCode: number; message: string | string[]; error?: string } {
+  if (typeof value !== 'object' || value === null) return false;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.statusCode === 'number' && candidate.message !== undefined
   );
 }
 

@@ -45,7 +45,7 @@
   border: 1px solid var(--eci-line);
   border-radius: var(--r-chip);
   /* Translucida y con desenfoque: la pantalla sigue viendose debajo, como en una emision. */
-  background: rgb(13 18 28 / 82%);
+  background: rgb(13 19 34 / 85%);
   backdrop-filter: blur(14px);
   box-shadow: var(--shadow-float);
 }
@@ -59,7 +59,7 @@
 }
 
 .bottom .active {
-  color: var(--eci-mint);
+  color: var(--eci-cyan);
 }
 
 /* La seccion activa se marca con color y con un punto: nunca con el color a secas. */

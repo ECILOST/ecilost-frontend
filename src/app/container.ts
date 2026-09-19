@@ -3,7 +3,11 @@ import { createHttpAuthGateway } from '@/features/auth/api/http-auth.gateway';
 import type { AuthGateway } from '@/features/auth/ports/auth.gateway';
 import { createHttpItemGateway } from '@/features/catalog/api/http-item.gateway';
 import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
+import { createHttpLotGateway } from '@/features/lots/api/http-lot.gateway';
+import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import { createHttpMediaGateway } from '@/features/media/api/http-media.gateway';
+import { createHttpWalletGateway } from '@/features/wallet/api/http-wallet.gateway';
+import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import type { MediaGateway } from '@/features/media/ports/media.gateway';
 import { createHttpClient } from '@/shared/api/http-client';
 import {
@@ -25,7 +29,9 @@ export interface Container {
   sessionLost: SessionChannel;
   auth: AuthGateway;
   items: ItemGateway;
+  lots: LotGateway;
   media: MediaGateway;
+  wallet: WalletGateway;
 }
 
 export function createContainer(appConfig: AppConfig = config): Container {
@@ -47,12 +53,26 @@ export function createContainer(appConfig: AppConfig = config): Container {
     baseUrl: appConfig.services.catalog,
     ...credentials,
   });
+  /*
+   * La billetera lleva el token pero NO avisa de que la sesion se perdio.
+   *
+   * Un 401 suyo no significa lo mismo que uno de auth o de catalog: puede venir de que su
+   * JWKS este mal configurada o de que no alcance al emisor, y entonces cerraria una sesion
+   * que los otros dos servicios estan aceptando sin problema. El saldo es informacion
+   * auxiliar; si falla, se deja de ver, pero nadie se queda fuera del catalogo por eso.
+   */
+  const walletHttp = createHttpClient({
+    baseUrl: appConfig.services.wallet,
+    getAccessToken: tokens.get,
+  });
 
   return {
     tokens,
     sessionLost,
     auth: createHttpAuthGateway(authHttp),
     items: createHttpItemGateway(catalogHttp),
+    lots: createHttpLotGateway(catalogHttp),
     media: createHttpMediaGateway(catalogHttp),
+    wallet: createHttpWalletGateway(walletHttp),
   };
 }

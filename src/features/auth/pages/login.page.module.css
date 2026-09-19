@@ -1,17 +1,29 @@
 /*
- * Pantalla de entrada. Es la unica sin datos que mostrar, asi que aqui el color y la forma
- * hacen todo el trabajo: es la primera impresion de la plataforma.
+ * Portada, con la composicion de la referencia: marca arriba, lema manuscrito, el collage de
+ * color en el centro y una sola accion en capsula. Es la unica pantalla sin datos que
+ * mostrar, asi que aqui el color y la forma hacen todo el trabajo.
  */
+/*
+ * El fondo va en un envoltorio y no dentro de `.login`: la entrada anima un `transform`, y
+ * un ancestro transformado convierte a sus hijos `position: fixed` en hijos suyos. El fondo
+ * dejaba de cubrir la ventana y se recortaba al ancho de la columna.
+ */
+.screen {
+  position: relative;
+  min-height: 100dvh;
+}
+
 .login {
   display: grid;
   align-content: center;
-  justify-items: start;
+  justify-items: center;
   gap: var(--s-5);
   width: 100%;
-  max-width: 560px;
+  max-width: 520px;
   min-height: 100dvh;
   margin: 0 auto;
   padding: var(--s-7) var(--page-gutter);
+  text-align: center;
   animation: enter var(--t-slow) var(--ease-out) both;
 }
 
@@ -22,30 +34,51 @@
   }
 }
 
+/* Lema manuscrito: el guiño humano de la referencia, en la unica pantalla que lo admite. */
 .tagline {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 500;
-  line-height: 1.2;
-  letter-spacing: var(--tracking-tight);
+  font-family: var(--font-script);
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  font-weight: 600;
+  line-height: 1.1;
   color: var(--eci-text);
+  opacity: 0.88;
 }
 
-/* La segunda linea en menta: el giro de la frase es lo que cuenta de que va la plataforma. */
-.taglineAccent {
-  color: var(--eci-mint);
+.art {
+  width: 100%;
+  max-width: 300px;
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Flotacion muy corta: da vida a la portada sin convertirla en un anuncio. */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .lead {
   color: var(--eci-text-soft);
-  max-width: 42ch;
+  max-width: 40ch;
 }
 
 /* Que va a pasar al pulsar: se dice antes, no despues de salir de la pagina. */
 .note {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
   color: var(--eci-text-dim);
   font-size: var(--text-xs);
+  max-width: 38ch;
+}
+
+/*
+ * El aviso de rechazo. La portada esta centrada, pero un parrafo de tres lineas centrado se
+ * lee peor que alineado a la izquierda, asi que aqui se revierte.
+ */
+.error {
+  width: 100%;
+  text-align: left;
 }

@@ -14,15 +14,8 @@
   padding: var(--s-3) var(--page-gutter);
   border-bottom: 1px solid var(--eci-line);
   /* Translucida: el color del fondo sigue pasando por debajo al desplazar. */
-  background: rgb(8 11 18 / 78%);
+  background: rgb(8 11 21 / 80%);
   backdrop-filter: blur(16px);
-}
-
-.session {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  margin-left: auto;
 }
 
 .main {
@@ -34,4 +27,36 @@
   .main {
     padding-bottom: 88px;
   }
+}
+
+/*
+ * Enlace de salto. Fuera de la pantalla hasta que recibe el foco, y entonces aparece sobre
+ * la cabecera. Se dibuja aqui y no con la clase global `u-sr-only` porque esa no sabe volver
+ * al enfocarse.
+ */
+.skip {
+  position: absolute;
+  top: var(--s-2);
+  left: var(--s-2);
+  z-index: 30;
+  padding: 10px 18px;
+  border-radius: var(--r-chip);
+  background: var(--eci-cyan);
+  color: var(--eci-on-accent);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  /* Sube fuera de la vista sin salir del arbol: asi el tabulador lo sigue alcanzando. */
+  transform: translateY(-200%);
+  transition: transform var(--t-fast) var(--ease-out);
+}
+
+.skip:focus {
+  transform: translateY(0);
+  text-decoration: none;
+}
+
+/* El foco al cambiar de pantalla es programatico; el anillo aqui no diria nada util. */
+.main:focus {
+  outline: none;
 }

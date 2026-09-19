@@ -1,6 +1,7 @@
 /*
- * Marco organico para los objetos. Es el gesto que hace que un objeto perdido no parezca
- * una miniatura de catalogo: el color no esta dentro de una caja, esta detras de la cosa.
+ * Marco organico para los objetos, calcado del tratamiento de la referencia: el objeto no
+ * va dentro de un recuadro, va apoyado sobre un collage de manchas de colores distintos,
+ * con una pieza pequeña suelta que rompe la simetria.
  */
 .frame {
   position: relative;
@@ -11,7 +12,8 @@
 }
 
 .sm {
-  width: 92px;
+  width: 100%;
+  max-width: 190px;
 }
 
 .md {
@@ -24,53 +26,94 @@
   max-width: 340px;
 }
 
-/*
- * El halo difuso: la luz de color.
- *
- * Se queda dentro del marco (`inset: 0`) y se derrama solo con el desenfoque. Sacarlo con
- * un inset negativo ensancharia la pagina unos pixeles y, en el movil, eso es scroll
- * horizontal en una ficha.
- */
+/* La luz de color del fondo. */
 .halo {
   position: absolute;
   inset: 0;
   z-index: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 45%, var(--tone) 0%, transparent 68%);
+  background: radial-gradient(circle at 50% 45%, var(--c1) 0%, transparent 70%);
   opacity: 0.55;
-  filter: blur(22px);
+  filter: blur(26px);
 }
 
-/* La mancha solida: la forma irregular sobre la que se apoya el objeto. */
-.blob {
+/*
+ * Mancha principal. Degradado entre dos de los colores de la paleta y no hacia transparente:
+ * en la referencia las manchas son planas y saturadas, y desvanecerlas contra el fondo
+ * oscuro las convierte en una nube gris.
+ */
+.blobA {
   position: absolute;
-  inset: 8%;
+  inset: 6%;
   z-index: 1;
-  background: linear-gradient(150deg, var(--tone), transparent 80%);
+  background: linear-gradient(150deg, var(--c1), var(--c2));
+  opacity: 0.95;
+}
+
+/* Mancha secundaria, desplazada: es la que hace que el conjunto no sea un circulo. */
+.blobB {
+  position: absolute;
+  z-index: 1;
+  top: 8%;
+  right: 4%;
+  width: 52%;
+  height: 52%;
+  background: var(--c2);
+  opacity: 0.75;
+  mix-blend-mode: screen;
+}
+
+/* Pieza suelta de un tercer color, como los confetis de la referencia. */
+.chip {
+  position: absolute;
+  z-index: 1;
+  bottom: 12%;
+  left: 6%;
+  width: 18%;
+  height: 18%;
+  border-radius: 46% 54% 38% 62% / 54% 42% 58% 46%;
+  background: var(--c3);
   opacity: 0.85;
+}
+
+.frame[data-shape='a'] .blobA {
+  border-radius: var(--blob-a);
   transform: rotate(-6deg);
 }
 
-.frame[data-shape='a'] .blob {
-  border-radius: var(--blob-a);
-}
-
-.frame[data-shape='b'] .blob {
+.frame[data-shape='a'] .blobB {
   border-radius: var(--blob-b);
-  transform: rotate(8deg);
 }
 
-.frame[data-shape='c'] .blob {
+.frame[data-shape='b'] .blobA {
+  border-radius: var(--blob-b);
+  transform: rotate(9deg);
+}
+
+.frame[data-shape='b'] .blobB {
+  border-radius: var(--blob-c);
+  top: auto;
+  bottom: 6%;
+  right: 8%;
+}
+
+.frame[data-shape='c'] .blobA {
   border-radius: var(--blob-c);
   transform: rotate(-14deg);
+}
+
+.frame[data-shape='c'] .blobB {
+  border-radius: var(--blob-a);
+  right: auto;
+  left: 2%;
 }
 
 .image {
   position: relative;
   z-index: 2;
-  width: 86%;
-  height: 86%;
-  filter: drop-shadow(0 18px 24px rgb(0 0 0 / 55%));
+  width: 84%;
+  height: 84%;
+  filter: drop-shadow(0 22px 26px rgb(0 0 0 / 60%));
 }
 
 /* Objetos recortados: se apoyan en la mancha y la desbordan un poco. */
@@ -83,8 +126,8 @@
  * rectangular con su propio fondo no rompa el lenguaje de formas.
  */
 .cover {
-  width: 92%;
-  height: 92%;
+  width: 88%;
+  height: 88%;
   object-fit: cover;
 }
 
@@ -105,29 +148,37 @@
   position: relative;
   z-index: 2;
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: 2.6rem;
   font-weight: 700;
-  color: var(--eci-on-accent);
-  opacity: 0.75;
-  mix-blend-mode: luminosity;
+  color: var(--eci-text);
+  opacity: 0.9;
+  text-shadow: 0 6px 18px rgb(0 0 0 / 45%);
 }
 
-.tone-mint {
-  --tone: var(--eci-mint);
+/*
+ * Las combinaciones de la referencia: nunca un solo color por objeto, siempre tres que se
+ * llevan bien. Se reparten por identificador, no al azar.
+ */
+.palette-1 {
+  --c1: var(--eci-pink);
+  --c2: var(--eci-blue);
+  --c3: var(--eci-yellow);
 }
 
-.tone-coral {
-  --tone: var(--eci-coral);
+.palette-2 {
+  --c1: var(--eci-purple);
+  --c2: var(--eci-cyan);
+  --c3: var(--eci-pink);
 }
 
-.tone-amber {
-  --tone: var(--eci-amber);
+.palette-3 {
+  --c1: var(--eci-blue);
+  --c2: var(--eci-yellow);
+  --c3: var(--eci-purple);
 }
 
-.tone-blue {
-  --tone: var(--eci-blue);
-}
-
-.tone-violet {
-  --tone: var(--eci-violet);
+.palette-4 {
+  --c1: var(--eci-cyan);
+  --c2: var(--eci-pink);
+  --c3: var(--eci-blue);
 }

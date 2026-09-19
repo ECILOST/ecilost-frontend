@@ -1,0 +1,50 @@
+.form {
+  display: grid;
+  gap: var(--s-5);
+  width: 100%;
+  max-width: 620px;
+}
+
+.note {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+}
+
+/*
+ * La persona ya encontrada. Se queda en pantalla mientras se decide la cantidad: a quien se
+ * le abona es la parte que no se puede dar por supuesta.
+ */
+.person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+  max-width: 620px;
+  padding: var(--s-4) var(--s-5);
+  border: 1px solid var(--eci-line-strong);
+  border-radius: var(--r-lg);
+  background: var(--eci-surface);
+}
+
+.identity {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

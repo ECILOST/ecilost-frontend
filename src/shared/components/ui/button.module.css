@@ -36,8 +36,13 @@
   box-shadow: none;
 }
 
+/*
+ * El relleno vertical sale de un calculo, no del ojo: 12 + 12 de relleno, 21,7 de linea y
+ * 2 de borde dan 48 px, que es el minimo tactil de Material. Con 10 px se quedaba en 44
+ * justos, y cualquier cambio de tipografia lo bajaba por debajo.
+ */
 .md {
-  padding: 10px 18px;
+  padding: 12px 18px;
   font-size: var(--text-sm);
 }
 
@@ -47,9 +52,9 @@
 }
 
 .primary {
-  background: var(--eci-mint);
+  background: var(--eci-cyan);
   color: var(--eci-on-accent);
-  box-shadow: var(--glow-mint);
+  box-shadow: var(--glow-cyan);
 }
 
 .primary:hover {
@@ -63,8 +68,25 @@
 }
 
 .secondary:hover {
-  border-color: var(--eci-mint);
-  color: var(--eci-mint);
+  border-color: var(--eci-cyan);
+  color: var(--eci-cyan);
+}
+
+/*
+ * Borrar y retirar. Va en rosa profundo y no en el rosa puro porque el blanco encima de
+ * este llega a 4,5:1 y encima del otro no.
+ *
+ * Lleva su propio color y no solo la palabra "Borrar": una accion irreversible tiene que
+ * distinguirse de la de al lado antes de leerla.
+ */
+.danger {
+  background: var(--eci-pink-deep);
+  color: var(--eci-text);
+  box-shadow: var(--glow-pink);
+}
+
+.danger:hover {
+  filter: brightness(1.08);
 }
 
 .quiet {

@@ -21,5 +21,17 @@ export interface NavItem {
  */
 export const NAV_ITEMS: NavItem[] = [
   { to: routes.items, label: 'Catálogo', icon: 'grid' },
+  /*
+   * Sin capacidad: `GET /lots` lo atiende cualquier sesion valida, y saber que objetos se
+   * van a subastar juntos le sirve al estudiante antes de entrar a una sala. Lo que si pide
+   * ser funcionario es crearlos, y eso se decide dentro de la pantalla.
+   */
+  { to: routes.lots, label: 'Lotes', icon: 'layers' },
   { to: routes.rooms, label: 'Salas', icon: 'live', requires: 'canBid' },
+  {
+    to: routes.rechargeWallet,
+    label: 'Billetera',
+    icon: 'coin',
+    requires: 'canManageWallets',
+  },
 ];

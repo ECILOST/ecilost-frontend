@@ -1,0 +1,15 @@
+.form {
+  display: grid;
+  gap: var(--s-5);
+  width: 100%;
+  max-width: 620px;
+}
+
+.summary {
+  max-width: 620px;
+}
+
+.requirement {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+}

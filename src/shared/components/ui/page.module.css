@@ -61,7 +61,7 @@
 }
 
 .back:hover {
-  color: var(--eci-mint);
+  color: var(--eci-cyan);
   text-decoration: none;
 }
 

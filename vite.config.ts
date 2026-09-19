@@ -34,6 +34,17 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path: string) => path.replace(/^\/api\/catalog/, ''),
       },
+
+      /*
+       * Wallet tampoco usa cookies, pero a diferencia de catalog si tiene prefijo propio:
+       * `app.setGlobalPrefix('wallet')`. Por eso aqui no se recorta, se sustituye: lo que
+       * el navegador pide como `/api/wallet/...` el servicio lo espera como `/wallet/...`.
+       */
+      '/api/wallet': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/api\/wallet/, '/wallet'),
+      },
     },
   },
   test: {

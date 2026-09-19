@@ -38,6 +38,6 @@
 }
 
 .option:has(:focus-visible) {
-  outline: 2px solid var(--eci-mint);
+  outline: 2px solid var(--eci-cyan);
   outline-offset: 3px;
 }

@@ -1,0 +1,37 @@
+/*
+ * Acciones de funcionario. Comparte la piel del panel de multimedia (borde punteado, fondo
+ * apenas levantado) porque son lo mismo: herramientas, no contenido del objeto. Quien mira
+ * la ficha tiene que poder distinguir de un vistazo lo que describe el objeto de lo que
+ * actua sobre el.
+ */
+.actions {
+  display: grid;
+  gap: var(--s-4);
+  padding: var(--s-5);
+  border: 1px dashed var(--eci-line-strong);
+  border-radius: var(--r-lg);
+  background: rgb(255 255 255 / 2%);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: var(--tracking-tight);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+}
+
+.hint {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+}
+
+/* Vacio cuando no hay nada que explicar: sin esto deja un hueco del alto de una linea. */
+.hint:empty {
+  display: none;
+}

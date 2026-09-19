@@ -1,0 +1,77 @@
+.titleBlock {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.created {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+}
+
+.section {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--eci-text-dim);
+}
+
+.items {
+  display: grid;
+  gap: var(--s-2);
+}
+
+/* Cada objeto es un enlace a su ficha: aqui solo hay nombre, lo demas vive en el catalogo. */
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border-radius: var(--r-sm);
+  background: var(--eci-surface);
+  color: inherit;
+  transition:
+    transform var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) linear;
+}
+
+.item:hover {
+  transform: translateX(2px);
+  background: var(--eci-surface-high);
+  text-decoration: none;
+}
+
+.itemName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.itemGo {
+  flex: none;
+  color: var(--eci-cyan);
+}
+
+.note {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+  max-width: 62ch;
+}

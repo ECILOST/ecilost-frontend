@@ -39,7 +39,7 @@ describe('Ficha del objeto', () => {
     ).toBeInTheDocument();
   });
 
-  it('no filtra por su cuenta: al estudiante no le llega la version y no la pinta', async () => {
+  it('al estudiante le da la ficha y ninguna herramienta de funcionario', async () => {
     const container = createTestContainer({
       items: createFakeItemGateway({ views: { 'item-1': fichaFixture() } }),
     });
@@ -47,10 +47,15 @@ describe('Ficha del objeto', () => {
     renderApp({ route: '/items/item-1', container });
     await screen.findByText('Portatil Lenovo ThinkPad');
 
+    expect(
+      screen.queryByRole('heading', { name: 'Multimedia' }),
+    ).not.toBeInTheDocument();
+    // La version es el numero del bloqueo optimista. Ni al estudiante le llega, ni al
+    // funcionario se le enseña: no es un dato del objeto.
     expect(screen.queryByText('Versión')).not.toBeInTheDocument();
   });
 
-  it('muestra la version cuando el servicio la manda, que es al funcionario', async () => {
+  it('al funcionario le ofrece administrar la multimedia, y sin numeros internos', async () => {
     const container = createTestContainer({
       auth: createFakeAuthGateway(STAFF),
       items: createFakeItemGateway({
@@ -60,8 +65,10 @@ describe('Ficha del objeto', () => {
 
     renderApp({ route: '/items/item-1', container });
 
-    expect(await screen.findByText('Versión')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Multimedia' }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Versión')).not.toBeInTheDocument();
   });
 
   it('explica el error del servicio cuando el objeto no existe', async () => {

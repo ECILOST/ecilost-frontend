@@ -1,0 +1,54 @@
+.account {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-left: auto;
+  min-width: 0;
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+/*
+ * Mismo cuadro para la fotografia y para la inicial, asi que la cabecera mide igual haya
+ * avatar o no y no da un salto cuando el perfil termina de llegar.
+ */
+.avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--eci-line-strong);
+  background: var(--eci-surface-high);
+  object-fit: cover;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--eci-cyan);
+}
+
+.name {
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+/*
+ * En el movil la cabecera ya lleva la marca y el boton de salir. El nombre es lo primero que
+ * sobra: el avatar sigue diciendo de quien es la sesion.
+ */
+@media (width < 768px) {
+  .name {
+    display: none;
+  }
+}

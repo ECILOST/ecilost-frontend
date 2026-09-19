@@ -32,8 +32,29 @@ export interface Principal {
   canManageCatalog: boolean;
   /** Programar salas de subasta. */
   canScheduleRooms: boolean;
+  /** Abonar ECICoin a la billetera de otra persona. */
+  canManageWallets: boolean;
   /** Pujar. Nunca es true a la vez que las anteriores: los roles no se solapan. */
   canBid: boolean;
+}
+
+/**
+ * Respuesta de `GET /auth/users?email=`. Operacion de funcionario.
+ *
+ * Es lo que permite traducir lo que un funcionario conoce (un correo institucional) a lo
+ * que el resto de la plataforma guarda (`userId`): wallet, auction-core y engagement no
+ * almacenan correos.
+ *
+ * Trae menos campos que `Profile` a proposito: son los datos de otra persona, no los
+ * propios, asi que no viajan ni el avatar ni el codigo institucional.
+ */
+export interface UserLookup {
+  userId: string;
+  email: string;
+  fullName: string;
+  role: Role;
+  /** Una cuenta inactiva no puede entrar, asi que operar sobre ella no sirve de nada. */
+  status: 'ACTIVE' | 'SUSPENDED';
 }
 
 /** Respuesta de `GET /auth/profile`. Los datos de presentacion de la persona. */

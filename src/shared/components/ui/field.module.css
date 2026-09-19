@@ -1,0 +1,118 @@
+/*
+ * Campo de formulario. Los controles son los del navegador con otra piel: un `<select>`
+ * propio hecho de divs pierde el teclado, la busqueda por letra y el desplegable nativo del
+ * movil, y todo eso a cambio de la flecha.
+ */
+.field {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--eci-text);
+}
+
+.required {
+  margin-left: 2px;
+  color: var(--eci-pink);
+}
+
+.hint {
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+}
+
+/*
+ * El error no se distingue solo por el color: lleva delante un triangulo dibujado con texto.
+ * Quien no separa el rosa del gris tiene que poder ver que ese campo es el del problema.
+ */
+.error {
+  display: flex;
+  gap: 6px;
+  color: var(--eci-pink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.error::before {
+  content: '⚠';
+  flex: none;
+}
+
+.control {
+  width: 100%;
+  min-width: 0;
+  /* 48 px de alto: el minimo tactil, el mismo que el boton de al lado. */
+  padding: 13px var(--s-4);
+  border: 1px solid var(--eci-line-strong);
+  border-radius: var(--r-sm);
+  background: var(--eci-surface);
+  color: var(--eci-text);
+  font-family: var(--font-text);
+  font-size: var(--text-md);
+  line-height: 1.4;
+  transition:
+    border-color var(--t-fast) linear,
+    background-color var(--t-fast) linear;
+}
+
+.control::placeholder {
+  color: var(--eci-text-dim);
+}
+
+.control:hover {
+  border-color: var(--eci-text-dim);
+}
+
+.control:focus {
+  background: var(--eci-surface-high);
+  /* El anillo lo dibuja :focus-visible en base.css; aqui solo se refuerza el borde. */
+  border-color: var(--eci-cyan);
+  outline: none;
+}
+
+.control[aria-invalid='true'] {
+  border-color: var(--eci-pink);
+}
+
+.control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: 1.55;
+}
+
+/*
+ * La flecha va como imagen de fondo para poder quitar la del sistema, que en un tema oscuro
+ * se pinta negra sobre negro en varios navegadores.
+ */
+.select {
+  appearance: none;
+  padding-right: var(--s-7);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238b95a9' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--s-4) center;
+  cursor: pointer;
+}
+
+/* El desplegable lo pinta el sistema: sin esto, sus opciones salen en blanco sobre blanco. */
+.select option {
+  background: var(--eci-surface-high);
+  color: var(--eci-text);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-2);
+}

@@ -8,6 +8,7 @@ export function NotFound() {
   return (
     <Page>
       <Notice
+        titleAs="h1"
         title="Esta dirección no existe"
         actions={
           <Link className={buttonClass('secondary')} to={routes.items}>

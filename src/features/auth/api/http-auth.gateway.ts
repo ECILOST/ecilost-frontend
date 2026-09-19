@@ -4,6 +4,7 @@ import type {
   Principal,
   Profile,
   UpdateProfileRequest,
+  UserLookup,
 } from '../model/session';
 import type { AuthGateway } from '../ports/auth.gateway';
 
@@ -38,6 +39,9 @@ export function createHttpAuthGateway(http: HttpClient): AuthGateway {
     me: () => http.get<Principal>('/me'),
 
     profile: () => http.get<Profile>('/profile'),
+
+    findUserByEmail: (email: string) =>
+      http.get<UserLookup>('/users', { query: { email } }),
 
     updateProfile: (request: UpdateProfileRequest) =>
       http.patch<Profile>('/profile', request),

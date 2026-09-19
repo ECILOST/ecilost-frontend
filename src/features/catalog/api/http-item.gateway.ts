@@ -1,6 +1,7 @@
 import type { HttpClient } from '@/shared/api/http-client';
 import type {
   CreateItemRequest,
+  ItemRecord,
   ItemSummary,
   ItemView,
   ListItemsQuery,
@@ -20,10 +21,10 @@ export function createHttpItemGateway(http: HttpClient): ItemGateway {
     findById: (id: string) => http.get<ItemView>(`/items/${id}`),
 
     create: (request: CreateItemRequest) =>
-      http.post<ItemSummary>('/items', request),
+      http.post<ItemRecord>('/items', request),
 
     update: (id: string, request: UpdateItemRequest) =>
-      http.patch<ItemSummary>(`/items/${id}`, request),
+      http.patch<ItemRecord>(`/items/${id}`, request),
 
     remove: (id: string, version: number) =>
       http.delete<void>(`/items/${id}`, { query: { version } }),

@@ -1,5 +1,6 @@
 import type {
   CreateItemRequest,
+  ItemRecord,
   ItemSummary,
   ItemView,
   ListItemsQuery,
@@ -22,11 +23,11 @@ export interface ItemGateway {
    */
   findById(id: string): Promise<ItemView>;
 
-  /** `POST /items`. Operacion de funcionario. */
-  create(request: CreateItemRequest): Promise<ItemSummary>;
+  /** `POST /items`. Operacion de funcionario. El objeto nace sin multimedia. */
+  create(request: CreateItemRequest): Promise<ItemRecord>;
 
   /** `PATCH /items/:id`. Operacion de funcionario, con bloqueo optimista por version. */
-  update(id: string, request: UpdateItemRequest): Promise<ItemSummary>;
+  update(id: string, request: UpdateItemRequest): Promise<ItemRecord>;
 
   /** `DELETE /items/:id`. La version viaja como parametro de consulta. */
   remove(id: string, version: number): Promise<void>;

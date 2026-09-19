@@ -3,20 +3,29 @@ import { Role } from '@/features/auth/domain/role';
 import type {
   AccessTokenResponse,
   Principal,
+  UserLookup,
 } from '@/features/auth/model/session';
 import type { AuthGateway } from '@/features/auth/ports/auth.gateway';
 import { ItemCondition } from '@/features/catalog/domain/item-condition';
 import { ItemStatus } from '@/features/catalog/domain/item-status';
 import type {
+  CreateItemRequest,
   ItemDetail,
   ItemFicha,
+  ItemRecord,
   ItemSummary,
   ItemView,
   ListItemsQuery,
+  UpdateItemRequest,
 } from '@/features/catalog/model/item';
 import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
+import { LotStatus } from '@/features/lots/domain/lot-status';
+import type { CreateLotRequest, Lot } from '@/features/lots/model/lot';
+import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import { MediaKind, type MediaAsset } from '@/features/media/model/media';
 import type { MediaGateway } from '@/features/media/ports/media.gateway';
+import type { RechargeRequest, Wallet } from '@/features/wallet/model/wallet';
+import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
 import { createSessionChannel } from '@/shared/api/session-channel';
 import { createTokenStore } from '@/shared/api/token-store';
@@ -33,6 +42,7 @@ export const STUDENT: Principal = {
   role: Role.STUDENT,
   canManageCatalog: false,
   canScheduleRooms: false,
+  canManageWallets: false,
   canBid: true,
 };
 
@@ -41,6 +51,7 @@ export const STAFF: Principal = {
   role: Role.STAFF,
   canManageCatalog: true,
   canScheduleRooms: true,
+  canManageWallets: true,
   canBid: false,
 };
 
@@ -50,7 +61,13 @@ const UNAUTHENTICATED = new ApiError({
   status: 401,
 });
 
-export function itemFixture(overrides: Partial<ItemSummary> = {}): ItemSummary {
+/**
+ * El objeto sin nada derivado de su multimedia: lo que devuelven las escrituras.
+ *
+ * Existe aparte porque la fila del listado lleva portada y la ficha no. Construir las dos
+ * desde aqui evita que un doble entregue un campo que el servicio no manda en ese endpoint.
+ */
+function recordFixture(): ItemRecord {
   return {
     id: 'item-1',
     name: 'Portatil Lenovo ThinkPad',
@@ -66,8 +83,13 @@ export function itemFixture(overrides: Partial<ItemSummary> = {}): ItemSummary {
     registeredBy: STAFF.userId,
     lastModifiedBy: STAFF.userId,
     lastModifiedAt: '2026-09-10T15:04:05.000Z',
-    ...overrides,
   };
+}
+
+export function itemFixture(overrides: Partial<ItemSummary> = {}): ItemSummary {
+  // Sin portada por defecto: la mayoria de las pruebas no hablan de fotografias, y un
+  // objeto recien registrado tampoco tiene ninguna.
+  return { ...recordFixture(), coverUrl: null, ...overrides };
 }
 
 export function photoFixture(overrides: Partial<MediaAsset> = {}): MediaAsset {
@@ -111,13 +133,33 @@ export function fichaFixture(overrides: Partial<ItemFicha> = {}): ItemFicha {
 
 /** La misma ficha con el rastro administrativo, tal como la recibe un funcionario. */
 export function detailFixture(overrides: Partial<ItemDetail> = {}): ItemDetail {
+  // Desde el registro y no desde la fila del listado: la ficha trae la galeria entera, no
+  // la portada, y colar `coverUrl` aqui describiria una respuesta que el servicio no da.
   return {
-    ...itemFixture(),
+    ...recordFixture(),
     photos: [photoFixture()],
     video: null,
     ...overrides,
   };
 }
+
+/** Las personas que el doble de identidad sabe encontrar, por su correo. */
+export const DIRECTORY: Record<string, UserLookup> = {
+  'estudiante@escuelaing.edu.co': {
+    userId: '3f2504e0-4f89-41d3-9a0c-0305e82c3301',
+    email: 'estudiante@escuelaing.edu.co',
+    fullName: 'Mariana Parra',
+    role: Role.STUDENT,
+    status: 'ACTIVE',
+  },
+  'suspendida@escuelaing.edu.co': {
+    userId: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
+    email: 'suspendida@escuelaing.edu.co',
+    fullName: 'Cuenta Inactiva',
+    role: Role.STUDENT,
+    status: 'SUSPENDED',
+  },
+};
 
 export function createFakeAuthGateway(
   principal: Principal | null,
@@ -134,7 +176,32 @@ export function createFakeAuthGateway(
       principal ? Promise.resolve(token) : Promise.reject(UNAUTHENTICATED),
     me: () =>
       principal ? Promise.resolve(principal) : Promise.reject(UNAUTHENTICATED),
-    profile: () => Promise.reject(new Error('no lo usa esta prueba')),
+    profile: () =>
+      principal
+        ? Promise.resolve({
+            userId: principal.userId,
+            email: 'persona@escuelaing.edu.co',
+            fullName: 'Andrea Parra',
+            // Sin avatar a proposito: es el caso que hay que ver funcionando, porque la
+            // direccion que da Google caduca y deja de servirse.
+            avatarUrl: null,
+            institutionalCode: null,
+            role: principal.role,
+          })
+        : Promise.reject(UNAUTHENTICATED),
+    findUserByEmail: (email: string) => {
+      const found = DIRECTORY[email.trim().toLowerCase()];
+      return found
+        ? Promise.resolve(found)
+        : Promise.reject(
+            new ApiError({
+              type: ProblemType.NOT_FOUND,
+              title: 'El recurso no existe',
+              status: 404,
+              detail: 'No hay ninguna cuenta con ese correo.',
+            }),
+          );
+    },
     updateProfile: () => Promise.reject(new Error('no lo usa esta prueba')),
     logout: () => Promise.resolve(),
     loginUrl: () => '/auth/google',
@@ -146,20 +213,44 @@ export interface FakeCatalog {
   views?: Record<string, ItemView>;
   /** Para comprobar con que filtros se llamo al servicio. */
   calls?: ListItemsQuery[];
+  /** Lo que se mando registrar, en orden. */
+  created?: CreateItemRequest[];
+  /** Lo que se mando editar. Lleva la version, que es lo que de verdad hay que comprobar. */
+  updated?: { id: string; request: UpdateItemRequest }[];
+  /** Lo que se mando borrar, con la version que se envio en la consulta. */
+  deleted?: { id: string; version: number }[];
+  /**
+   * Con que error responde cada escritura, cuando la prueba quiere uno.
+   *
+   * Se declara por operacion y no como un solo fallo global porque lo que hay que probar es
+   * que cada error cae donde debe: la validacion debajo de su campo y el conflicto arriba.
+   */
+  rejects?: { create?: ApiError; update?: ApiError; remove?: ApiError };
 }
 
 export function createFakeItemGateway(catalog: FakeCatalog = {}): ItemGateway {
   const items = catalog.items ?? [];
   const views = catalog.views ?? {};
   const calls = catalog.calls ?? [];
+  const created = catalog.created ?? [];
+  const updated = catalog.updated ?? [];
+  const deleted = catalog.deleted ?? [];
 
   return {
     list: (query: ListItemsQuery = {}) => {
       calls.push(query);
-      const filtered = query.status
-        ? items.filter((item) => item.status === query.status)
-        : items;
-      return Promise.resolve(filtered);
+
+      const filtered = items.filter(
+        (item) =>
+          (!query.status || item.status === query.status) &&
+          (!query.category || item.category === query.category),
+      );
+
+      // Se pagina como el servicio, porque es lo que decide cuando el catalogo ofrece
+      // "Cargar mas": una pagina mas corta que el tope significa que ya no queda nada.
+      const offset = query.offset ?? 0;
+      const limit = query.limit ?? filtered.length;
+      return Promise.resolve(filtered.slice(offset, offset + limit));
     },
     findById: (id: string) => {
       const view = views[id];
@@ -173,16 +264,181 @@ export function createFakeItemGateway(catalog: FakeCatalog = {}): ItemGateway {
             }),
           );
     },
-    create: () => Promise.reject(new Error('no lo usa esta prueba')),
-    update: () => Promise.reject(new Error('no lo usa esta prueba')),
-    remove: () => Promise.resolve(),
+    create: (request: CreateItemRequest) => {
+      if (catalog.rejects?.create) return Promise.reject(catalog.rejects.create);
+
+      created.push(request);
+      const item = itemFixture({ id: `item-${items.length + 1}`, ...request });
+      items.push(item);
+      // Tambien queda su ficha: crear termina navegando a ella, asi que sin esto la prueba
+      // aterrizaria en un 404 justo despues de comprobar que el alta funciono.
+      views[item.id] = { ...item, photos: [], video: null };
+
+      return Promise.resolve(item);
+    },
+    update: (id: string, request: UpdateItemRequest) => {
+      if (catalog.rejects?.update) return Promise.reject(catalog.rejects.update);
+
+      updated.push({ id, request });
+      const { version, ...changes } = request;
+      const current = views[id];
+      // La ficha guardada se actualiza para que un refresco despues de editar enseñe lo
+      // nuevo, y la version sube como la subiria el servicio en cada escritura aceptada.
+      const next = { ...current, ...changes, version: version + 1 } as ItemView;
+      views[id] = next;
+
+      return Promise.resolve(next as ItemRecord);
+    },
+    remove: (id: string, version: number) => {
+      if (catalog.rejects?.remove) return Promise.reject(catalog.rejects.remove);
+
+      deleted.push({ id, version });
+      delete views[id];
+      return Promise.resolve();
+    },
   };
 }
 
-export function createFakeMediaGateway(): MediaGateway {
+export function lotFixture(overrides: Partial<Lot> = {}): Lot {
   return {
-    upload: () => Promise.resolve(photoFixture({ id: 'media-subida' })),
-    remove: () => Promise.resolve(),
+    id: 'lot-1',
+    name: 'Kit de electronica extraviada',
+    status: LotStatus.ACTIVE,
+    items: [
+      { id: 'item-1', name: 'Portatil Lenovo ThinkPad' },
+      { id: 'item-2', name: 'Audifonos Sony' },
+    ],
+    createdBy: STAFF.userId,
+    createdAt: '2026-09-18T10:00:00.000Z',
+    ...overrides,
+  };
+}
+
+export interface FakeLots {
+  lots?: Lot[];
+  /** Lo que se mando crear, en orden. */
+  created?: CreateLotRequest[];
+  rejects?: { create?: ApiError };
+}
+
+export function createFakeLotGateway(catalog: FakeLots = {}): LotGateway {
+  const lots = catalog.lots ?? [];
+  const created = catalog.created ?? [];
+
+  return {
+    list: () => Promise.resolve(lots),
+    findById: (id: string) => {
+      const lot = lots.find((candidate) => candidate.id === id);
+      return lot
+        ? Promise.resolve(lot)
+        : Promise.reject(
+            new ApiError({
+              type: ProblemType.NOT_FOUND,
+              title: 'El recurso no existe',
+              status: 404,
+            }),
+          );
+    },
+    create: (request: CreateLotRequest) => {
+      if (catalog.rejects?.create) return Promise.reject(catalog.rejects.create);
+
+      created.push(request);
+      const lot = lotFixture({
+        id: `lot-${lots.length + 1}`,
+        name: request.name,
+        // Se devuelven con el nombre que tenga el doble a mano; lo que importa de la
+        // respuesta es cuantos entraron y con que identificadores.
+        items: request.itemIds.map((id) => ({ id, name: id })),
+      });
+      lots.push(lot);
+
+      return Promise.resolve(lot);
+    },
+  };
+}
+
+export function walletFixture(overrides: Partial<Wallet> = {}): Wallet {
+  return {
+    id: 'wallet-1',
+    userId: STUDENT.userId,
+    // Cadena y no numero, como lo serializa Prisma: es un Decimal(18, 2) y pasarlo por un
+    // double perderia precision justo en lo que la plataforma usa como dinero.
+    availableBalance: '150000.00',
+    heldBalance: '0.00',
+    createdAt: '2026-09-18T10:00:00.000Z',
+    updatedAt: '2026-09-18T10:00:00.000Z',
+    ...overrides,
+  };
+}
+
+export interface FakeWallet {
+  wallet?: Wallet;
+  /** Lo que se mando recargar, en orden. */
+  recharges?: { userId: string; request: RechargeRequest }[];
+  rejects?: { mine?: ApiError; recharge?: ApiError };
+  /** Simula que la referencia ya existia: el servicio devuelve la recarga de antes. */
+  replayed?: boolean;
+}
+
+export function createFakeWalletGateway(fake: FakeWallet = {}): WalletGateway {
+  const recharges = fake.recharges ?? [];
+  const wallet = fake.wallet ?? walletFixture();
+
+  return {
+    mine: () =>
+      fake.rejects?.mine
+        ? Promise.reject(fake.rejects.mine)
+        : Promise.resolve(wallet),
+
+    recharge: (userId: string, request: RechargeRequest) => {
+      if (fake.rejects?.recharge) return Promise.reject(fake.rejects.recharge);
+
+      recharges.push({ userId, request });
+      return Promise.resolve({
+        wallet,
+        transaction: {
+          id: `tx-${recharges.length}`,
+          type: 'ADMIN_RECHARGE',
+          amount: request.amount.toFixed(2),
+          reference: request.reference ?? null,
+          createdAt: '2026-09-19T00:00:00.000Z',
+        },
+        replayed: fake.replayed ?? false,
+      });
+    },
+  };
+}
+
+export interface FakeMedia {
+  /** Los archivos que se llegaron a mandar, en orden. Es lo que prueba el encadenado. */
+  uploaded?: File[];
+  /** Los identificadores que se mandaron quitar. */
+  removed?: string[];
+  /** Con que error responde la subida, por nombre de archivo. */
+  rejects?: Record<string, ApiError>;
+}
+
+export function createFakeMediaGateway(media: FakeMedia = {}): MediaGateway {
+  const uploaded = media.uploaded ?? [];
+  const removed = media.removed ?? [];
+
+  return {
+    upload: (_itemId: string, file: File) => {
+      const rejection = media.rejects?.[file.name];
+      if (rejection) return Promise.reject(rejection);
+
+      uploaded.push(file);
+      return Promise.resolve(
+        photoFixture({
+          id: `media-${uploaded.length}`,
+          position: uploaded.length - 1,
+        }),
+      );
+    },
+    remove: (_itemId: string, mediaId: string) => {
+      removed.push(mediaId);
+      return Promise.resolve();
+    },
   };
 }
 
@@ -195,7 +451,9 @@ export function createTestContainer(
     sessionLost: createSessionChannel(),
     auth: createFakeAuthGateway(STUDENT),
     items: createFakeItemGateway(),
+    lots: createFakeLotGateway(),
     media: createFakeMediaGateway(),
+    wallet: createFakeWalletGateway(),
     ...overrides,
   };
 }

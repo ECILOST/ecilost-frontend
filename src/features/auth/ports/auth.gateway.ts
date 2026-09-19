@@ -3,6 +3,7 @@ import type {
   Principal,
   Profile,
   UpdateProfileRequest,
+  UserLookup,
 } from '../model/session';
 
 /**
@@ -26,6 +27,15 @@ export interface AuthGateway {
   me(): Promise<Principal>;
 
   profile(): Promise<Profile>;
+
+  /**
+   * `GET /auth/users?email=`. Operacion de funcionario.
+   *
+   * Traduce un correo al `userId` que guardan los demas servicios. Es busqueda exacta y
+   * de un solo resultado: sirve para confirmar a quien ya se conoce, no para recorrer el
+   * directorio. Rechaza con 404 cuando nadie usa ese correo.
+   */
+  findUserByEmail(email: string): Promise<UserLookup>;
 
   updateProfile(request: UpdateProfileRequest): Promise<Profile>;
 

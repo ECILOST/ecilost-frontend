@@ -4,11 +4,16 @@ import { Notice } from '../components/ui/notice';
 import { Page } from '../components/ui/page';
 
 /** Las banderas que publica `GET /auth/me`. */
-export type Capability = 'canManageCatalog' | 'canScheduleRooms' | 'canBid';
+export type Capability =
+  | 'canManageCatalog'
+  | 'canScheduleRooms'
+  | 'canManageWallets'
+  | 'canBid';
 
 const CAPABILITY_MESSAGES: Record<Capability, string> = {
   canManageCatalog: 'Administrar el catálogo es una operación de funcionario.',
   canScheduleRooms: 'Programar salas es una operación de funcionario.',
+  canManageWallets: 'Abonar ECICoin es una operación de funcionario.',
   canBid:
     'Solo los estudiantes pujan: quien dirige la subasta no compite en ella.',
 };
@@ -27,6 +32,7 @@ export function RequireCapability({ capability }: { capability: Capability }) {
     return (
       <Page>
         <Notice
+          titleAs="h1"
           tone="alert"
           live="alert"
           title="No tienes permiso para esta pantalla"
