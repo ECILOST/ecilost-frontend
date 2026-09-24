@@ -1,0 +1,220 @@
+.section {
+  display: grid;
+  gap: 14px;
+}
+
+.heading {
+  font-size: var(--text-lg);
+}
+
+.empty {
+  font-size: var(--text-sm);
+  color: var(--eci-text-dim);
+}
+
+/* --- Pujas recientes -------------------------------------------------------- */
+.bids {
+  display: grid;
+  gap: 9px;
+}
+
+.bid {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--eci-surface);
+  animation: enter var(--t-med) var(--ease-out);
+}
+
+.mine {
+  border-color: rgb(25 229 213 / 30%);
+  background: var(--eci-surface-glow);
+}
+
+.avatar {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.alias {
+  flex: 1;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.mine .alias {
+  font-weight: 700;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* --- Actividad -------------------------------------------------------------- */
+.activity {
+  display: grid;
+  gap: 12px;
+}
+
+.event {
+  display: flex;
+  gap: 11px;
+}
+
+.eventIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.pinkIcon {
+  background: rgb(255 79 120 / 20%);
+  color: var(--eci-pink-text);
+}
+
+.greyIcon {
+  background: rgb(124 143 181 / 20%);
+  color: var(--eci-text-soft);
+}
+
+.cyanIcon {
+  background: rgb(25 229 213 / 20%);
+  color: var(--eci-cyan);
+}
+
+.blueIcon {
+  background: rgb(43 107 255 / 22%);
+  color: var(--eci-blue-text);
+}
+
+.eventText {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--eci-text-body);
+}
+
+.eventTime {
+  display: block;
+  margin-top: 3px;
+  font-size: var(--text-2xs);
+  color: var(--eci-text-faint);
+}
+
+/* --- Siguiente objeto --------------------------------------------------------- */
+.next {
+  padding: 16px;
+  border: 1px solid var(--eci-line);
+  border-radius: 22px;
+  background: var(--eci-surface);
+}
+
+.nextLabel {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--eci-text-label);
+}
+
+.nextRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 11px;
+}
+
+.nextName {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.nextMeta {
+  margin-top: 3px;
+  font-size: var(--text-2xs);
+  color: var(--eci-text-dim);
+}
+
+/* --- Objetos de la sala ------------------------------------------------------- */
+.strip {
+  display: grid;
+  gap: 14px;
+}
+
+.stripHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.stripCount {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--eci-text-dim);
+}
+
+.stripList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+}
+
+.stripItem {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 20px;
+  background: var(--eci-surface);
+}
+
+.stripThumb {
+  width: 100%;
+  height: 56px;
+  margin-bottom: 5px;
+}
+
+.stripLive {
+  border-color: rgb(255 79 120 / 55%);
+  background: var(--eci-surface-high);
+  box-shadow: 0 0 26px rgb(255 79 120 / 16%);
+}
+
+.stripClosed {
+  opacity: 0.6;
+}
+
+.stripName {
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+.stripLive .stripName {
+  font-weight: 700;
+}
+
+.stripState {
+  font-size: 0.5625rem;
+  font-weight: 600;
+  color: var(--eci-text-dim);
+}
+
+.stateLive {
+  font-weight: 700;
+  color: var(--eci-pink-text);
+}
+
+.stateNext {
+  color: var(--eci-cyan);
+}

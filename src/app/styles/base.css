@@ -39,14 +39,14 @@ h2,
 h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: var(--tracking-tight);
   line-height: 1.1;
 }
 
 /* El titulo se encoge con la pantalla: a 375 px, 2.25rem se come la mitad del movil. */
 h1 {
-  font-size: clamp(1.75rem, 6.5vw, 2.25rem);
+  font-size: clamp(1.625rem, 5vw, var(--text-2xl));
 }
 
 h2 {
@@ -117,4 +117,18 @@ button {
   font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--tracking-tight);
+}
+
+/* Punto de "en vivo": lo unico que se mueve de forma continua en la interfaz. */
+@keyframes live-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
 }

@@ -9,9 +9,9 @@
   padding: 6px 13px;
   border: 1px solid transparent;
   border-radius: var(--r-chip);
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  font-weight: 600;
+  font-family: var(--font-text);
+  font-size: 0.6875rem;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -23,16 +23,19 @@
 
 .cyan {
   background: var(--eci-cyan-soft);
+  border-color: var(--eci-cyan-line);
   color: var(--eci-cyan);
 }
 
 .pink {
   background: var(--eci-pink-soft);
-  color: var(--eci-pink);
+  border-color: var(--eci-pink-line);
+  color: var(--eci-pink-text);
 }
 
 .yellow {
   background: var(--eci-yellow-soft);
+  border-color: var(--eci-yellow-line);
   color: var(--eci-yellow);
 }
 
@@ -56,7 +59,7 @@
  * "en vivo" no es translucido, porque sobre una imagen clara dejaria de leerse.
  */
 .solid.pink {
-  background: var(--eci-pink-deep);
+  background: var(--eci-pink);
   color: var(--eci-text);
 }
 
@@ -97,10 +100,11 @@
  */
 .interactive {
   cursor: pointer;
-  padding: 11px 18px;
-  font-size: var(--text-sm);
-  background: var(--eci-surface);
-  border-color: var(--eci-line);
+  padding: 11px 20px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  background: var(--eci-surface-alt);
+  border-color: transparent;
   color: var(--eci-text-soft);
   transition:
     transform var(--t-fast) var(--ease-out),
@@ -115,10 +119,11 @@
   color: var(--eci-text);
 }
 
-/* El filtro activo es una capsula clara, como en la referencia. */
+/* El filtro activo es la capsula cian del diseño. */
 .selected {
-  background: var(--eci-text);
-  border-color: var(--eci-text);
+  background: var(--eci-cyan);
+  border-color: var(--eci-cyan);
+  font-weight: 700;
   color: var(--eci-on-accent);
 }
 
@@ -131,4 +136,11 @@
   height: 6px;
   border-radius: 50%;
   background: currentcolor;
+}
+
+/* Punto que late: solo para lo que esta pasando ahora mismo. */
+.live {
+  width: 8px;
+  height: 8px;
+  animation: live-dot 1.4s ease-in-out infinite;
 }

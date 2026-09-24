@@ -1,0 +1,25 @@
+.bell {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--eci-line);
+  border-radius: 50%;
+  background: var(--eci-surface-alt);
+  color: var(--eci-text-soft);
+}
+
+.bell:hover {
+  color: var(--eci-text);
+}
+
+.dot {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--eci-pink);
+}

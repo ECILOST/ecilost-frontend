@@ -1,8 +1,9 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import styles from './button.module.css';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'quiet';
-export type ButtonSize = 'md' | 'lg';
+export type ButtonVariant =
+  'primary' | 'bid' | 'secondary' | 'danger' | 'quiet';
+export type ButtonSize = 'md' | 'lg' | 'block';
 
 /**
  * Las clases se exponen aparte del componente para que un enlace pueda verse como boton sin

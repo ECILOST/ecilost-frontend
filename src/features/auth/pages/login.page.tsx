@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { Loading } from '@/shared/components/loading';
-import { Brand, BrandMark } from '@/shared/components/shell/brand';
-import { Backdrop } from '@/shared/components/ui/backdrop';
-import { BlobFrame } from '@/shared/components/ui/blob-frame';
+import { Brand } from '@/shared/components/shell/brand';
 import { Button } from '@/shared/components/ui/button';
 import { Notice } from '@/shared/components/ui/notice';
 import { loginErrorMessage } from '../domain/auth-error';
@@ -12,16 +10,14 @@ import { useSession } from '../hooks/use-session';
 import styles from './login.page.module.css';
 
 /**
- * Entrada de la aplicacion.
+ * Entrada de la aplicacion, con el diseño de "Escritorio · Acceso".
  *
- * El boton no envia un formulario: manda el navegador a `GET /auth/google`, que responde un
- * 302 hacia Google. Un `fetch` se comeria la redireccion y nadie saldria de la pagina.
- * Aqui no hay campos de usuario ni contraseña: las credenciales las pide Google, nunca
- * ECILOST, y conviene que se vea.
+ * El diseño dibuja correo y contraseña, pero la cuenta es la institucional de Google: el
+ * boton manda el navegador a `GET /auth/google`, que responde un 302 hacia Google. ECILOST
+ * nunca ve ni guarda contraseñas, y conviene que se vea: por eso la tarjeta no tiene campos.
  *
  * Tambien es la pantalla a la que el servicio devuelve a quien rechaza, con el motivo en la
- * direccion. Sin leerlo, una cuenta inactiva o un correo sin verificar reintentarian en
- * bucle contra la misma portada de bienvenida, sin enterarse de que el problema no es suyo.
+ * direccion. Sin leerlo, una cuenta inactiva reintentaria en bucle sin saber por que.
  */
 export function LoginPage() {
   const { status, login } = useSession();
@@ -29,100 +25,105 @@ export function LoginPage() {
   const [params] = useSearchParams();
   const error = loginErrorMessage(params.get('error'));
 
-  /**
-   * Se sale de la pagina, no se envia nada, asi que lo unico que hay que evitar es que el
-   * boton parezca muerto mientras el navegador negocia con Google.
-   */
+  /** Se sale de la pagina: solo hay que evitar que el boton parezca muerto mientras tanto. */
   const [leaving, setLeaving] = useState(false);
 
-  // Volver atras desde Google restaura esta pagina tal como estaba, con el boton todavia
-  // deshabilitado. `pageshow` es el unico aviso de que la pagina se resucito de la cache.
+  // Volver atras desde Google restaura esta pagina con el boton deshabilitado. `pageshow`
+  // es el unico aviso de que la pagina se resucito de la cache.
   useEffect(() => {
     const revive = () => setLeaving(false);
     window.addEventListener('pageshow', revive);
     return () => window.removeEventListener('pageshow', revive);
   }, []);
 
-  if (status === 'loading') {
-    return (
-      <div className={styles.screen}>
-        <Backdrop variant="splash" />
-        <div className={styles.login}>
-          <Brand size="lg" asLink={false} />
-          <Loading label="Comprobando la sesión..." />
-        </div>
-      </div>
-    );
-  }
-
-  // Con sesion no hay nada que hacer en /login. `from` lo deja el guard al redirigir.
   if (status === 'authenticated') {
     const from = (location.state as { from?: string } | null)?.from;
-    return <Navigate to={from ?? routes.items} replace />;
+    return <Navigate to={from ?? routes.home} replace />;
   }
 
   return (
     <div className={styles.screen}>
-      <Backdrop variant="splash" />
+      <span className={`${styles.blob} ${styles.blue}`} aria-hidden="true" />
+      <span className={`${styles.blob} ${styles.cyan}`} aria-hidden="true" />
+      <span className={`${styles.blob} ${styles.pink}`} aria-hidden="true" />
+      <span className={`${styles.blob} ${styles.yellow}`} aria-hidden="true" />
+      <span className={styles.fade} aria-hidden="true" />
 
-      <div className={styles.login}>
-        <Brand size="lg" asLink={false} />
+      <div className={styles.layout}>
+        <section className={styles.intro}>
+          <Brand size="md" asLink={false} />
+          <h1 className={styles.tagline}>
+            Objetos perdidos,
+            <br />
+            nuevas historias
+          </h1>
+          <p className={styles.lead}>
+            Descubre, puja y llévatelos. Las subastas de objetos perdidos de tu
+            universidad, en vivo y con ECICoin.
+          </p>
+          <dl className={styles.stats}>
+            <div>
+              <dt>objetos recuperados</dt>
+              <dd className={styles.yellowText}>1.240</dd>
+            </div>
+            <div>
+              <dt>salas al mes</dt>
+              <dd className={styles.cyanText}>38</dd>
+            </div>
+            <div>
+              <dt>estudiantes activos</dt>
+              <dd className={styles.pinkText}>4.5k</dd>
+            </div>
+          </dl>
+        </section>
 
-        {/*
-          Va delante de todo lo demas y no al lado del boton: quien llega aqui rebotado
-          necesita leer por que antes de volver a intentarlo, y quien usa lector de pantalla
-          empieza por el principio del documento.
-        */}
-        {error ? (
-          <div className={styles.error}>
-            <Notice
-              tone="alert"
-              live="alert"
-              title="No pudimos iniciar tu sesión"
-            >
-              {error}
-            </Notice>
+        <section className={styles.panel}>
+          <div className={styles.card}>
+            {status === 'loading' ? (
+              <Loading label="Comprobando la sesión..." />
+            ) : (
+              <>
+                <h2 className={styles.cardTitle}>
+                  Entra con tu correo institucional
+                </h2>
+
+                {/*
+                  Va delante del boton: quien llega aqui rebotado necesita leer por que antes
+                  de volver a intentarlo.
+                */}
+                {error ? (
+                  <Notice
+                    tone="alert"
+                    live="alert"
+                    title="No pudimos iniciar tu sesión"
+                  >
+                    {error}
+                  </Notice>
+                ) : null}
+
+                <p className={styles.hint}>
+                  Usa tu cuenta <strong>@escuelaing.edu.co</strong>. La
+                  contraseña la pide Google: ECILOST nunca la ve.
+                </p>
+
+                <Button
+                  size="block"
+                  disabled={leaving}
+                  onClick={() => {
+                    setLeaving(true);
+                    login();
+                  }}
+                >
+                  {leaving
+                    ? 'Abriendo Google...'
+                    : error
+                      ? 'Volver a intentarlo'
+                      : 'Entrar con Google'}
+                </Button>
+              </>
+            )}
           </div>
-        ) : null}
-
-        <p className={styles.tagline}>
-          Objetos perdidos,
-          <br />
-          nuevas historias
-        </p>
-
-        <BlobFrame
-          className={styles.art}
-          size="lg"
-          palette={2}
-          shape="b"
-          fallback={<BrandMark size={72} />}
-        />
-
-        <p className={styles.lead}>
-          Lo que la universidad no pudo devolver sale a subasta. Explora el
-          catálogo, entra a una sala y puja con ECICoin.
-        </p>
-
-        <Button
-          size="lg"
-          disabled={leaving}
-          onClick={() => {
-            setLeaving(true);
-            login();
-          }}
-        >
-          {leaving
-            ? 'Abriendo Google...'
-            : error
-              ? 'Volver a intentarlo'
-              : 'Entrar con Google'}
-        </Button>
-
-        <p className={styles.note}>
-          Usa tu cuenta institucional. La contraseña la pide Google: ECILOST
-          nunca la ve.
-        </p>
+        </section>
       </div>
     </div>
   );

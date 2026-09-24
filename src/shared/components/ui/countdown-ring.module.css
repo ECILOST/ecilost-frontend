@@ -1,0 +1,36 @@
+.ring {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: conic-gradient(var(--eci-pink) 0 var(--progress), rgb(255 255 255 / 20%) 0);
+  box-shadow: 0 10px 32px rgb(255 79 120 / 35%);
+}
+
+.face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--size) * 0.83);
+  height: calc(var(--size) * 0.83);
+  border-radius: 50%;
+  background: var(--eci-night);
+}
+
+.label {
+  font-size: calc(var(--size) * 0.085);
+  font-weight: 500;
+  color: var(--eci-text-label);
+}
+
+.time {
+  font-family: var(--font-display);
+  font-size: calc(var(--size) * 0.19);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}

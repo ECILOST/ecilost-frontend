@@ -6,10 +6,9 @@
   border: 1px solid transparent;
   border-radius: var(--r-chip);
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: var(--tracking-tight);
+  font-weight: 800;
+  text-align: center;
   text-decoration: none;
-  white-space: nowrap;
   cursor: pointer;
   transition:
     transform var(--t-fast) var(--ease-out),
@@ -36,49 +35,60 @@
   box-shadow: none;
 }
 
-/*
- * El relleno vertical sale de un calculo, no del ojo: 12 + 12 de relleno, 21,7 de linea y
- * 2 de borde dan 48 px, que es el minimo tactil de Material. Con 10 px se quedaba en 44
- * justos, y cualquier cambio de tipografia lo bajaba por debajo.
- */
+/* 12 + 12 de relleno, la linea y el borde dan 44 px como minimo tactil. */
 .md {
-  padding: 12px 18px;
+  padding: 12px 20px;
   font-size: var(--text-sm);
 }
 
 .lg {
-  padding: 15px 28px;
+  padding: 16px 32px;
   font-size: var(--text-md);
 }
 
+/* Bloque: las acciones de la sala ocupan todo el ancho de su columna. */
+.block {
+  width: 100%;
+  padding-block: 18px;
+  font-size: var(--text-lg);
+}
+
 .primary {
-  background: var(--eci-cyan);
+  background: var(--grad-cyan);
   color: var(--eci-on-accent);
   box-shadow: var(--glow-cyan);
 }
 
 .primary:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
+  color: var(--eci-on-accent);
+}
+
+/* Pujar: rosa y con resplandor, solo dentro de una subasta. */
+.bid {
+  background: var(--eci-pink);
+  color: var(--eci-text);
+  box-shadow: var(--glow-pink);
+}
+
+.bid:hover {
+  filter: brightness(1.06);
+  color: var(--eci-text);
 }
 
 .secondary {
-  background: transparent;
+  background: var(--eci-surface);
   border-color: var(--eci-line-strong);
   color: var(--eci-text);
+  font-weight: 700;
 }
 
 .secondary:hover {
   border-color: var(--eci-cyan);
-  color: var(--eci-cyan);
+  color: var(--eci-text);
 }
 
-/*
- * Borrar y retirar. Va en rosa profundo y no en el rosa puro porque el blanco encima de
- * este llega a 4,5:1 y encima del otro no.
- *
- * Lleva su propio color y no solo la palabra "Borrar": una accion irreversible tiene que
- * distinguirse de la de al lado antes de leerla.
- */
+/* Borrar y retirar: una accion irreversible se distingue antes de leerla. */
 .danger {
   background: var(--eci-pink-deep);
   color: var(--eci-text);
@@ -86,16 +96,18 @@
 }
 
 .danger:hover {
-  filter: brightness(1.08);
+  filter: brightness(1.06);
 }
 
 .quiet {
-  background: var(--eci-neutral-soft);
+  background: var(--eci-surface-alt);
+  border-color: var(--eci-line);
   color: var(--eci-text-soft);
+  font-family: var(--font-text);
+  font-weight: 600;
 }
 
 .quiet:hover {
-  background: rgb(255 255 255 / 12%);
   color: var(--eci-text);
 }
 

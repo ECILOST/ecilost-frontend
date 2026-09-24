@@ -1,84 +1,168 @@
-/*
- * Portada, con la composicion de la referencia: marca arriba, lema manuscrito, el collage de
- * color en el centro y una sola accion en capsula. Es la unica pantalla sin datos que
- * mostrar, asi que aqui el color y la forma hacen todo el trabajo.
- */
-/*
- * El fondo va en un envoltorio y no dentro de `.login`: la entrada anima un `transform`, y
- * un ancestro transformado convierte a sus hijos `position: fixed` en hijos suyos. El fondo
- * dejaba de cubrir la ventana y se recortaba al ancho de la columna.
- */
 .screen {
   position: relative;
-  min-height: 100dvh;
-}
-
-.login {
   display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: var(--s-5);
-  width: 100%;
-  max-width: 520px;
   min-height: 100dvh;
-  margin: 0 auto;
-  padding: var(--s-7) var(--page-gutter);
-  text-align: center;
-  animation: enter var(--t-slow) var(--ease-out) both;
+  overflow: hidden;
+  background: var(--eci-night);
+  isolation: isolate;
 }
 
-@keyframes enter {
-  from {
-    opacity: 0;
-    transform: translateY(14px);
-  }
+.blob {
+  position: absolute;
+  z-index: -2;
 }
 
-/* Lema manuscrito: el guiño humano de la referencia, en la unica pantalla que lo admite. */
-.tagline {
-  font-family: var(--font-script);
-  font-size: clamp(1.75rem, 7vw, 2.5rem);
-  font-weight: 600;
-  line-height: 1.1;
-  color: var(--eci-text);
-  opacity: 0.88;
+.blue {
+  right: -120px;
+  top: 8%;
+  width: 480px;
+  height: 430px;
+  background: var(--eci-blue);
+  border-radius: var(--blob-a);
 }
 
-.art {
+.cyan {
+  right: 12%;
+  bottom: -150px;
+  width: 420px;
+  height: 360px;
+  background: var(--eci-cyan);
+  border-radius: 62% 38% 45% 55% / 40% 58% 42% 60%;
+}
+
+.pink {
+  right: 28%;
+  top: -70px;
+  width: 220px;
+  height: 200px;
+  background: var(--eci-pink);
+  border-radius: 52% 48% 38% 62% / 58% 42% 58% 42%;
+}
+
+.yellow {
+  right: 38%;
+  top: 48%;
+  width: 140px;
+  height: 130px;
+  background: var(--eci-yellow);
+  border-radius: var(--blob-d);
+}
+
+/* Veladura: la mitad izquierda se lee sobre fondo liso, las manchas asoman a la derecha. */
+.fade {
+  position: absolute;
+  inset: 0 44% 0 0;
+  z-index: -1;
+  background: linear-gradient(90deg, var(--eci-night) 72%, rgb(6 21 40 / 82%));
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
   width: 100%;
-  max-width: 300px;
-  animation: float 6s ease-in-out infinite;
+  max-width: 1160px;
+  margin: 0 auto;
 }
 
-/* Flotacion muy corta: da vida a la portada sin convertirla en un anuncio. */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
+.intro,
+.panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 50px;
+}
 
-  50% {
-    transform: translateY(-10px);
-  }
+.panel {
+  background: rgb(6 21 40 / 78%);
+}
+
+.tagline {
+  margin-top: 22px;
+  font: italic 800 2.625rem/1.18 var(--font-display);
+  color: #e6eeff;
 }
 
 .lead {
+  max-width: 400px;
+  margin-top: 20px;
+  font-size: var(--text-md);
+  line-height: 1.7;
   color: var(--eci-text-soft);
-  max-width: 40ch;
 }
 
-/* Que va a pasar al pulsar: se dice antes, no despues de salir de la pagina. */
-.note {
+.stats {
+  display: flex;
+  gap: 34px;
+  margin: 34px 0 0;
+}
+
+.stats div {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+}
+
+.stats dt {
+  font-size: 0.6875rem;
   color: var(--eci-text-dim);
-  font-size: var(--text-xs);
-  max-width: 38ch;
 }
 
-/*
- * El aviso de rechazo. La portada esta centrada, pero un parrafo de tres lineas centrado se
- * lee peor que alineado a la izquierda, asi que aqui se revierte.
- */
-.error {
-  width: 100%;
-  text-align: left;
+.stats dd {
+  margin: 0;
+  font: 800 1.625rem var(--font-display);
+}
+
+.yellowText {
+  color: var(--eci-yellow);
+}
+
+.cyanText {
+  color: var(--eci-cyan);
+}
+
+.pinkText {
+  color: var(--eci-pink-text);
+}
+
+.card {
+  display: grid;
+  gap: 20px;
+  padding: 34px;
+  border: 1px solid rgb(25 229 213 / 30%);
+  border-radius: var(--r-xl);
+  background: var(--eci-surface);
+  box-shadow: 0 0 40px rgb(25 229 213 / 10%);
+}
+
+.cardTitle {
+  font-size: var(--text-xl);
+}
+
+.hint {
+  padding: 15px 17px;
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-md);
+  background: var(--eci-night);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--eci-text-label);
+}
+
+.hint strong {
+  color: var(--eci-text);
+}
+
+@media (width < 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .fade {
+    inset: 0;
+  }
+
+  .intro,
+  .panel {
+    padding: 40px var(--page-gutter);
+  }
 }

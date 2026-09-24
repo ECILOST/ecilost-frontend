@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import {
   STAFF,
@@ -20,7 +21,11 @@ describe('Marco de la aplicación', () => {
       }),
     });
 
-    expect(await screen.findByText('Andrea Parra')).toBeInTheDocument();
+    // La cabecera solo muestra el avatar; nombre y rol estan a un clic, en su menu.
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Cuenta de Andrea Parra' }),
+    );
+    expect(screen.getByText('Andrea Parra')).toBeInTheDocument();
     expect(screen.getByText('Funcionario')).toBeInTheDocument();
   });
 
@@ -50,13 +55,13 @@ describe('Marco de la aplicación', () => {
     });
 
     /*
-      Salas pide `canBid`, que solo tiene el estudiante. Se consulta en plural porque la
+      Subastas pide `canBid`, que solo tiene el estudiante. Se consulta en plural porque la
       misma lista se pinta dos veces, como pastillas arriba y como barra abajo: en el
       navegador solo una esta visible (`display: none` tambien la saca del arbol de
       accesibilidad), pero aqui no hay CSS aplicado y estan las dos.
     */
     expect(
-      await screen.findAllByRole('link', { name: /salas/i }),
+      await screen.findAllByRole('link', { name: /subastas/i }),
     ).not.toHaveLength(0);
     student.unmount();
 
@@ -70,7 +75,7 @@ describe('Marco de la aplicación', () => {
 
     await screen.findByRole('heading', { name: 'Catálogo' });
     expect(
-      screen.queryByRole('link', { name: /salas/i }),
+      screen.queryByRole('link', { name: /subastas/i }),
     ).not.toBeInTheDocument();
   });
 });

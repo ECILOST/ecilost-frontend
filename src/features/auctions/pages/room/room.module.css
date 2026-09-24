@@ -1,0 +1,511 @@
+.page {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 32px var(--page-gutter) 38px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr;
+  gap: 34px;
+}
+
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.side {
+  gap: 22px;
+}
+
+.chip {
+  padding: 6px 13px;
+  border: 1px solid var(--eci-cyan-line);
+  border-radius: 16px;
+  background: var(--eci-surface-high);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--eci-cyan);
+  white-space: nowrap;
+}
+
+/* --- Objeto en subasta ------------------------------------------------------------ */
+.art {
+  position: relative;
+}
+
+.ring {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  pointer-events: none;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 26px;
+  margin-top: 24px;
+}
+
+.itemName {
+  font-size: 1.625rem;
+}
+
+.label {
+  display: block;
+  margin: 10px 0 4px;
+  font-size: 0.6875rem;
+  color: var(--eci-text-label);
+}
+
+.mine {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.myBid {
+  padding: 12px 16px;
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-md);
+  background: var(--eci-surface);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--eci-text-body);
+}
+
+.state {
+  padding: 11px 15px;
+  border-radius: var(--r-md);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.winning {
+  background: var(--eci-cyan);
+  color: var(--eci-on-accent);
+}
+
+.outbid {
+  background: var(--eci-pink);
+  color: var(--eci-text);
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.actions {
+  display: flex;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.actions > :first-child {
+  flex: 1.5;
+}
+
+.actions > :nth-child(2) {
+  flex: 1;
+}
+
+.strip {
+  margin-top: 28px;
+}
+
+.between {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  height: 430px;
+  border: 1px dashed var(--eci-line-strong);
+  border-radius: var(--r-xl);
+  color: var(--eci-text-soft);
+  text-align: center;
+}
+
+/* --- Solo seguimiento ------------------------------------------------------------- */
+.bannerWrap {
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 20px var(--page-gutter) 0;
+}
+
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 18px;
+  border: 1px solid var(--eci-yellow-line);
+  border-radius: 22px;
+  background: rgb(255 200 74 / 10%);
+}
+
+.bannerIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgb(255 200 74 / 20%);
+  color: var(--eci-yellow);
+}
+
+.bannerText {
+  flex: 1;
+  min-width: 220px;
+}
+
+.bannerTitle {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--eci-yellow);
+}
+
+.bannerSub {
+  margin-top: 3px;
+  font-size: 0.6875rem;
+  color: #e0cb9a;
+}
+
+.pageTight {
+  padding-top: 24px;
+}
+
+.stats {
+  display: flex;
+  gap: 12px;
+}
+
+.unavailable {
+  margin-top: 18px;
+  padding: 17px;
+  border: 1px dashed rgb(255 255 255 / 18%);
+  border-radius: 26px;
+  background: var(--eci-surface);
+  font: 700 0.875rem var(--font-display);
+  color: var(--eci-text-faint);
+  text-align: center;
+}
+
+/* --- Sala de espera --------------------------------------------------------------- */
+.waitGrid {
+  grid-template-columns: 1.25fr 1fr;
+}
+
+.waitTitle {
+  margin-top: 22px;
+  font-size: 1.75rem;
+}
+
+.warning {
+  margin-top: 10px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--eci-yellow);
+}
+
+.startsLabel {
+  margin-top: 20px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--eci-text-dim);
+}
+
+.countdown {
+  position: relative;
+  margin-top: 8px;
+  padding: 26px;
+  overflow: hidden;
+  border: 1px solid rgb(25 229 213 / 30%);
+  border-radius: 28px;
+  background: linear-gradient(120deg, var(--eci-surface-high), var(--eci-surface));
+  text-align: center;
+  box-shadow: 0 0 36px rgb(25 229 213 / 10%);
+  isolation: isolate;
+}
+
+.countdown::before {
+  content: '';
+  position: absolute;
+  left: -50px;
+  bottom: -60px;
+  z-index: -1;
+  width: 200px;
+  height: 170px;
+  background: rgb(25 229 213 / 20%);
+  border-radius: var(--blob-d);
+}
+
+.countdownValue {
+  font: 800 3.875rem/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 3px;
+}
+
+.waitStats {
+  display: flex;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.orderHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.orderTitle {
+  font-size: 1.125rem;
+}
+
+.count {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--eci-text-dim);
+}
+
+.order {
+  display: grid;
+  gap: 10px;
+}
+
+.orderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border: 1px solid rgb(255 255 255 / 7%);
+  border-radius: 20px;
+  background: var(--eci-surface);
+}
+
+.orderNumber {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--eci-surface-high);
+  font: 800 0.6875rem var(--font-display);
+  color: var(--eci-cyan);
+}
+
+.orderRow > :nth-child(2) {
+  width: 44px;
+  height: 44px;
+}
+
+.orderName {
+  flex: 1;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.join {
+  margin-top: 22px;
+}
+
+.note {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--eci-line);
+  border-radius: 20px;
+  background: var(--eci-surface);
+  font-size: 0.6875rem;
+  line-height: 1.6;
+  color: var(--eci-text-label);
+}
+
+/* --- Sala finalizada --------------------------------------------------------------- */
+.finished {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.finished::before,
+.finished::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+}
+
+.finished::before {
+  left: -120px;
+  bottom: 40px;
+  width: 360px;
+  height: 300px;
+  background: rgb(43 107 255 / 25%);
+}
+
+.finished::after {
+  right: -140px;
+  bottom: -140px;
+  width: 420px;
+  height: 360px;
+  background: rgb(25 229 213 / 20%);
+}
+
+.finishedHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.finishedTitle {
+  font-size: 2.5rem;
+}
+
+.finishedMeta {
+  margin-top: 8px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.counters {
+  display: flex;
+  gap: 10px;
+}
+
+.counter {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  min-width: 90px;
+  padding: 12px 16px;
+  border: 1px solid var(--eci-line-strong);
+  border-radius: 20px;
+  background: var(--eci-night);
+  font-size: var(--text-2xs);
+  color: var(--eci-text-soft);
+}
+
+.counter strong {
+  font: 800 1.75rem/1 var(--font-display);
+}
+
+.counterWon {
+  border-color: var(--eci-cyan-line);
+}
+
+.counterWon strong {
+  color: var(--eci-cyan);
+}
+
+.counterLost {
+  border-color: var(--eci-pink-line);
+}
+
+.counterLost strong {
+  color: var(--eci-pink-text);
+}
+
+.resumeTitle {
+  margin: 30px 0 16px;
+  font-size: 1.25rem;
+}
+
+.resume {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.resumeRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--eci-line);
+  border-radius: 22px;
+  background: rgb(10 28 52 / 85%);
+}
+
+.resumeRow > :first-child {
+  width: 70px;
+  height: 70px;
+  border-radius: 16px;
+}
+
+.resumeWon {
+  border-color: var(--eci-cyan-line);
+}
+
+.resumeLost {
+  border-color: rgb(255 79 120 / 30%);
+}
+
+.resumeText {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.resumeName {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.resumeDetail {
+  font-size: var(--text-2xs);
+  color: var(--eci-text-dim);
+}
+
+.total {
+  border-color: var(--eci-yellow-line);
+}
+
+.totalBadge {
+  display: grid;
+  place-items: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 16px;
+  background: var(--grad-coin);
+  font: 800 1.125rem var(--font-display);
+  color: var(--eci-on-accent);
+}
+
+.finishedActions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+@media (width < 960px) {
+  .grid,
+  .waitGrid,
+  .resume {
+    grid-template-columns: 1fr;
+  }
+}
+
+.followArt.followArt {
+  height: 360px;
+}

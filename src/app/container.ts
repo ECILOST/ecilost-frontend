@@ -1,4 +1,6 @@
 import { config, type AppConfig } from '@/config/env';
+import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
+import type { AuctionGateway } from '@/features/auctions/ports/auction.gateway';
 import { createHttpAuthGateway } from '@/features/auth/api/http-auth.gateway';
 import type { AuthGateway } from '@/features/auth/ports/auth.gateway';
 import { createHttpItemGateway } from '@/features/catalog/api/http-item.gateway';
@@ -32,6 +34,11 @@ export interface Container {
   lots: LotGateway;
   media: MediaGateway;
   wallet: WalletGateway;
+  /**
+   * Salas, pujas y notificaciones. Hoy en memoria (`createDemoAuctionGateway`) hasta
+   * conectar ecilost-auction-service y el canal en vivo de ecilost-engagement-service.
+   */
+  auctions: AuctionGateway;
 }
 
 export function createContainer(appConfig: AppConfig = config): Container {
@@ -74,5 +81,6 @@ export function createContainer(appConfig: AppConfig = config): Container {
     lots: createHttpLotGateway(catalogHttp),
     media: createHttpMediaGateway(catalogHttp),
     wallet: createHttpWalletGateway(walletHttp),
+    auctions: createDemoAuctionGateway({ latencyMs: 150 }),
   };
 }

@@ -1,0 +1,111 @@
+.page {
+  display: grid;
+  gap: 22px;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 30px var(--page-gutter) 38px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.title {
+  font-size: var(--text-2xl);
+}
+
+.subtitle {
+  margin-top: 7px;
+  font-size: var(--text-xs);
+  color: var(--eci-text-dim);
+}
+
+.tabs {
+  display: flex;
+  gap: 9px;
+}
+
+.list {
+  display: grid;
+  gap: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 18px 14px 14px;
+  border: 1px solid var(--eci-line);
+  border-radius: 24px;
+  background: var(--eci-surface);
+  color: var(--eci-text);
+  text-decoration: none;
+  transition: border-color var(--t-fast) linear;
+}
+
+.row:hover {
+  border-color: var(--eci-line-strong);
+  color: var(--eci-text);
+  text-decoration: none;
+}
+
+.winning {
+  border-color: rgb(25 229 213 / 40%);
+}
+
+.outbid {
+  border-color: rgb(255 79 120 / 30%);
+}
+
+.thumb.thumb {
+  width: 84px;
+  height: 84px;
+  border-radius: 18px;
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.detail {
+  font-size: var(--text-2xs);
+  color: var(--eci-text-dim);
+}
+
+.amount {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.amountLabel {
+  font-size: var(--text-2xs);
+  color: var(--eci-text-dim);
+}
+
+.row > span:last-child {
+  min-width: 92px;
+  justify-content: center;
+  padding-block: 9px;
+}
+
+/* "Ganada" va en contorno cian, como en el diseño: ya no hay nada que hacer, solo recogerla. */
+.wonPill.wonPill {
+  background: var(--eci-surface-high);
+}

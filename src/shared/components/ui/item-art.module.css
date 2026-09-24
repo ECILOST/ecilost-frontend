@@ -1,0 +1,152 @@
+.art {
+  position: relative;
+  overflow: hidden;
+  background: var(--eci-night);
+  isolation: isolate;
+}
+
+.blob {
+  position: absolute;
+  z-index: -1;
+}
+
+/* --- Tarjeta: dos manchas que desbordan por esquinas opuestas --------------- */
+.card {
+  height: 170px;
+}
+
+.card .b1 {
+  left: -40px;
+  top: -30px;
+  width: 210px;
+  height: 190px;
+  background: var(--c1);
+  border-radius: 58% 42% 45% 55% / 48% 52% 48% 52%;
+}
+
+.card .b2 {
+  right: -40px;
+  bottom: -34px;
+  width: 200px;
+  height: 180px;
+  background: var(--c2);
+  border-radius: 52% 48% 60% 40% / 50% 46% 54% 50%;
+}
+
+/* --- Protagonista: cuatro manchas y borde azul con halo --------------------- */
+.hero {
+  height: 430px;
+  border: 1px solid var(--eci-blue-line);
+  border-radius: var(--r-xl);
+  box-shadow: 0 0 44px rgb(43 107 255 / 16%);
+}
+
+.hero .b1 {
+  left: -70px;
+  top: -50px;
+  width: 400px;
+  height: 360px;
+  background: var(--c1);
+  border-radius: var(--blob-a);
+}
+
+.hero .b2 {
+  right: -80px;
+  bottom: -90px;
+  width: 380px;
+  height: 330px;
+  background: var(--c2);
+  border-radius: var(--blob-b);
+}
+
+.hero .b3 {
+  left: 40%;
+  top: -40px;
+  width: 200px;
+  height: 180px;
+  background: var(--c3);
+  border-radius: var(--blob-c);
+}
+
+.hero .b4 {
+  right: 22%;
+  bottom: 40px;
+  width: 120px;
+  height: 110px;
+  background: var(--c4);
+  border-radius: var(--blob-d);
+}
+
+.dimmed {
+  border-color: var(--eci-line-strong);
+  box-shadow: none;
+}
+
+.dimmed .b1 {
+  opacity: 0.55;
+}
+
+.dimmed .b2 {
+  opacity: 0.45;
+}
+
+.dimmed .b3,
+.dimmed .b4 {
+  display: none;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  background: rgb(6 21 40 / 30%);
+  pointer-events: none;
+}
+
+/* --- Miniatura: dos degradados radiales ------------------------------------- */
+.thumb {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-sm);
+  background:
+    radial-gradient(75% 75% at 28% 26%, var(--c1) 0, transparent 68%),
+    radial-gradient(75% 75% at 76% 78%, var(--c2) 0, transparent 68%),
+    var(--eci-surface-high);
+}
+
+.plain {
+  height: 250px;
+  border-radius: var(--r-xl);
+  background: var(--eci-surface-high);
+}
+
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Marcador del diseño: icono de imagen + nombre, sobre un recuadro punteado. */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed rgb(255 255 255 / 30%);
+  border-radius: inherit;
+  color: rgb(255 255 255 / 85%);
+  font-family: var(--font-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 35%);
+}
+
+.plain .placeholder {
+  border-color: rgb(255 255 255 / 12%);
+}

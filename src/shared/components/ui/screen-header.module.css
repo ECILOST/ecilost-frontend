@@ -1,0 +1,41 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+  padding: 18px max(var(--page-gutter), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
+  border-bottom: 1px solid var(--eci-line);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-left: -8px;
+  border-radius: 50%;
+  color: var(--eci-text);
+}
+
+.back:hover {
+  background: var(--eci-neutral-soft);
+  color: var(--eci-text);
+}
+
+.title {
+  font-size: 1.1875rem;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.aside {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--eci-text-dim);
+}

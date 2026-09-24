@@ -50,7 +50,8 @@ describe('Billetera', () => {
       }),
     });
 
-    expect(await screen.findByText('150.000,00')).toBeInTheDocument();
+    // En la cabecera la cifra va como en el diseño, sin decimales si no los tiene.
+    expect(await screen.findByText('150.000')).toBeInTheDocument();
   });
 
   it('al funcionario no se le abre billetera: no puja', async () => {
@@ -75,7 +76,7 @@ describe('Billetera', () => {
 
     await screen.findByRole('heading', { name: 'Catálogo' });
     expect(consultada).toBe(false);
-    expect(screen.queryByText('150.000,00')).not.toBeInTheDocument();
+    expect(screen.queryByText(/150.000/)).not.toBeInTheDocument();
   });
 
   it('recarga contra el userId que devolvio la busqueda, no contra el correo', async () => {

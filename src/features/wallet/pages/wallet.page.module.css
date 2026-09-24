@@ -1,0 +1,204 @@
+.page {
+  display: grid;
+  gap: 22px;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 30px var(--page-gutter) 38px;
+}
+
+.title {
+  font-size: var(--text-2xl);
+}
+
+.top {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+}
+
+/* --- Tarjeta de saldo ------------------------------------------------------------ */
+.balance {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  padding: 26px;
+  overflow: hidden;
+  border: 1px solid rgb(255 200 74 / 40%);
+  border-radius: 28px;
+  background: linear-gradient(120deg, var(--eci-surface-high), var(--eci-surface));
+  box-shadow: 0 0 40px rgb(255 200 74 / 10%);
+  isolation: isolate;
+}
+
+.balance::before,
+.balance::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+}
+
+.balance::before {
+  right: -60px;
+  top: -80px;
+  width: 260px;
+  height: 260px;
+  background: rgb(255 255 255 / 12%);
+}
+
+.balance::after {
+  left: -40px;
+  bottom: -70px;
+  width: 170px;
+  height: 150px;
+  background: rgb(43 107 255 / 35%);
+}
+
+.balanceHead {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--grad-coin);
+  box-shadow: 0 10px 26px rgb(255 154 62 / 45%);
+  font: 800 1.125rem var(--font-display);
+  color: var(--eci-on-accent);
+}
+
+.caption {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--eci-text-label);
+}
+
+.total {
+  display: block;
+  font: 800 3.25rem/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--eci-yellow);
+}
+
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background:
+    linear-gradient(90deg, var(--eci-cyan), var(--eci-blue)) 0 0 / var(--share) 100% no-repeat,
+    rgb(255 255 255 / 16%);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0;
+}
+
+.split dt {
+  font-size: var(--text-2xs);
+  color: var(--eci-text-label);
+}
+
+.split dd {
+  margin-top: 2px;
+  font: 800 1.25rem var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+.right {
+  text-align: right;
+}
+
+.cyan {
+  color: var(--eci-cyan);
+}
+
+.pink {
+  color: var(--eci-pink-text);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 12px;
+}
+
+/* --- Que es ECICoin -------------------------------------------------------------- */
+.info {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 24px;
+  border: 1px solid var(--eci-line);
+  border-radius: 28px;
+  background: var(--eci-surface);
+}
+
+.infoTitle {
+  font-size: var(--text-lg);
+}
+
+.infoText {
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--eci-text-body);
+}
+
+.facts {
+  display: grid;
+  gap: 10px;
+}
+
+.facts li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--eci-night);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--eci-text-body);
+}
+
+.facts strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--eci-yellow);
+}
+
+.facts .plain {
+  color: var(--eci-text-soft);
+  font-family: var(--font-text);
+  font-weight: 600;
+}
+
+/* --- Historial ------------------------------------------------------------------- */
+.history {
+  display: grid;
+  gap: 14px;
+}
+
+.historyTitle {
+  font-size: var(--text-lg);
+}
+
+.historyEmpty {
+  padding: 18px;
+  border: 1px dashed var(--eci-line-strong);
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  color: var(--eci-text-dim);
+}
+
+@media (width < 900px) {
+  .top {
+    grid-template-columns: 1fr;
+  }
+}

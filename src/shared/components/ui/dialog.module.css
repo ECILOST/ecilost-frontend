@@ -1,0 +1,56 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--page-gutter);
+  background: rgb(2 8 18 / 72%);
+  backdrop-filter: blur(6px);
+  animation: fade var(--t-med) var(--ease-out);
+}
+
+.panel {
+  position: relative;
+  width: min(100%, 700px);
+  max-height: calc(100dvh - 2 * var(--page-gutter));
+  overflow: auto;
+  border: 1px solid var(--eci-line);
+  border-radius: 26px;
+  background: var(--eci-night);
+  box-shadow: 0 30px 70px rgb(0 0 0 / 60%);
+  animation: rise var(--t-med) var(--ease-spring);
+}
+
+.panel:focus {
+  outline: none;
+}
+
+.lg {
+  width: min(100%, 1060px);
+}
+
+.cyan {
+  border-color: rgb(25 229 213 / 32%);
+}
+
+.pink {
+  border-color: rgb(255 79 120 / 32%);
+}
+
+.yellow {
+  border-color: rgb(255 200 74 / 35%);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}

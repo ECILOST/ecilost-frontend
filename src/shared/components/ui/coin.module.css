@@ -1,0 +1,65 @@
+.coin {
+  display: inline-block;
+  flex: none;
+  border-radius: 50%;
+  background: var(--grad-coin);
+}
+
+/* En tamaños pequeños el diseño usa la moneda plana, sin degradado. */
+.flat {
+  background: var(--eci-yellow);
+}
+
+.amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+}
+
+.value {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--eci-yellow);
+  line-height: 1;
+}
+
+.plain {
+  color: var(--eci-text);
+}
+
+.unit {
+  font-family: var(--font-text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--eci-text-label);
+}
+
+.sm .value {
+  font-size: 0.8125rem;
+}
+
+.md .value {
+  font-size: 1rem;
+}
+
+.lg .value {
+  font-size: 1.25rem;
+}
+
+.xl {
+  gap: 9px;
+}
+
+.xl .value {
+  font-size: 1.875rem;
+}
+
+.hero {
+  gap: 10px;
+}
+
+.hero .value {
+  font-size: var(--text-hero);
+}

@@ -6,7 +6,22 @@
  */
 export const routes = {
   login: '/login',
+  home: '/',
+  /**
+   * Destino del login en ecilost-auth-service (POST_LOGIN_REDIRECT_URL). Se conserva para
+   * no tener que reconfigurar el servicio: redirige a la portada.
+   */
   rooms: '/rooms',
+
+  // --- Quien puja -----------------------------------------------------------------
+  auctions: '/subastas',
+  auction: (id: string) => `/subastas/${id}`,
+  room: (id: string) => `/salas/${id}`,
+  wallet: '/billetera',
+  myBids: '/mis-pujas',
+  notifications: '/notificaciones',
+
+  // --- Funcionario -------------------------------------------------------------------
   items: '/items',
   item: (id: string) => `/items/${id}`,
   /*
@@ -25,6 +40,8 @@ export const routes = {
 
 /** Patron de ruta para el router, donde el id todavia no tiene valor. */
 export const routePatterns = {
+  auction: '/subastas/:id',
+  room: '/salas/:id',
   item: '/items/:id',
   editItem: '/items/:id/editar',
   lot: '/lots/:id',

@@ -1,4 +1,5 @@
 import type { Container } from '@/app/container';
+import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
 import { Role } from '@/features/auth/domain/role';
 import type {
   AccessTokenResponse,
@@ -265,7 +266,8 @@ export function createFakeItemGateway(catalog: FakeCatalog = {}): ItemGateway {
           );
     },
     create: (request: CreateItemRequest) => {
-      if (catalog.rejects?.create) return Promise.reject(catalog.rejects.create);
+      if (catalog.rejects?.create)
+        return Promise.reject(catalog.rejects.create);
 
       created.push(request);
       const item = itemFixture({ id: `item-${items.length + 1}`, ...request });
@@ -277,7 +279,8 @@ export function createFakeItemGateway(catalog: FakeCatalog = {}): ItemGateway {
       return Promise.resolve(item);
     },
     update: (id: string, request: UpdateItemRequest) => {
-      if (catalog.rejects?.update) return Promise.reject(catalog.rejects.update);
+      if (catalog.rejects?.update)
+        return Promise.reject(catalog.rejects.update);
 
       updated.push({ id, request });
       const { version, ...changes } = request;
@@ -290,7 +293,8 @@ export function createFakeItemGateway(catalog: FakeCatalog = {}): ItemGateway {
       return Promise.resolve(next as ItemRecord);
     },
     remove: (id: string, version: number) => {
-      if (catalog.rejects?.remove) return Promise.reject(catalog.rejects.remove);
+      if (catalog.rejects?.remove)
+        return Promise.reject(catalog.rejects.remove);
 
       deleted.push({ id, version });
       delete views[id];
@@ -340,7 +344,8 @@ export function createFakeLotGateway(catalog: FakeLots = {}): LotGateway {
           );
     },
     create: (request: CreateLotRequest) => {
-      if (catalog.rejects?.create) return Promise.reject(catalog.rejects.create);
+      if (catalog.rejects?.create)
+        return Promise.reject(catalog.rejects.create);
 
       created.push(request);
       const lot = lotFixture({
@@ -454,6 +459,8 @@ export function createTestContainer(
     lots: createFakeLotGateway(),
     media: createFakeMediaGateway(),
     wallet: createFakeWalletGateway(),
+    // Sin rivales ni reloj propio: las pruebas no dependen del azar ni del tiempo real.
+    auctions: createDemoAuctionGateway({ rivals: false, tickMs: 0 }),
     ...overrides,
   };
 }

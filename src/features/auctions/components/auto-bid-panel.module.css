@@ -1,0 +1,153 @@
+.panel {
+  display: grid;
+  gap: 10px;
+  padding: 16px 18px;
+  border: 1px solid var(--eci-cyan-line);
+  border-radius: var(--r-lg);
+  background: var(--eci-surface);
+  box-shadow: 0 0 26px rgb(25 229 213 / 7%);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 0.875rem;
+}
+
+.description {
+  margin-top: 2px;
+  font-size: var(--text-2xs);
+  color: var(--eci-text-label);
+}
+
+.figures {
+  display: flex;
+  gap: 10px;
+}
+
+.figure {
+  display: grid;
+  flex: 1;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--eci-night);
+}
+
+.label {
+  display: block;
+  font-size: 0.5625rem;
+  color: var(--eci-text-dim);
+}
+
+.value {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.limit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--eci-yellow-line);
+  border-radius: 16px;
+  background: var(--eci-night);
+}
+
+.limit > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.editor {
+  display: grid;
+  flex: 1;
+  gap: 4px;
+}
+
+.editor input {
+  width: 100%;
+  padding: 6px 0;
+  border: 0;
+  border-bottom: 1px solid var(--eci-yellow-line);
+  background: none;
+  color: var(--eci-yellow);
+  font: 800 1.25rem var(--font-display);
+  outline: none;
+}
+
+.editActions {
+  display: flex;
+  gap: 6px;
+}
+
+.editActions button {
+  padding: 8px 14px;
+}
+
+.limit > button {
+  padding: 8px 14px;
+  font-size: var(--text-2xs);
+}
+
+.error {
+  flex-basis: 100%;
+  font-size: var(--text-2xs);
+  color: var(--eci-pink-text);
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 2px;
+  padding: 10px 13px;
+  border: 1px solid;
+  border-radius: 16px;
+}
+
+.dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+
+.statusText {
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.hint {
+  margin-left: auto;
+  font-size: var(--text-2xs);
+  color: var(--eci-text-label);
+  text-align: right;
+}
+
+.on {
+  border-color: rgb(25 229 213 / 45%);
+  background: var(--eci-cyan-soft);
+  color: var(--eci-cyan);
+}
+
+.stopped {
+  border-color: var(--eci-pink-line);
+  background: var(--eci-pink-soft);
+  color: var(--eci-pink-text);
+}
+
+.off {
+  border-color: var(--eci-line-strong);
+  background: var(--eci-neutral-soft);
+  color: var(--eci-text-soft);
+}

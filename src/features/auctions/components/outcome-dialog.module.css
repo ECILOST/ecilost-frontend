@@ -1,0 +1,222 @@
+.layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  min-height: 470px;
+  padding: 24px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.cyan {
+  --tone: var(--eci-cyan);
+  --tone-ink: var(--eci-on-accent);
+}
+
+.pink {
+  --tone: var(--eci-pink);
+  --tone-ink: var(--eci-text);
+}
+
+.yellow {
+  --tone: var(--eci-yellow);
+  --tone-ink: var(--eci-on-accent);
+}
+
+/* Mancha grande del color del estado, desde la esquina superior izquierda. */
+.stain {
+  position: absolute;
+  left: -90px;
+  top: -120px;
+  z-index: -1;
+  width: 440px;
+  height: 460px;
+  background: var(--tone);
+  border-radius: 38% 62% 64% 36% / 40% 34% 66% 60%;
+}
+
+/* Pieza azul/violeta de la esquina inferior derecha, detras de la caja del precio. */
+.corner {
+  position: absolute;
+  right: -120px;
+  bottom: -140px;
+  z-index: -1;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: var(--eci-blue);
+}
+
+.pink .corner {
+  background: var(--eci-purple);
+}
+
+.confetti i {
+  position: absolute;
+  width: 10px;
+  height: 22px;
+  border-radius: 4px;
+  animation: drop 1.2s var(--ease-out) both;
+}
+
+.confetti i:nth-child(1) {
+  left: 50%;
+  top: 22px;
+  background: var(--eci-pink);
+  transform: rotate(20deg);
+}
+
+.confetti i:nth-child(2) {
+  left: 62%;
+  top: 8px;
+  background: var(--eci-cyan);
+  transform: rotate(-15deg);
+}
+
+.confetti i:nth-child(3) {
+  left: 70%;
+  top: 14px;
+  background: var(--eci-yellow);
+  transform: rotate(35deg);
+}
+
+.confetti i:nth-child(4) {
+  right: 18px;
+  top: 30px;
+  background: var(--eci-purple);
+  transform: rotate(10deg);
+}
+
+@keyframes drop {
+  from {
+    opacity: 0;
+    translate: 0 -30px;
+  }
+}
+
+.artWrap {
+  display: flex;
+  align-items: center;
+}
+
+.art {
+  width: 100%;
+  height: 290px;
+  border: 1px dashed rgb(255 255 255 / 30%);
+  background: rgb(6 21 40 / 25%);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heading {
+  align-self: flex-start;
+  padding: 10px 18px;
+  border-radius: 20px;
+  background: var(--tone);
+  color: var(--tone-ink);
+  font: 800 1.375rem/1.15 var(--font-display);
+  text-transform: uppercase;
+  box-shadow: 0 10px 30px color-mix(in srgb, var(--tone) 35%, transparent);
+  animation: pop var(--t-slow) var(--ease-spring);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.85);
+  }
+}
+
+.subtitle {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.figure {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-md);
+  background: rgb(6 21 40 / 70%);
+}
+
+.figureLabel {
+  font-size: 0.5625rem;
+  color: var(--eci-text-label);
+}
+
+.figureValue {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 800;
+}
+
+.figureStrong {
+  padding: 16px 16px 18px;
+  background: rgb(10 28 52 / 85%);
+}
+
+.figureStrong .figureLabel {
+  font-size: var(--text-2xs);
+}
+
+.strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid;
+  border-radius: var(--r-md);
+  background: rgb(6 21 40 / 70%);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.strip-cyan {
+  border-color: var(--eci-cyan-line);
+  color: var(--eci-cyan);
+}
+
+.strip-pink {
+  border-color: var(--eci-pink-line);
+  color: var(--eci-pink-text);
+}
+
+.strip-yellow {
+  border-color: var(--eci-yellow-line);
+  color: var(--eci-yellow);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: auto;
+}
+
+@media (width < 640px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .art {
+    height: 160px;
+  }
+}
+
+.actions > * {
+  padding-inline: 16px;
+}

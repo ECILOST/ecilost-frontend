@@ -1,16 +1,14 @@
 .account {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  margin-left: auto;
-  min-width: 0;
+  position: relative;
 }
 
-.identity {
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  min-width: 0;
+.trigger {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
 }
 
 /*
@@ -20,35 +18,46 @@
 .avatar {
   display: grid;
   place-items: center;
-  flex: none;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  border: 1px solid var(--eci-line-strong);
-  background: var(--eci-surface-high);
+  background: var(--grad-avatar);
   object-fit: cover;
   font-family: var(--font-display);
   font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--eci-cyan);
+  font-weight: 800;
+  color: var(--eci-text);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-2);
+  min-width: 240px;
+  padding: var(--s-4);
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-md);
+  background: var(--eci-surface);
+  box-shadow: var(--shadow-float);
+}
+
+.menu > button {
+  align-self: stretch;
+  margin-top: var(--s-1);
 }
 
 .name {
-  max-width: 22ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: 600;
+  font-size: var(--text-md);
+  font-weight: 700;
 }
 
-/*
- * En el movil la cabecera ya lleva la marca y el boton de salir. El nombre es lo primero que
- * sobra: el avatar sigue diciendo de quien es la sesion.
- */
-@media (width < 768px) {
-  .name {
-    display: none;
-  }
+.email {
+  font-size: var(--text-xs);
+  color: var(--eci-text-dim);
 }

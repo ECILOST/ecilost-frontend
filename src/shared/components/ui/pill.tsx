@@ -36,6 +36,8 @@ export interface PillProps extends PillOptions {
   tone?: PillTone;
   /** Punto del color del tono, para estados que se leen de un vistazo. */
   dot?: boolean;
+  /** El punto late: lo que esta pasando ahora mismo ("En vivo"). */
+  live?: boolean;
   children: ReactNode;
   className?: string;
 }
@@ -43,6 +45,7 @@ export interface PillProps extends PillOptions {
 export function Pill({
   tone = 'neutral',
   dot,
+  live,
   children,
   className,
   ...options
@@ -53,7 +56,14 @@ export function Pill({
         .filter(Boolean)
         .join(' ')}
     >
-      {dot ? <span className={styles.dot} aria-hidden="true" /> : null}
+      {dot || live ? (
+        <span
+          className={[styles.dot, live ? styles.live : '']
+            .filter(Boolean)
+            .join(' ')}
+          aria-hidden="true"
+        />
+      ) : null}
       {children}
     </span>
   );

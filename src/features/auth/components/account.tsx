@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { EcicoinBalance } from '@/features/wallet/components/ecicoin-balance';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Pill } from '@/shared/components/ui/pill';
 import { ROLE_LABELS } from '../domain/role';
@@ -8,20 +7,40 @@ import { useSession } from '../hooks/use-session';
 import styles from './account.module.css';
 
 /**
- * Quien esta dentro, en la cabecera.
+ * Quien esta dentro: el avatar de la cabecera y, al pulsarlo, nombre, rol y salida.
  *
- * Enseña a la persona y no solo su rol: "Funcionario" describe un permiso, no dice en que
- * cuenta se esta trabajando, que es justo lo que hay que poder comprobar de un vistazo en un
- * ordenador compartido.
+ * El diseño deja en la cabecera solo el circulo; el nombre sigue a un clic porque en un
+ * ordenador compartido hay que poder comprobar en que cuenta se esta trabajando.
  *
  * El avatar de Google caduca y puede dejar de servirse, asi que siempre hay respaldo: la
- * inicial sobre color. No es un caso raro que haya que tratar algun dia, es el motivo por el
- * que el modelo declara `avatarUrl` como anulable.
+ * inicial sobre el degradado del diseño.
  */
 export function Account() {
   const { principal, logout } = useSession();
   const { data: profile } = useProfile();
   const [brokenAvatar, setBrokenAvatar] = useState(false);
+  const [open, setOpen] = useState(false);
+  const menuId = useId();
+  const root = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: MouseEvent | KeyboardEvent) => {
+      if (
+        event instanceof KeyboardEvent
+          ? event.key === 'Escape'
+          : !root.current?.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', close);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', close);
+    };
+  }, [open]);
 
   if (!principal) return null;
 
@@ -30,15 +49,20 @@ export function Account() {
   const showAvatar = Boolean(profile?.avatarUrl) && !brokenAvatar;
 
   return (
-    <div className={styles.account}>
-      <span className={styles.identity}>
+    <div className={styles.account} ref={root}>
+      <button
+        type="button"
+        className={styles.trigger}
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-label={name ? `Cuenta de ${name}` : 'Cuenta'}
+        onClick={() => setOpen((value) => !value)}
+      >
         {showAvatar ? (
           <img
             className={styles.avatar}
             src={profile?.avatarUrl ?? undefined}
             alt=""
-            // Decorativo: el nombre ya esta al lado en texto, y para quien no lo ve la
-            // fotografia no añade nada.
             onError={() => setBrokenAvatar(true)}
           />
         ) : (
@@ -46,21 +70,22 @@ export function Account() {
             {initial}
           </span>
         )}
+      </button>
 
-        {/* El nombre se esconde en pantallas estrechas; el avatar y el rol se quedan. */}
-        {name ? <span className={styles.name}>{name}</span> : null}
-      </span>
-
-      {/* Solo aparece para quien puja: un funcionario no tiene billetera que mirar. */}
-      <EcicoinBalance />
-
-      <Pill tone="cyan" dot>
-        {ROLE_LABELS[principal.role]}
-      </Pill>
-
-      <Button variant="quiet" onClick={() => void logout()}>
-        Salir
-      </Button>
+      {open ? (
+        <div className={styles.menu} id={menuId}>
+          {name ? <span className={styles.name}>{name}</span> : null}
+          {profile?.email ? (
+            <span className={styles.email}>{profile.email}</span>
+          ) : null}
+          <Pill tone="cyan" dot>
+            {ROLE_LABELS[principal.role]}
+          </Pill>
+          <Button variant="quiet" onClick={() => void logout()}>
+            Salir
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }
