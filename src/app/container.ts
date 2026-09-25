@@ -11,6 +11,8 @@ import { createHttpMediaGateway } from '@/features/media/api/http-media.gateway'
 import { createHttpWalletGateway } from '@/features/wallet/api/http-wallet.gateway';
 import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import type { MediaGateway } from '@/features/media/ports/media.gateway';
+import { createHttpRoomGateway } from '@/features/rooms/api/http-room.gateway';
+import type { RoomGateway } from '@/features/rooms/ports/room.gateway';
 import { createHttpClient } from '@/shared/api/http-client';
 import {
   createSessionChannel,
@@ -39,6 +41,8 @@ export interface Container {
    * conectar ecilost-auction-service y el canal en vivo de ecilost-engagement-service.
    */
   auctions: AuctionGateway;
+  /** Programacion de salas por el funcionario, ya contra ecilost-auction-service. */
+  rooms: RoomGateway;
 }
 
 export function createContainer(appConfig: AppConfig = config): Container {
@@ -72,6 +76,12 @@ export function createContainer(appConfig: AppConfig = config): Container {
     baseUrl: appConfig.services.wallet,
     getAccessToken: tokens.get,
   });
+  // Auction verifica el token igual que catalog, contra la misma JWKS: su 401 si significa
+  // que la sesion ya no vale.
+  const auctionHttp = createHttpClient({
+    baseUrl: appConfig.services.auction,
+    ...credentials,
+  });
 
   return {
     tokens,
@@ -82,5 +92,6 @@ export function createContainer(appConfig: AppConfig = config): Container {
     media: createHttpMediaGateway(catalogHttp),
     wallet: createHttpWalletGateway(walletHttp),
     auctions: createDemoAuctionGateway({ latencyMs: 150 }),
+    rooms: createHttpRoomGateway(auctionHttp),
   };
 }

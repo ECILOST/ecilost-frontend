@@ -36,6 +36,13 @@ export const routes = {
   lot: (id: string) => `/lots/${id}`,
   newLot: '/lots/nuevo',
   rechargeWallet: '/wallet/recargar',
+  /*
+   * Salas vistas por quien las programa. No cuelgan de `/salas`, que es la sala en vivo de
+   * quien puja: son la misma sala, pero pantallas y permisos distintos.
+   */
+  managedRooms: '/programacion',
+  managedRoom: (id: string) => `/programacion/${id}`,
+  newRoom: '/programacion/nueva',
 } as const;
 
 /** Patron de ruta para el router, donde el id todavia no tiene valor. */
@@ -45,4 +52,5 @@ export const routePatterns = {
   item: '/items/:id',
   editItem: '/items/:id/editar',
   lot: '/lots/:id',
+  managedRoom: '/programacion/:id',
 } as const;

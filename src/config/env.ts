@@ -13,6 +13,8 @@ export interface AppConfig {
     readonly catalog: string;
     /** ecilost-wallet-service. Saldo en ECICoin y recargas. */
     readonly wallet: string;
+    /** ecilost-auction-service. Salas, rondas y pujas. */
+    readonly auction: string;
   };
 }
 
@@ -28,5 +30,6 @@ export const config: AppConfig = {
     auth: import.meta.env.VITE_AUTH_BASE_URL ?? '/auth',
     catalog: import.meta.env.VITE_CATALOG_BASE_URL ?? '/api/catalog',
     wallet: import.meta.env.VITE_WALLET_BASE_URL ?? '/api/wallet',
+    auction: import.meta.env.VITE_AUCTION_BASE_URL ?? '/api/auction',
   },
 };

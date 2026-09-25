@@ -45,6 +45,14 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path: string) => path.replace(/^\/api\/wallet/, '/wallet'),
       },
+
+      // Auction tampoco usa cookies ni prefijo global: sus rutas cuelgan de la raiz
+      // (`/rooms`, `/rounds/:id/bids`), asi que el prefijo se recorta como en catalog.
+      '/api/auction': {
+        target: 'http://localhost:3003',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/api\/auction/, ''),
+      },
     },
   },
   test: {

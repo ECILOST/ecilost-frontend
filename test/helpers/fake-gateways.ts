@@ -25,6 +25,16 @@ import type { CreateLotRequest, Lot } from '@/features/lots/model/lot';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import { MediaKind, type MediaAsset } from '@/features/media/model/media';
 import type { MediaGateway } from '@/features/media/ports/media.gateway';
+import {
+  AuctionableKind,
+  RoomStatus,
+  RoundStatus,
+} from '@/features/rooms/domain/room-status';
+import type {
+  RoomDetail,
+  ScheduleRoomRequest,
+} from '@/features/rooms/model/room';
+import type { RoomGateway } from '@/features/rooms/ports/room.gateway';
 import type { RechargeRequest, Wallet } from '@/features/wallet/model/wallet';
 import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
@@ -447,6 +457,90 @@ export function createFakeMediaGateway(media: FakeMedia = {}): MediaGateway {
   };
 }
 
+export function roomFixture(overrides: Partial<RoomDetail> = {}): RoomDetail {
+  return {
+    id: 'room-1',
+    name: 'Subasta de electrónica',
+    status: RoomStatus.SCHEDULED,
+    startsAt: '2030-10-01T21:00:00.000Z',
+    maximumCapacity: 30,
+    admittedCount: 4,
+    createdAt: '2026-09-25T10:00:00.000Z',
+    isParticipant: false,
+    rounds: [
+      {
+        id: 'round-1',
+        position: 1,
+        status: RoundStatus.SCHEDULED,
+        startingPrice: '50000.00',
+        currentPrice: '50000.00',
+        startedAt: null,
+        endsAt: null,
+        maximumEndsAt: null,
+        entries: [{ kind: AuctionableKind.ITEM, catalogId: 'item-1' }],
+      },
+    ],
+    ...overrides,
+  };
+}
+
+export interface FakeRooms {
+  rooms?: RoomDetail[];
+  /** Lo que se mando programar, en orden. */
+  scheduled?: ScheduleRoomRequest[];
+  rejects?: { schedule?: ApiError };
+}
+
+export function createFakeRoomGateway(fake: FakeRooms = {}): RoomGateway {
+  const rooms = fake.rooms ?? [];
+  const scheduled = fake.scheduled ?? [];
+
+  return {
+    list: () =>
+      Promise.resolve(
+        rooms.map(({ rounds, ...room }) => ({
+          ...room,
+          roundCount: rounds.length,
+        })),
+      ),
+    findById: (id: string) => {
+      const room = rooms.find((candidate) => candidate.id === id);
+      return room
+        ? Promise.resolve(room)
+        : Promise.reject(
+            new ApiError({
+              type: ProblemType.NOT_FOUND,
+              title: 'La sala no existe.',
+              status: 404,
+            }),
+          );
+    },
+    schedule: (request: ScheduleRoomRequest) => {
+      if (fake.rejects?.schedule) return Promise.reject(fake.rejects.schedule);
+
+      scheduled.push(request);
+      const room = roomFixture({
+        id: `room-${rooms.length + 1}`,
+        name: request.name,
+        startsAt: request.startsAt,
+        maximumCapacity: request.maximumCapacity,
+        admittedCount: 0,
+        rounds: request.rounds.map((round, index) => ({
+          ...roomFixture().rounds[0],
+          id: `round-${index + 1}`,
+          position: index + 1,
+          startingPrice: `${round.startingPrice}.00`,
+          currentPrice: `${round.startingPrice}.00`,
+          entries: round.entries,
+        })),
+      });
+      rooms.push(room);
+
+      return Promise.resolve(room);
+    },
+  };
+}
+
 /** Contenedor completo con dobles. Las pruebas cambian solo lo que les interesa. */
 export function createTestContainer(
   overrides: Partial<Container> = {},
@@ -461,6 +555,7 @@ export function createTestContainer(
     wallet: createFakeWalletGateway(),
     // Sin rivales ni reloj propio: las pruebas no dependen del azar ni del tiempo real.
     auctions: createDemoAuctionGateway({ rivals: false, tickMs: 0 }),
+    rooms: createFakeRoomGateway(),
     ...overrides,
   };
 }

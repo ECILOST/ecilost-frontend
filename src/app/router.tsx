@@ -16,6 +16,9 @@ import { ItemsPage } from '@/features/catalog/pages/items.page';
 import { LotDetailPage } from '@/features/lots/pages/lot-detail.page';
 import { LotFormPage } from '@/features/lots/pages/lot-form.page';
 import { LotsPage } from '@/features/lots/pages/lots.page';
+import { ManagedRoomDetailPage } from '@/features/rooms/pages/managed-room-detail.page';
+import { ManagedRoomsPage } from '@/features/rooms/pages/managed-rooms.page';
+import { ScheduleRoomPage } from '@/features/rooms/pages/schedule-room.page';
 import { RechargePage } from '@/features/wallet/pages/recharge.page';
 import { WalletPage } from '@/features/wallet/pages/wallet.page';
 import { NotFound } from '@/shared/components/not-found';
@@ -92,6 +95,16 @@ export function AppRouter() {
           */}
           <Route element={<RequireCapability capability="canManageWallets" />}>
             <Route path={routes.rechargeWallet} element={<RechargePage />} />
+          </Route>
+
+          {/* Programar salas tiene su propia capacidad: no es administrar el catalogo. */}
+          <Route element={<RequireCapability capability="canScheduleRooms" />}>
+            <Route path={routes.managedRooms} element={<ManagedRoomsPage />} />
+            <Route path={routes.newRoom} element={<ScheduleRoomPage />} />
+            <Route
+              path={routePatterns.managedRoom}
+              element={<ManagedRoomDetailPage />}
+            />
           </Route>
         </Route>
 

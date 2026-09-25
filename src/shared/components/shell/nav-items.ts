@@ -52,6 +52,12 @@ export const NAV_ITEMS: NavItem[] = [
     requires: 'canManageCatalog',
   },
   {
+    to: routes.managedRooms,
+    label: 'Salas',
+    icon: 'timer',
+    requires: 'canScheduleRooms',
+  },
+  {
     to: routes.rechargeWallet,
     label: 'Recargas',
     icon: 'coin',
