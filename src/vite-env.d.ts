@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_WALLET_BASE_URL?: string;
   readonly VITE_AUCTION_BASE_URL?: string;
   readonly VITE_AUCTIONS_DEMO?: string;
+  readonly VITE_ENGAGEMENT_BASE_URL?: string;
+  readonly VITE_REALTIME_URL?: string;
 }
 
 interface ImportMeta {

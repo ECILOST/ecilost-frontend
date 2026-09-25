@@ -1,6 +1,7 @@
 import { config, type AppConfig } from '@/config/env';
 import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
 import { createHttpAuctionGateway } from '@/features/auctions/api/http-auction.gateway';
+import { createSocketRealtimeChannel } from '@/features/auctions/api/realtime-channel';
 import type { AuctionGateway } from '@/features/auctions/ports/auction.gateway';
 import { createHttpAuthGateway } from '@/features/auth/api/http-auth.gateway';
 import type { AuthGateway } from '@/features/auth/ports/auth.gateway';
@@ -40,8 +41,8 @@ export interface Container {
   /**
    * Salas, pujas y notificaciones de quien puja. Contra ecilost-auction-service
    * (`createHttpAuctionGateway`), o en memoria (`createDemoAuctionGateway`) con
-   * `VITE_AUCTIONS_DEMO=true`. La sala en vivo y el canal de engagement aun no estan
-   * conectados en el adaptador real.
+   * `VITE_AUCTIONS_DEMO=true`. El canal en vivo y la bandeja vienen de
+   * ecilost-engagement-service.
    */
   auctions: AuctionGateway;
   /** Programacion de salas por el funcionario, ya contra ecilost-auction-service. */
@@ -85,6 +86,11 @@ export function createContainer(appConfig: AppConfig = config): Container {
     baseUrl: appConfig.services.auction,
     ...credentials,
   });
+  // Engagement tambien verifica contra la misma JWKS: su 401 significa sesion vencida.
+  const engagementHttp = createHttpClient({
+    baseUrl: appConfig.services.engagement,
+    ...credentials,
+  });
 
   // Las subastas reales piden a catalog el nombre y la foto de cada ronda, con los mismos
   // adaptadores que el resto de la aplicacion.
@@ -105,6 +111,11 @@ export function createContainer(appConfig: AppConfig = config): Container {
           http: auctionHttp,
           items: itemGateway,
           lots: lotGateway,
+          engagement: engagementHttp,
+          realtime: createSocketRealtimeChannel({
+            url: appConfig.services.realtime,
+            getToken: tokens.get,
+          }),
         }),
     rooms: createHttpRoomGateway(auctionHttp),
   };

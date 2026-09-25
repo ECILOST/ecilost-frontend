@@ -22,6 +22,9 @@ export function useLiveRoom(roomId: string, enabled = true) {
       queryClient.setQueryData(auctionKeys.live(roomId), state);
       // La transicion de ronda o el cierre de la sala tambien cambian la sala.
       queryClient.setQueryData(auctionKeys.room(roomId), state.room);
+      // Un cambio en vivo puede traer un aviso personal (superado, ganado): la bandeja se
+      // relee ya, sin esperar su propio intervalo.
+      void queryClient.invalidateQueries({ queryKey: auctionKeys.notifications() });
     });
   }, [auctions, queryClient, roomId, enabled]);
 

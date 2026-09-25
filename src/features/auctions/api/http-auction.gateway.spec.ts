@@ -5,6 +5,7 @@ import type { RoomDetail, RoundDetail } from '@/features/rooms/model/room';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
 import { createHttpAuctionGateway } from './http-auction.gateway';
+import type { RealtimeChannel, RoomEvent } from './realtime-channel';
 
 const round = (overrides: Partial<RoundDetail> = {}): RoundDetail => ({
   id: 'round-1',
@@ -255,6 +256,92 @@ describe('createHttpAuctionGateway', () => {
         vi.useRealTimers();
       }
     });
+  });
+
+  describe('canal en vivo', () => {
+    function withChannel() {
+      let emit: (event: RoomEvent) => void = () => undefined;
+      const leave = vi.fn();
+      const realtime: RealtimeChannel = {
+        joinRoom: vi.fn((_roomId, listener) => {
+          emit = listener;
+          return leave;
+        }),
+      };
+      const base = setup(room({ status: 'ACTIVE', isParticipant: true, rounds: [round({ status: 'ACTIVE' })] }));
+      const gateway = createHttpAuctionGateway({ http: base.http, items: base.items, lots: base.lots, realtime });
+      const detailReads = () => base.http.get.mock.calls.filter(([path]) => path === '/rooms/room-1').length;
+      return { gateway, emit: (event: RoomEvent) => emit(event), leave, detailReads, http: base.http };
+    }
+
+    it('cada evento de la sala dispara una relectura del estado del servidor', async () => {
+      const { gateway, emit, detailReads } = withChannel();
+      const listener = vi.fn();
+      gateway.subscribe('room-1', listener);
+
+      emit({ name: 'round.price', roundId: 'round-1', sequence: 1 });
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
+      expect(detailReads()).toBe(1);
+    });
+
+    it('una rafaga de eventos durante una lectura se funde en una sola lectura mas', async () => {
+      const { gateway, emit, detailReads, http } = withChannel();
+      let release: () => void = () => undefined;
+      const original = http.get.getMockImplementation() as (path: string) => Promise<unknown>;
+      http.get.mockImplementationOnce((path: string) => new Promise((resolve) => { release = () => resolve(original(path)); }));
+      const listener = vi.fn();
+      gateway.subscribe('room-1', listener);
+
+      emit({ name: 'round.price', roundId: 'round-1', sequence: 1 });
+      emit({ name: 'round.price', roundId: 'round-1', sequence: 2 });
+      emit({ name: 'round.price', roundId: 'round-1', sequence: 3 });
+      emit({ name: 'bid.outbid', roundId: 'round-1' });
+      release();
+
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledTimes(2));
+      // Cuatro eventos, dos lecturas: la que estaba en vuelo y una que los cubre a todos.
+      expect(detailReads()).toBe(2);
+    });
+
+    it('descarta un precio que llego tarde: la sala nunca retrocede', async () => {
+      const { gateway, emit, detailReads } = withChannel();
+      const listener = vi.fn();
+      gateway.subscribe('room-1', listener);
+
+      emit({ name: 'round.price', roundId: 'round-1', sequence: 5 });
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
+      emit({ name: 'round.price', roundId: 'round-1', sequence: 4 });
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(detailReads()).toBe(1);
+    });
+
+    it('dejar de escuchar suelta la sala del canal', () => {
+      const { gateway, leave } = withChannel();
+      gateway.subscribe('room-1', vi.fn())();
+      expect(leave).toHaveBeenCalledOnce();
+    });
+  });
+
+  it('la bandeja viene de engagement, con sus avisos traducidos', async () => {
+    const base = setup();
+    const engagement = {
+      get: vi.fn().mockResolvedValue({
+        items: [
+          { id: 'n2', kind: 'ROUND_WON', roomId: 'room-1', payload: { position: 1, currentPrice: '200.00' }, createdAt: '2030-10-01T21:05:00.000Z', readAt: null },
+          { id: 'n1', kind: 'OUTBID', roomId: 'room-1', payload: { position: 1, currentPrice: '150.00' }, createdAt: '2030-10-01T21:04:00.000Z', readAt: '2030-10-01T21:04:30.000Z' },
+        ],
+      }),
+      post: vi.fn().mockResolvedValue(undefined),
+    } as unknown as HttpClient & { post: ReturnType<typeof vi.fn> };
+    const gateway = createHttpAuctionGateway({ http: base.http, items: base.items, lots: base.lots, engagement });
+
+    const inbox = await gateway.notifications();
+    expect(inbox.map((n) => [n.kind, n.read])).toEqual([['WON', false], ['OUTBID', true]]);
+    expect(inbox[0].body).toContain('200');
+
+    await gateway.markNotificationsRead();
+    expect(engagement.post).toHaveBeenCalledWith('/notifications/read');
   });
 
   it('el resumen dice que se gano, que se perdio y que quedo desierto, con lo gastado', async () => {

@@ -53,6 +53,20 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path: string) => path.replace(/^\/api\/auction/, ''),
       },
+
+      // Engagement: la bandeja por HTTP y el canal en vivo por WebSocket. Socket.IO usa su
+      // ruta `/socket.io` (el namespace `/realtime` viaja dentro del protocolo), por eso
+      // esa ruta se republica tal cual y con `ws`.
+      '/api/engagement': {
+        target: 'http://localhost:3005',
+        changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/api\/engagement/, ''),
+      },
+      '/socket.io': {
+        target: 'http://localhost:3005',
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
   test: {

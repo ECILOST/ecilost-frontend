@@ -15,6 +15,13 @@ export interface AppConfig {
     readonly wallet: string;
     /** ecilost-auction-service. Salas, rondas y pujas. */
     readonly auction: string;
+    /** ecilost-engagement-service por HTTP: bandeja de notificaciones. */
+    readonly engagement: string;
+    /**
+     * Origen del canal en vivo de engagement (Socket.IO, namespace `/realtime`). Vacio es el
+     * mismo origen de la aplicacion, que en desarrollo republica el proxy de Vite.
+     */
+    readonly realtime: string;
   };
   /**
    * Subastas del estudiante en memoria, con rivales simulados, en vez de contra
@@ -36,6 +43,8 @@ export const config: AppConfig = {
     catalog: import.meta.env.VITE_CATALOG_BASE_URL ?? '/api/catalog',
     wallet: import.meta.env.VITE_WALLET_BASE_URL ?? '/api/wallet',
     auction: import.meta.env.VITE_AUCTION_BASE_URL ?? '/api/auction',
+    engagement: import.meta.env.VITE_ENGAGEMENT_BASE_URL ?? '/api/engagement',
+    realtime: import.meta.env.VITE_REALTIME_URL ?? '',
   },
   // Solo el texto exacto la activa: una variable mal escrita no debe esconder el backend real.
   auctionsDemo: import.meta.env.VITE_AUCTIONS_DEMO === 'true',

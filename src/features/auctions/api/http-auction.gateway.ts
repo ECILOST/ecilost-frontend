@@ -11,6 +11,7 @@ import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
 import { minimumBid } from '../domain/auction-rules';
 import type {
+  AppNotification,
   AuctionItem,
   AuctionItemStatus,
   LiveRoom,
@@ -19,9 +20,13 @@ import type {
   Round,
 } from '../model/auction';
 import type { AuctionGateway } from '../ports/auction.gateway';
+import type { RealtimeChannel } from './realtime-channel';
 
-/** Cada cuanto se relee la sala mientras no exista el canal en vivo. */
+/** Cada cuanto se relee la sala cuando no hay canal en vivo. */
 const POLL_INTERVAL_MS = 2_000;
+
+/** Con canal en vivo, un sondeo lento por si se pierde algun evento o la conexion. */
+const FALLBACK_POLL_MS = 15_000;
 
 /** Cuanto se reutiliza lo que catalog dijo de una entrada. */
 const ENTRY_CACHE_MS = 5 * 60_000;
@@ -44,9 +49,9 @@ interface EntryInfo {
  * llevan puntos).
  *
  * Cubre descubrir salas, registrarse, la sala en vivo, la puja manual y el resumen al
- * cerrar (HU-15 a HU-21 y HU-28). Mientras no se conecte el canal de
- * ecilost-engagement-service, `subscribe` consulta la sala cada pocos segundos. Compra
- * inmediata y puja automatica fallan con un 501
+ * cerrar (HU-15 a HU-21 y HU-28), con el canal en vivo y la bandeja de
+ * ecilost-engagement-service (HU-26, HU-27). Compra inmediata y puja automatica fallan con
+ * un 501
  * explicito en vez de fingir datos; "Mis pujas" y las notificaciones responden vacias
  * porque el servicio aun no las publica.
  */
@@ -54,6 +59,10 @@ export function createHttpAuctionGateway(deps: {
   http: HttpClient;
   items: ItemGateway;
   lots: LotGateway;
+  /** Canal en vivo de engagement. Sin el, la sala se consulta cada pocos segundos. */
+  realtime?: RealtimeChannel;
+  /** API HTTP de engagement, para la bandeja de notificaciones. */
+  engagement?: HttpClient;
 }): AuctionGateway {
   const { http } = deps;
   const entryInfo = createEntryResolver(deps);
@@ -208,33 +217,59 @@ export function createHttpAuctionGateway(deps: {
     },
 
     /**
-     * Sondeo de la sala hasta que exista el canal en vivo de engagement. Un fallo puntual no
-     * corta la escucha: el siguiente intento vuelve a partir del estado del servidor.
+     * Cambios en vivo de la sala. Con canal (engagement), cada evento dispara una relectura;
+     * sin canal, o si se cae, un sondeo lento mantiene la sala al dia.
+     *
+     * Concurrencia sin bloqueos:
+     * - una sola lectura en vuelo por sala; los eventos que llegan mientras tanto se
+     *   funden en UNA lectura mas al terminar (no una por evento);
+     * - un precio con `sequence` menor o igual al ultimo visto de su ronda llego tarde y se
+     *   descarta: lo que muestra la pantalla nunca retrocede;
+     * - lo que se pinta es siempre el estado del servidor, nunca el evento aplicado a mano,
+     *   asi que dos eventos cruzados no pueden dejar la sala en un estado que no existio.
      */
     subscribe(roomId, listener) {
       let stopped = false;
-      let timer: ReturnType<typeof setTimeout>;
-
-      const tick = async () => {
+      const refresh = coalesce(async () => {
         try {
           const state = await live(roomId);
           if (!stopped) listener(state);
         } catch {
-          // Se reintenta en el siguiente ciclo.
-        } finally {
-          if (!stopped) timer = setTimeout(tick, POLL_INTERVAL_MS);
+          // El siguiente evento, o el sondeo de respaldo, vuelve a intentarlo.
         }
-      };
-      timer = setTimeout(tick, POLL_INTERVAL_MS);
+      });
+
+      const lastSequence = new Map<string, number>();
+      const leave = deps.realtime?.joinRoom(roomId, (event) => {
+        if (event.name === 'round.price') {
+          if (event.sequence <= (lastSequence.get(event.roundId) ?? -1)) return;
+          lastSequence.set(event.roundId, event.sequence);
+        }
+        void refresh();
+      });
+
+      const every = deps.realtime ? FALLBACK_POLL_MS : POLL_INTERVAL_MS;
+      const timer = setInterval(() => void refresh(), every);
 
       return () => {
         stopped = true;
-        clearTimeout(timer);
+        clearInterval(timer);
+        leave?.();
       };
     },
+
     myBids: () => Promise.resolve([]),
-    notifications: () => Promise.resolve([]),
-    markNotificationsRead: () => Promise.resolve(),
+
+    /** La bandeja que engagement proyecta de los eventos de auction (HU-27, HU-29). */
+    async notifications() {
+      if (!deps.engagement) return [];
+      const { items } = await deps.engagement.get<{ items: InboxNotification[] }>('/notifications');
+      return items.map(toAppNotification);
+    },
+
+    async markNotificationsRead() {
+      if (deps.engagement) await deps.engagement.post('/notifications/read');
+    },
   };
 }
 
@@ -387,4 +422,57 @@ function notConnected(): Promise<never> {
         'La compra inmediata y la puja automática todavía no están conectadas con el servicio de subastas.',
     }),
   );
+}
+
+/**
+ * Una lectura a la vez; lo que se pide mientras corre se funde en una sola lectura mas.
+ * Es la version sin bloqueos de "no leas dos veces lo mismo al mismo tiempo".
+ */
+function coalesce(task: () => Promise<void>): () => Promise<void> {
+  let running: Promise<void> | null = null;
+  let again = false;
+
+  const run = async (): Promise<void> => {
+    if (running) {
+      again = true;
+      return running;
+    }
+    running = (async () => {
+      do {
+        again = false;
+        await task();
+      } while (again);
+    })();
+    try {
+      await running;
+    } finally {
+      running = null;
+    }
+  };
+
+  return run;
+}
+
+/** Una notificacion tal como la guarda engagement. */
+interface InboxNotification {
+  id: string;
+  kind: 'OUTBID' | 'ROUND_CLOSED' | 'ROUND_WON';
+  roomId: string;
+  payload: { position?: number; currentPrice?: string };
+  createdAt: string;
+  readAt: string | null;
+}
+
+function toAppNotification(entry: InboxNotification): AppNotification {
+  const price = Number(entry.payload.currentPrice ?? 0).toLocaleString('es-CO');
+  const item = entry.payload.position ? `el objeto ${entry.payload.position}` : 'la ronda';
+  const base = { id: entry.id, at: entry.createdAt, read: entry.readAt !== null, roomId: entry.roomId };
+
+  if (entry.kind === 'ROUND_WON') {
+    return { ...base, kind: 'WON', title: '¡Ganaste este objeto!', body: `Ganaste ${item} por ${price} ECICoin.` };
+  }
+  if (entry.kind === 'OUTBID') {
+    return { ...base, kind: 'OUTBID', title: '¡Te superaron!', body: `Alguien pujó ${price} ECICoin en ${item}.` };
+  }
+  return { ...base, kind: 'ROOM_CLOSED', title: 'La ronda cerró', body: `Se cerró ${item} en ${price} ECICoin.` };
 }
