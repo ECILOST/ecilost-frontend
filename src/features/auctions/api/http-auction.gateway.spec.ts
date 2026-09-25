@@ -323,6 +323,35 @@ describe('createHttpAuctionGateway', () => {
     });
   });
 
+  it('mis pujas: solo salas donde participo y rondas donde puje, con su estado', async () => {
+    const { gateway, http } = setup();
+    const detail = room({
+      status: 'ACTIVE',
+      isParticipant: true,
+      rounds: [
+        round({ status: 'CLOSED', result: 'AWARDED', isLeading: true, hasBids: true, currentPrice: '275.00', myHighestBid: '275.00' }),
+        round({ id: 'round-2', position: 2, status: 'CLOSED', result: 'AWARDED', hasBids: true, currentPrice: '900.00', myHighestBid: '500.00' }),
+        round({ id: 'round-3', position: 3, status: 'ACTIVE', hasBids: true, isLeading: true, currentPrice: '120.00', myHighestBid: '120.00' }),
+        round({ id: 'round-4', position: 4, status: 'ACTIVE', hasBids: true, currentPrice: '800.00', myHighestBid: '650.00' }),
+        round({ id: 'round-5', position: 5, status: 'SCHEDULED' }),
+      ],
+    });
+    http.get.mockImplementation((path: string) =>
+      Promise.resolve(path === '/rooms' ? [{ id: 'room-1', isParticipant: true }, { id: 'ajena', isParticipant: false }] : detail),
+    );
+
+    const bids = await gateway.myBids();
+
+    expect(bids.map((bid) => [bid.status, bid.amount, bid.outbidBy])).toEqual([
+      ['WON', 275, null],
+      ['LOST', 500, null],
+      ['WINNING', 120, null],
+      ['OUTBID', 650, 150],
+    ]);
+    // La sala donde no participo ni siquiera se consulta.
+    expect(http.get).not.toHaveBeenCalledWith('/rooms/ajena');
+  });
+
   it('la bandeja viene de engagement, con sus avisos traducidos', async () => {
     const base = setup();
     const engagement = {

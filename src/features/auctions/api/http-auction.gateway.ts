@@ -15,6 +15,7 @@ import type {
   AuctionItem,
   AuctionItemStatus,
   LiveRoom,
+  MyBid,
   Room,
   RoomSummary,
   Round,
@@ -50,10 +51,8 @@ interface EntryInfo {
  *
  * Cubre descubrir salas, registrarse, la sala en vivo, la puja manual y el resumen al
  * cerrar (HU-15 a HU-21 y HU-28), con el canal en vivo y la bandeja de
- * ecilost-engagement-service (HU-26, HU-27). Compra inmediata y puja automatica fallan con
- * un 501
- * explicito en vez de fingir datos; "Mis pujas" y las notificaciones responden vacias
- * porque el servicio aun no las publica.
+ * ecilost-engagement-service (HU-26, HU-27), y "Mis pujas". Compra inmediata y puja
+ * automatica fallan con un 501 explicito en vez de fingir datos.
  */
 export function createHttpAuctionGateway(deps: {
   http: HttpClient;
@@ -258,7 +257,45 @@ export function createHttpAuctionGateway(deps: {
       };
     },
 
-    myBids: () => Promise.resolve([]),
+    /**
+     * Mis pujas: las rondas donde puje, sacadas de las salas en las que participo. El estado
+     * sale del mismo detalle que ve la sala (lidero o no, resultado al cerrar), asi que "Mis
+     * pujas" y la sala nunca se contradicen.
+     */
+    async myBids() {
+      const rooms = await http.get<RoomListing[]>('/rooms');
+      const details = await Promise.all(
+        rooms.filter((room) => room.isParticipant).map((room) => roomDetail(room.id)),
+      );
+
+      const bids = details.flatMap((detail) =>
+        detail.rounds
+          .filter((round) => round.myHighestBid !== null)
+          .map(async (round): Promise<MyBid> => {
+            const info = await entryInfo(round.entries[0]);
+            const price = Number(round.currentPrice);
+            const mine = Number(round.myHighestBid);
+            const closed = round.status === 'CLOSED';
+            const status: MyBid['status'] = closed
+              ? round.result === 'AWARDED' && round.isLeading ? 'WON' : 'LOST'
+              : round.isLeading ? 'WINNING' : 'OUTBID';
+
+            return {
+              id: `${detail.id}.${round.id}`,
+              itemId: `${detail.id}.${round.id}`,
+              itemName: info.name,
+              roomId: detail.id,
+              detail: `${detail.name} · Objeto ${round.position} de ${detail.rounds.length} · ${closed ? 'finalizado' : 'en curso'}`,
+              amount: status === 'WON' ? price : mine,
+              status,
+              outbidBy: status === 'OUTBID' ? price - mine : null,
+              // La puja automatica no esta conectada con el servicio.
+              autoBidLimit: null,
+            };
+          }),
+      );
+      return Promise.all(bids);
+    },
 
     /** La bandeja que engagement proyecta de los eventos de auction (HU-27, HU-29). */
     async notifications() {
