@@ -50,3 +50,27 @@ export interface RechargeResult {
   /** Cierto cuando la referencia ya existia: no se sumo nada, se devolvio lo de antes. */
   replayed: boolean;
 }
+
+/** Tipos de movimiento, copiados del enum `WalletTransactionType` del servicio. */
+export type WalletTransactionType =
+  | 'INITIAL_ISSUANCE'
+  | 'ADMIN_RECHARGE'
+  | 'HOLD'
+  | 'RELEASE'
+  | 'DEBIT';
+
+/** Una fila de `GET /wallet/me/transactions`. El importe llega como texto decimal. */
+export interface WalletTransaction {
+  id: string;
+  type: WalletTransactionType;
+  amount: string;
+  createdAt: string;
+}
+
+/** Una pagina del historial, del movimiento mas reciente al mas antiguo. */
+export interface WalletTransactionPage {
+  items: WalletTransaction[];
+  page: number;
+  pageSize: number;
+  total: number;
+}

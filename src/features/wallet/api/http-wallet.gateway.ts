@@ -1,6 +1,11 @@
 import { ApiError } from '@/shared/api/problem-details';
 import type { HttpClient } from '@/shared/api/http-client';
-import type { RechargeRequest, RechargeResult, Wallet } from '../model/wallet';
+import type {
+  RechargeRequest,
+  RechargeResult,
+  Wallet,
+  WalletTransactionPage,
+} from '../model/wallet';
 import type { WalletGateway } from '../ports/wallet.gateway';
 
 /**
@@ -9,6 +14,9 @@ import type { WalletGateway } from '../ports/wallet.gateway';
  * Las rutas son relativas porque la base ya trae el prefijo del servicio (ver
  * `src/config/env.ts`): aqui `/me` es el `GET /wallet/me` documentado.
  */
+/** Movimientos por pagina. El servicio admite mas; veinte llenan la pantalla. */
+export const TRANSACTIONS_PAGE_SIZE = 20;
+
 export function createHttpWalletGateway(http: HttpClient): WalletGateway {
   return {
     /**
@@ -36,5 +44,10 @@ export function createHttpWalletGateway(http: HttpClient): WalletGateway {
 
     recharge: (userId: string, request: RechargeRequest) =>
       http.post<RechargeResult>(`/${userId}/recharges`, request),
+
+    transactions: (page: number) =>
+      http.get<WalletTransactionPage>('/me/transactions', {
+        query: { page, pageSize: TRANSACTIONS_PAGE_SIZE },
+      }),
   };
 }

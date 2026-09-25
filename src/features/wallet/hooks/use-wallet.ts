@@ -6,6 +6,7 @@ import type { Wallet } from '../model/wallet';
 export const walletKeys = {
   all: ['wallet'] as const,
   mine: () => [...walletKeys.all, 'mine'] as const,
+  transactions: () => [...walletKeys.all, 'transactions'] as const,
 };
 
 /**

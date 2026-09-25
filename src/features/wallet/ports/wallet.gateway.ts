@@ -1,14 +1,15 @@
-import type { RechargeRequest, RechargeResult, Wallet } from '../model/wallet';
+import type {
+  RechargeRequest,
+  RechargeResult,
+  Wallet,
+  WalletTransactionPage,
+} from '../model/wallet';
 
 /**
  * Lo que la aplicacion necesita de la billetera, sin decir por donde llega.
  *
- * Son dos operaciones y no las tres rutas del servicio: leer la billetera propia y
- * provisionarla son un solo caso de uso desde aqui ("mi billetera"), y cual de las dos
- * rutas hace falta lo decide el adaptador.
- *
- * Lo que no hay es historial: el servicio guarda cada movimiento en su tabla, pero no
- * publica ningun endpoint que los devuelva.
+ * Leer la billetera propia y provisionarla son un solo caso de uso desde aqui ("mi
+ * billetera"), y cual de las dos rutas hace falta lo decide el adaptador.
  */
 export interface WalletGateway {
   /**
@@ -26,4 +27,10 @@ export interface WalletGateway {
    * codigo institucional: la billetera no conoce ninguno de los dos.
    */
   recharge(userId: string, request: RechargeRequest): Promise<RechargeResult>;
+  /**
+   * `GET /wallet/me/transactions`. Mis movimientos, del mas reciente al mas antiguo: la
+   * emision inicial, las recargas, lo que se reservo al pujar, lo que se libero y lo que se
+   * pago al ganar.
+   */
+  transactions(page: number): Promise<WalletTransactionPage>;
 }

@@ -1,7 +1,10 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import type { RechargeRequest } from '@/features/wallet/model/wallet';
+import type {
+  RechargeRequest,
+  WalletTransaction,
+} from '@/features/wallet/model/wallet';
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
 import {
   DIRECTORY,
@@ -52,6 +55,33 @@ describe('Billetera', () => {
 
     // En la cabecera la cifra va como en el diseño, sin decimales si no los tiene.
     expect(await screen.findByText('150.000')).toBeInTheDocument();
+  });
+
+  it('el historial muestra cada movimiento con su signo y carga los anteriores por paginas', async () => {
+    const transactions: WalletTransaction[] = Array.from({ length: 22 }, (_, index) => ({
+      id: `tx-${index}`,
+      type: index === 0 ? 'DEBIT' : 'HOLD',
+      amount: index === 0 ? '275.00' : '100.00',
+      createdAt: '2026-09-25T09:31:00.000Z',
+    }));
+    transactions[21] = { id: 'tx-21', type: 'INITIAL_ISSUANCE', amount: '10000.00', createdAt: '2026-09-18T10:00:00.000Z' };
+    renderApp({
+      route: '/billetera',
+      container: createTestContainer({
+        auth: createFakeAuthGateway(STUDENT),
+        wallet: createFakeWalletGateway({ transactions }),
+      }),
+    });
+
+    expect(await screen.findByText('Pago de objeto ganado')).toBeInTheDocument();
+    expect(screen.getByText('− 275')).toBeInTheDocument();
+    expect(screen.queryByText('Emisión inicial')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: /movimientos anteriores/i }));
+
+    expect(await screen.findByText('Emisión inicial')).toBeInTheDocument();
+    expect(screen.getByText('+ 10.000')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /movimientos anteriores/i })).not.toBeInTheDocument();
   });
 
   it('al funcionario no se le abre billetera: no puja', async () => {

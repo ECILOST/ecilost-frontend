@@ -35,7 +35,11 @@ import type {
   ScheduleRoomRequest,
 } from '@/features/rooms/model/room';
 import type { RoomGateway } from '@/features/rooms/ports/room.gateway';
-import type { RechargeRequest, Wallet } from '@/features/wallet/model/wallet';
+import type {
+  RechargeRequest,
+  Wallet,
+  WalletTransaction,
+} from '@/features/wallet/model/wallet';
 import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
 import { createSessionChannel } from '@/shared/api/session-channel';
@@ -388,6 +392,8 @@ export function walletFixture(overrides: Partial<Wallet> = {}): Wallet {
 
 export interface FakeWallet {
   wallet?: Wallet;
+  /** Movimientos de la billetera, ya en el orden en que los devuelve el servicio. */
+  transactions?: WalletTransaction[];
   /** Lo que se mando recargar, en orden. */
   recharges?: { userId: string; request: RechargeRequest }[];
   rejects?: { mine?: ApiError; recharge?: ApiError };
@@ -404,6 +410,17 @@ export function createFakeWalletGateway(fake: FakeWallet = {}): WalletGateway {
       fake.rejects?.mine
         ? Promise.reject(fake.rejects.mine)
         : Promise.resolve(wallet),
+
+    transactions: (page: number) => {
+      const all = fake.transactions ?? [];
+      const pageSize = 20;
+      return Promise.resolve({
+        items: all.slice((page - 1) * pageSize, page * pageSize),
+        page,
+        pageSize,
+        total: all.length,
+      });
+    },
 
     recharge: (userId: string, request: RechargeRequest) => {
       if (fake.rejects?.recharge) return Promise.reject(fake.rejects.recharge);

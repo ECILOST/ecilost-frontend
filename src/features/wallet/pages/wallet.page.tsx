@@ -4,15 +4,14 @@ import { Loading } from '@/shared/components/loading';
 import { Button } from '@/shared/components/ui/button';
 import { formatCoins } from '@/shared/components/ui/coin';
 import { Icon } from '@/shared/components/ui/icon';
+import { TransactionHistory } from '../components/transaction-history';
 import { useWallet } from '../hooks/use-wallet';
 import styles from './wallet.page.module.css';
 
 /**
  * Mi billetera: total, disponible y comprometido, siempre distinguibles.
  *
- * Los saldos vienen de ecilost-wallet-service. El historial de movimientos todavia no: el
- * servicio guarda cada movimiento pero no publica ningun endpoint que los devuelva, asi que
- * la seccion lo dice en lugar de inventar filas.
+ * Los saldos y el historial de movimientos vienen de ecilost-wallet-service.
  */
 export function WalletPage() {
   const { data: wallet, isPending, isError, error, refetch } = useWallet();
@@ -120,10 +119,7 @@ export function WalletPage() {
             <h2 id="historial" className={styles.historyTitle}>
               Historial de movimientos
             </h2>
-            <p className={styles.historyEmpty}>
-              El historial llegará cuando ecilost-wallet-service publique sus
-              movimientos. Tu saldo ya está actualizado.
-            </p>
+            <TransactionHistory />
           </section>
         </>
       ) : null}
