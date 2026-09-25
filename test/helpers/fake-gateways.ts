@@ -474,6 +474,8 @@ export function roomFixture(overrides: Partial<RoomDetail> = {}): RoomDetail {
         status: RoundStatus.SCHEDULED,
         startingPrice: '50000.00',
         currentPrice: '50000.00',
+        hasBids: false,
+        isLeading: false,
         startedAt: null,
         endsAt: null,
         maximumEndsAt: null,

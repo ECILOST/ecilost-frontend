@@ -10,9 +10,10 @@ import type {
 /**
  * Lo que las pantallas de subasta necesitan, sin decir por donde llega.
  *
- * Hoy lo cumple `createDemoAuctionGateway` (en memoria). El adaptador real repartira las
- * operaciones entre ecilost-auction-service (salas, admision, pujas, estado) y
- * ecilost-engagement-service (canal `/realtime` y notificaciones), sin tocar pantallas.
+ * Lo cumplen dos adaptadores: `createHttpAuctionGateway`, contra ecilost-auction-service
+ * (salas y admision hoy; estado y pujas despues) y en adelante ecilost-engagement-service
+ * (canal `/realtime` y notificaciones); y `createDemoAuctionGateway`, en memoria, para
+ * demostrar las pantallas sin backend. Cambiar de uno a otro no toca ninguna pantalla.
  */
 export interface AuctionGateway {
   /** Objetos de todas las salas, para el catalogo y la portada. */

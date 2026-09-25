@@ -1,5 +1,6 @@
 import { config, type AppConfig } from '@/config/env';
 import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
+import { createHttpAuctionGateway } from '@/features/auctions/api/http-auction.gateway';
 import type { AuctionGateway } from '@/features/auctions/ports/auction.gateway';
 import { createHttpAuthGateway } from '@/features/auth/api/http-auth.gateway';
 import type { AuthGateway } from '@/features/auth/ports/auth.gateway';
@@ -37,8 +38,10 @@ export interface Container {
   media: MediaGateway;
   wallet: WalletGateway;
   /**
-   * Salas, pujas y notificaciones. Hoy en memoria (`createDemoAuctionGateway`) hasta
-   * conectar ecilost-auction-service y el canal en vivo de ecilost-engagement-service.
+   * Salas, pujas y notificaciones de quien puja. Contra ecilost-auction-service
+   * (`createHttpAuctionGateway`), o en memoria (`createDemoAuctionGateway`) con
+   * `VITE_AUCTIONS_DEMO=true`. La sala en vivo y el canal de engagement aun no estan
+   * conectados en el adaptador real.
    */
   auctions: AuctionGateway;
   /** Programacion de salas por el funcionario, ya contra ecilost-auction-service. */
@@ -83,15 +86,26 @@ export function createContainer(appConfig: AppConfig = config): Container {
     ...credentials,
   });
 
+  // Las subastas reales piden a catalog el nombre y la foto de cada ronda, con los mismos
+  // adaptadores que el resto de la aplicacion.
+  const itemGateway = createHttpItemGateway(catalogHttp);
+  const lotGateway = createHttpLotGateway(catalogHttp);
+
   return {
     tokens,
     sessionLost,
     auth: createHttpAuthGateway(authHttp),
-    items: createHttpItemGateway(catalogHttp),
-    lots: createHttpLotGateway(catalogHttp),
+    items: itemGateway,
+    lots: lotGateway,
     media: createHttpMediaGateway(catalogHttp),
     wallet: createHttpWalletGateway(walletHttp),
-    auctions: createDemoAuctionGateway({ latencyMs: 150 }),
+    auctions: appConfig.auctionsDemo
+      ? createDemoAuctionGateway({ latencyMs: 150 })
+      : createHttpAuctionGateway({
+          http: auctionHttp,
+          items: itemGateway,
+          lots: lotGateway,
+        }),
     rooms: createHttpRoomGateway(auctionHttp),
   };
 }

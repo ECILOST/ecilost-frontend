@@ -12,6 +12,27 @@ export function nextBidFor(currentPrice: number): number {
   return currentPrice + BID_INCREMENT;
 }
 
+/**
+ * Lo minimo que una puja debe superar al precio vigente en ecilost-auction-service, cuando
+ * la ronda ya tiene lider. El demo sigue con `BID_INCREMENT` hasta que las pujas se
+ * conecten al servicio.
+ */
+export const SERVICE_BID_INCREMENT = 100;
+
+/**
+ * La puja minima segun el servicio: la primera debe alcanzar el precio minimo de la ronda;
+ * las siguientes, el vigente mas `SERVICE_BID_INCREMENT`.
+ */
+export function minimumServiceBid(round: {
+  startingPrice: number;
+  currentPrice: number;
+  hasBids: boolean;
+}): number {
+  return round.hasBids
+    ? round.currentPrice + SERVICE_BID_INCREMENT
+    : round.startingPrice;
+}
+
 const pad = (value: number) => String(value).padStart(2, '0');
 
 /** `08:21` bajo una hora, `02:34:16` por encima. Nunca negativo. */

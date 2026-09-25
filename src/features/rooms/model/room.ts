@@ -44,6 +44,10 @@ export interface RoundDetail {
   startingPrice: string;
   /** Arranca en `startingPrice` y sube con cada puja aceptada. */
   currentPrice: string;
+  /** Si alguien ya pujo. Decide la puja minima: el precio minimo o el vigente + 100. */
+  hasBids: boolean;
+  /** Si quien consulta lidera la ronda. El servicio no publica quien es el lider. */
+  isLeading: boolean;
   startedAt: string | null;
   endsAt: string | null;
   maximumEndsAt: string | null;

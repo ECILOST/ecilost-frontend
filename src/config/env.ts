@@ -16,6 +16,11 @@ export interface AppConfig {
     /** ecilost-auction-service. Salas, rondas y pujas. */
     readonly auction: string;
   };
+  /**
+   * Subastas del estudiante en memoria, con rivales simulados, en vez de contra
+   * ecilost-auction-service. Para demostrar las pantallas sin levantar el backend.
+   */
+  readonly auctionsDemo: boolean;
 }
 
 /**
@@ -32,4 +37,6 @@ export const config: AppConfig = {
     wallet: import.meta.env.VITE_WALLET_BASE_URL ?? '/api/wallet',
     auction: import.meta.env.VITE_AUCTION_BASE_URL ?? '/api/auction',
   },
+  // Solo el texto exacto la activa: una variable mal escrita no debe esconder el backend real.
+  auctionsDemo: import.meta.env.VITE_AUCTIONS_DEMO === 'true',
 };
