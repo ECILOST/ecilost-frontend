@@ -50,6 +50,9 @@ export interface RoundDetail {
   isLeading: boolean;
   /** La mejor puja aceptada de quien consulta en esta ronda, o `null` si no pujo. */
   myHighestBid: string | null;
+  /** Solo cerrada (HU-28): adjudicada a quien lideraba, o desierta si nadie pujo. */
+  result: 'AWARDED' | 'DESERTED' | null;
+  closedAt: string | null;
   startedAt: string | null;
   endsAt: string | null;
   maximumEndsAt: string | null;

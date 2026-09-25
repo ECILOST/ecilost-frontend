@@ -3,7 +3,7 @@ import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import type {
   RoomDetail,
-  RoomSummary,
+  RoomSummary as RoomListing,
   RoundDetail,
   RoundEntry,
 } from '@/features/rooms/model/room';
@@ -15,6 +15,7 @@ import type {
   AuctionItemStatus,
   LiveRoom,
   Room,
+  RoomSummary,
   Round,
 } from '../model/auction';
 import type { AuctionGateway } from '../ports/auction.gateway';
@@ -42,9 +43,10 @@ interface EntryInfo {
  * `roomId.roundId` para que la ficha encuentre su sala con una sola peticion (los UUID no
  * llevan puntos).
  *
- * Cubre descubrir salas, registrarse, la sala en vivo y la puja manual (HU-15 a HU-21).
- * Mientras no se conecte el canal de ecilost-engagement-service, `subscribe` consulta la
- * sala cada pocos segundos. Compra inmediata, puja automatica y el resumen fallan con un 501
+ * Cubre descubrir salas, registrarse, la sala en vivo, la puja manual y el resumen al
+ * cerrar (HU-15 a HU-21 y HU-28). Mientras no se conecte el canal de
+ * ecilost-engagement-service, `subscribe` consulta la sala cada pocos segundos. Compra
+ * inmediata y puja automatica fallan con un 501
  * explicito en vez de fingir datos; "Mis pujas" y las notificaciones responden vacias
  * porque el servicio aun no las publica.
  */
@@ -112,7 +114,7 @@ export function createHttpAuctionGateway(deps: {
 
   return {
     async items() {
-      const rooms = await http.get<RoomSummary[]>('/rooms');
+      const rooms = await http.get<RoomListing[]>('/rooms');
       const details = await Promise.all(rooms.map((room) => roomDetail(room.id)));
       const items = await Promise.all(details.map(toItems));
       return items.flat();
@@ -154,7 +156,56 @@ export function createHttpAuctionGateway(deps: {
 
     buyNow: () => notConnected(),
     setAutoBid: () => notConnected(),
-    roomSummary: () => notConnected(),
+    /**
+     * Lo que paso en cada ronda para quien consulta, a partir del resultado que auction
+     * registra al cerrar: gano si la ronda se adjudico y lideraba; perdio si pujo y no
+     * lideraba; y si no pujo, se dice si se vendio o quedo desierta.
+     */
+    async roomSummary(roomId: string): Promise<RoomSummary> {
+      const detail = await roomDetail(roomId);
+      const room = await toRoom(detail);
+
+      const rows = detail.rounds.map((round, index) => {
+        const price = Number(round.currentPrice);
+        const mine = round.myHighestBid === null ? null : Number(round.myHighestBid);
+        const won = round.result === 'AWARDED' && round.isLeading;
+        const outcome = won ? 'WON' : mine !== null ? 'LOST' : 'NO_BID';
+        const sold =
+          round.result === 'DESERTED' ? 'quedó desierta' : `se vendió por ${price}`;
+
+        return {
+          itemId: round.entries[0].catalogId,
+          itemName: room.rounds[index].itemName,
+          position: round.position,
+          outcome,
+          amount: won ? price : mine,
+          detail: `Objeto ${round.position} · ${
+            won
+              ? 'lo ganaste'
+              : mine !== null
+                ? `tu mejor puja fue superada; ${sold}`
+                : sold
+          }`,
+        } as RoomSummary['rows'][number];
+      });
+
+      const closings = detail.rounds
+        .map((round) => round.closedAt ?? round.endsAt)
+        .filter((value): value is string => value !== null)
+        .sort();
+
+      return {
+        roomId: detail.id,
+        roomName: detail.name,
+        items: detail.rounds.length,
+        participants: detail.admittedCount,
+        closedAt: closings.at(-1) ?? new Date().toISOString(),
+        rows,
+        totalSpent: rows
+          .filter((row) => row.outcome === 'WON')
+          .reduce((total, row) => total + (row.amount ?? 0), 0),
+      };
+    },
 
     /**
      * Sondeo de la sala hasta que exista el canal en vivo de engagement. Un fallo puntual no
@@ -333,7 +384,7 @@ function notConnected(): Promise<never> {
       title: 'Todavía no disponible',
       status: 501,
       detail:
-        'La compra inmediata, la puja automática y el resumen de la sala todavía no están conectados con el servicio de subastas.',
+        'La compra inmediata y la puja automática todavía no están conectadas con el servicio de subastas.',
     }),
   );
 }

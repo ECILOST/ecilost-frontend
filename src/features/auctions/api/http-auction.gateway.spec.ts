@@ -15,6 +15,8 @@ const round = (overrides: Partial<RoundDetail> = {}): RoundDetail => ({
   hasBids: false,
   isLeading: false,
   myHighestBid: null,
+  result: null,
+  closedAt: null,
   startedAt: null,
   endsAt: null,
   maximumEndsAt: null,
@@ -253,6 +255,30 @@ describe('createHttpAuctionGateway', () => {
         vi.useRealTimers();
       }
     });
+  });
+
+  it('el resumen dice que se gano, que se perdio y que quedo desierto, con lo gastado', async () => {
+    const { gateway } = setup(
+      room({
+        status: 'CLOSED',
+        rounds: [
+          round({ status: 'CLOSED', result: 'AWARDED', isLeading: true, hasBids: true, currentPrice: '200.00', myHighestBid: '200.00', closedAt: '2030-10-01T21:03:00.000Z' }),
+          round({ id: 'round-2', position: 2, status: 'CLOSED', result: 'AWARDED', hasBids: true, currentPrice: '900.00', myHighestBid: '500.00', closedAt: '2030-10-01T21:06:00.000Z', entries: [{ kind: 'LOT', catalogId: 'lot-1' }] }),
+          round({ id: 'round-3', position: 3, status: 'CLOSED', result: 'DESERTED', closedAt: '2030-10-01T21:09:00.000Z' }),
+        ],
+      }),
+    );
+
+    const summary = await gateway.roomSummary('room-1');
+
+    expect(summary.rows.map((row) => [row.outcome, row.amount])).toEqual([
+      ['WON', 200],
+      ['LOST', 500],
+      ['NO_BID', null],
+    ]);
+    expect(summary.rows[2].detail).toMatch(/desierta/);
+    expect(summary.totalSpent).toBe(200);
+    expect(summary.closedAt).toBe('2030-10-01T21:09:00.000Z');
   });
 
   it('lo que el servicio aun no ofrece falla con 501 explicito en vez de inventar datos', async () => {
