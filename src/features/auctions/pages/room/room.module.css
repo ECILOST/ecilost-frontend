@@ -124,6 +124,11 @@
   flex: 1;
 }
 
+/* Pujar una cantidad exacta, debajo de los botones: es la opcion menos frecuente. */
+.customBid {
+  margin-top: 14px;
+}
+
 .strip {
   margin-top: 28px;
 }

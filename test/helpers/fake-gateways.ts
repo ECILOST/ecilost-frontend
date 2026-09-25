@@ -476,6 +476,7 @@ export function roomFixture(overrides: Partial<RoomDetail> = {}): RoomDetail {
         currentPrice: '50000.00',
         hasBids: false,
         isLeading: false,
+        myHighestBid: null,
         startedAt: null,
         endsAt: null,
         maximumEndsAt: null,

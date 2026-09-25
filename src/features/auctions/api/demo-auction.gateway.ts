@@ -1,5 +1,5 @@
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
-import { BID_INCREMENT, nextBidFor } from '../domain/auction-rules';
+import { BID_INCREMENT, minimumBid, nextBidFor } from '../domain/auction-rules';
 import type {
   AppNotification,
   AuctionItem,
@@ -831,6 +831,15 @@ export function createDemoAuctionGateway(
     return room;
   }
 
+  /** La misma regla que el servicio: el precio minimo sin pujas, el vigente + 100 despues. */
+  function minimumFor(target: DemoRound): number {
+    return minimumBid({
+      startingPrice: target.item.basePrice,
+      currentPrice: target.currentPrice,
+      hasBids: target.currentBidderId !== null,
+    });
+  }
+
   function roundView(target: DemoRound): Round {
     const mine = target.bids
       .filter((bid) => bid.bidderId === ME)
@@ -843,6 +852,7 @@ export function createDemoAuctionGateway(
       status: target.status,
       basePrice: target.item.basePrice,
       currentPrice: target.currentPrice,
+      minimumBid: minimumFor(target),
       currentBidderId: target.currentBidderId,
       startedAt: target.startedAt === null ? null : iso(target.startedAt),
       endsAt: target.endsAt === null ? null : iso(target.endsAt),
@@ -912,7 +922,7 @@ export function createDemoAuctionGateway(
       roomSize: room.rounds.length,
       status,
       currentPrice: target.currentPrice,
-      nextBid: nextBidFor(target.currentPrice),
+      nextBid: minimumFor(target),
       buyNowPrice: target.item.buyNowPrice,
       startsAt: iso(room.startsAt),
       endsAt: status === 'LIVE' && target.endsAt ? iso(target.endsAt) : null,
@@ -982,8 +992,9 @@ export function createDemoAuctionGateway(
       run(() => {
         const room = find(roomId);
         const active = activeRoundFor(room);
-        if (!Number.isFinite(amount) || amount <= active.currentPrice) {
-          throw conflict('La puja debe superar el precio actual.');
+        const minimum = minimumFor(active);
+        if (!Number.isInteger(amount) || amount < minimum) {
+          throw conflict(`La puja debe ser de al menos ${minimum} ECICoin.`);
         }
         recordBid(room, active, ME, amount, now());
         room.nextRivalAt = now() + 6_000 + random() * 8_000;

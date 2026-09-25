@@ -30,10 +30,10 @@ import {
   RoomActivityList,
   RoomItemsStrip,
 } from '../../components/room-panels';
+import { CustomBidForm } from '../../components/custom-bid-form';
 import {
   LAST_SECONDS_MS,
   formatCountdown,
-  nextBidFor,
   roundProgress,
 } from '../../domain/auction-rules';
 import { useCountdown } from '../../hooks/use-countdown';
@@ -213,7 +213,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     );
   }
 
-  const nextBid = round ? nextBidFor(round.currentPrice) : 0;
+  const nextBid = round ? round.minimumBid : 0;
   const mutationError = placeBid.error ?? buyNow.error ?? autoBid.error;
   /*
    * "Vas ganando" y "ultimos segundos" siguen el precio y el reloj en vivo. Los demas
@@ -296,6 +296,14 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                       🛒 Comprar ahora · {formatCoins(round.buyNowPrice)}
                     </Button>
                   ) : null}
+                </div>
+
+                <div className={styles.customBid}>
+                  <CustomBidForm
+                    minimum={nextBid}
+                    disabled={placeBid.isPending}
+                    onBid={(amount) => start('bid', amount)}
+                  />
                 </div>
               </>
             ) : (
@@ -394,7 +402,7 @@ function OutcomeScreens({
   onRaiseLimit: () => void;
   onToggleAutoBid: (enabled: boolean) => void;
 }) {
-  const next = nextBidFor(round.currentPrice);
+  const next = round.minimumBid;
   const common = {
     open: true,
     onClose,

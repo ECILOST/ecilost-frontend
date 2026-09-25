@@ -1,0 +1,13 @@
+/* El campo y su boton van en fila; el boton se alinea con el control, no con la etiqueta. */
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--s-3);
+}
+
+@media (max-width: 480px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+}

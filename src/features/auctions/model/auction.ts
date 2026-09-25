@@ -48,6 +48,12 @@ export interface Round {
   status: RoundStatus;
   basePrice: number;
   currentPrice: number;
+  /**
+   * Lo minimo que se puede pujar ahora (ver `minimumBid`). Lo calcula el adaptador y no la
+   * pantalla, porque depende de si ya hay pujas y eso solo lo sabe quien habla con el
+   * servicio.
+   */
+  minimumBid: number;
   currentBidderId: string | null;
   startedAt: string | null;
   endsAt: string | null;

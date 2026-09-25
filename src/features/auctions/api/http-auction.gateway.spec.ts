@@ -14,6 +14,7 @@ const round = (overrides: Partial<RoundDetail> = {}): RoundDetail => ({
   currentPrice: '50000.00',
   hasBids: false,
   isLeading: false,
+  myHighestBid: null,
   startedAt: null,
   endsAt: null,
   maximumEndsAt: null,
@@ -41,12 +42,18 @@ const room = (overrides: Partial<RoomDetail> = {}): RoomDetail => ({
   ...overrides,
 });
 
+const SERVER_TIME = '2030-10-01T21:01:00.000Z';
+
 function setup(detail: RoomDetail = room()) {
   const http = {
     baseUrl: '/api/auction',
     get: vi.fn((path: string) =>
       Promise.resolve(
-        path === '/rooms' ? [{ id: detail.id }] : detail,
+        path === '/rooms'
+          ? [{ id: detail.id }]
+          : path.endsWith('/state')
+            ? { serverTime: SERVER_TIME }
+            : detail,
       ),
     ),
     post: vi.fn(() => Promise.resolve({ alreadyAdmitted: false })),
@@ -166,10 +173,92 @@ describe('createHttpAuctionGateway', () => {
     expect(first.name).toBe('Objeto del catálogo');
   });
 
-  it('la sala en vivo falla con 501 explicito en vez de inventar datos', async () => {
+  describe('sala en vivo', () => {
+    const activeRoom = (isParticipant: boolean) =>
+      room({
+        status: 'ACTIVE',
+        isParticipant,
+        rounds: [
+          round({ status: 'CLOSED', hasBids: true }),
+          round({
+            id: 'round-2',
+            position: 2,
+            status: 'ACTIVE',
+            currentPrice: '60000.00',
+            hasBids: true,
+            isLeading: true,
+            myHighestBid: '60000.00',
+            endsAt: '2030-10-01T21:04:00.000Z',
+          }),
+        ],
+      });
+
+    it('toma la ronda activa y la hora del servidor para quien participa', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+
+      const live = await gateway.liveRoom('room-1');
+
+      expect(http.get).toHaveBeenCalledWith('/rooms/room-1/state');
+      expect(live.serverTime).toBe(SERVER_TIME);
+      expect(live.round).toMatchObject({
+        id: 'round-2',
+        currentPrice: 60000,
+        leading: true,
+        myHighestBid: 60000,
+        minimumBid: 60100,
+      });
+      expect(live.participants).toBe(3);
+    });
+
+    it('quien solo sigue la sala no pide el estado, que es solo para participantes', async () => {
+      const { gateway, http } = setup(activeRoom(false));
+
+      await gateway.liveRoom('room-1');
+
+      expect(http.get).not.toHaveBeenCalledWith('/rooms/room-1/state');
+    });
+
+    it('puja sobre la ronda activa con el monto exacto y devuelve la sala al dia', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+
+      const live = await gateway.placeBid('room-1', 73250);
+
+      expect(http.post).toHaveBeenCalledWith('/rounds/round-2/bids', { amount: 73250 });
+      expect(live.round?.id).toBe('round-2');
+    });
+
+    it('sin ronda en curso no envia la puja', async () => {
+      const { gateway, http } = setup();
+
+      await expect(gateway.placeBid('room-1', 50000)).rejects.toSatisfy(
+        (error: unknown) => error instanceof ApiError && error.status === 409,
+      );
+      expect(http.post).not.toHaveBeenCalled();
+    });
+
+    it('mientras no hay canal en vivo, consulta la sala cada dos segundos hasta dejar de escuchar', async () => {
+      vi.useFakeTimers();
+      try {
+        const { gateway } = setup(activeRoom(true));
+        const listener = vi.fn();
+
+        const stop = gateway.subscribe('room-1', listener);
+        await vi.advanceTimersByTimeAsync(2_000);
+        expect(listener).toHaveBeenCalledTimes(1);
+
+        stop();
+        await vi.advanceTimersByTimeAsync(10_000);
+        expect(listener).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+  });
+
+  it('lo que el servicio aun no ofrece falla con 501 explicito en vez de inventar datos', async () => {
     const { gateway } = setup();
 
-    await expect(gateway.liveRoom('room-1')).rejects.toSatisfy(
+    await expect(gateway.buyNow('room-1')).rejects.toSatisfy(
       (error: unknown) => error instanceof ApiError && error.status === 501,
     );
     await expect(gateway.myBids()).resolves.toEqual([]);

@@ -9,14 +9,21 @@ import type {
 } from '@/features/rooms/model/room';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
-import { minimumServiceBid } from '../domain/auction-rules';
+import { minimumBid } from '../domain/auction-rules';
 import type {
   AuctionItem,
   AuctionItemStatus,
+  LiveRoom,
   Room,
   Round,
 } from '../model/auction';
 import type { AuctionGateway } from '../ports/auction.gateway';
+
+/** Cada cuanto se relee la sala mientras no exista el canal en vivo. */
+const POLL_INTERVAL_MS = 2_000;
+
+/** Cuanto se reutiliza lo que catalog dijo de una entrada. */
+const ENTRY_CACHE_MS = 5 * 60_000;
 
 /** Lo que las pantallas enseñan de una entrada, sacado de catalog. */
 interface EntryInfo {
@@ -35,10 +42,11 @@ interface EntryInfo {
  * `roomId.roundId` para que la ficha encuentre su sala con una sola peticion (los UUID no
  * llevan puntos).
  *
- * Cubre descubrir salas y registrarse (HU-15 a HU-17). La sala en vivo, las pujas y el canal
- * de tiempo real todavia no estan conectados: esas operaciones fallan con un 501 explicito
- * en vez de fingir datos, y "Mis pujas" y las notificaciones responden vacias porque el
- * servicio aun no las publica.
+ * Cubre descubrir salas, registrarse, la sala en vivo y la puja manual (HU-15 a HU-21).
+ * Mientras no se conecte el canal de ecilost-engagement-service, `subscribe` consulta la
+ * sala cada pocos segundos. Compra inmediata, puja automatica y el resumen fallan con un 501
+ * explicito en vez de fingir datos; "Mis pujas" y las notificaciones responden vacias
+ * porque el servicio aun no las publica.
  */
 export function createHttpAuctionGateway(deps: {
   http: HttpClient;
@@ -46,14 +54,11 @@ export function createHttpAuctionGateway(deps: {
   lots: LotGateway;
 }): AuctionGateway {
   const { http } = deps;
-  // Un resolvedor por operacion y no uno para toda la sesion: las fotos de catalog van en
-  // URL firmadas que caducan a los quince minutos, y una cache larga las serviria rotas.
-  const resolver = () => createEntryResolver(deps);
+  const entryInfo = createEntryResolver(deps);
 
   const roomDetail = (id: string) => http.get<RoomDetail>(`/rooms/${id}`);
 
   async function toRoom(detail: RoomDetail): Promise<Room> {
-    const entryInfo = resolver();
     const infos = await Promise.all(
       detail.rounds.map((round) => entryInfo(round.entries[0])),
     );
@@ -72,10 +77,7 @@ export function createHttpAuctionGateway(deps: {
     };
   }
 
-  async function toItems(
-    detail: RoomDetail,
-    entryInfo: ReturnType<typeof resolver>,
-  ): Promise<AuctionItem[]> {
+  async function toItems(detail: RoomDetail): Promise<AuctionItem[]> {
     return Promise.all(
       detail.rounds.map(async (round) =>
         toAuctionItem(detail, round, await entryInfo(round.entries[0])),
@@ -83,14 +85,36 @@ export function createHttpAuctionGateway(deps: {
     );
   }
 
+  /**
+   * Lo que hay que pintar de una sala en curso. La hora del servidor sale de
+   * `GET /rooms/:id/state`, que solo responde a quien participa; quien solo sigue la sala
+   * usa su reloj, porque no puede pujar y un desfase no le cuesta nada.
+   */
+  async function live(roomId: string): Promise<LiveRoom> {
+    const detail = await roomDetail(roomId);
+    const serverTime = detail.isParticipant
+      ? (await http.get<{ serverTime: string }>(`/rooms/${roomId}/state`))
+          .serverTime
+      : new Date().toISOString();
+    const room = await toRoom(detail);
+
+    return {
+      room,
+      round: room.rounds.find((round) => round.status === 'ACTIVE') ?? null,
+      // El servicio no publica todavia el historial de pujas ni la actividad de la sala.
+      bids: [],
+      activity: [],
+      autoBid: { enabled: false, limit: 0, stopped: false },
+      participants: detail.admittedCount,
+      serverTime,
+    };
+  }
+
   return {
     async items() {
       const rooms = await http.get<RoomSummary[]>('/rooms');
       const details = await Promise.all(rooms.map((room) => roomDetail(room.id)));
-      const entryInfo = resolver();
-      const items = await Promise.all(
-        details.map((detail) => toItems(detail, entryInfo)),
-      );
+      const items = await Promise.all(details.map(toItems));
       return items.flat();
     },
 
@@ -99,7 +123,7 @@ export function createHttpAuctionGateway(deps: {
       const detail = await roomDetail(roomId);
       const round = detail.rounds.find((candidate) => candidate.id === roundId);
       if (!round) throw notFound('Ese objeto no está en ninguna sala.');
-      return toAuctionItem(detail, round, await resolver()(round.entries[0]));
+      return toAuctionItem(detail, round, await entryInfo(round.entries[0]));
     },
 
     room: async (id: string) => toRoom(await roomDetail(id)),
@@ -113,13 +137,50 @@ export function createHttpAuctionGateway(deps: {
       return toRoom(await roomDetail(id));
     },
 
-    liveRoom: () => notConnected(),
-    placeBid: () => notConnected(),
+    liveRoom: (roomId: string) => live(roomId),
+
+    /**
+     * `POST /rounds/:id/bids` sobre la ronda activa. La ronda se busca en el momento: si
+     * cambio entre que se pinto y se pujo, el servicio responde 409 y no se reserva nada.
+     */
+    async placeBid(roomId: string, amount: number) {
+      const detail = await roomDetail(roomId);
+      const active = detail.rounds.find((round) => round.status === 'ACTIVE');
+      if (!active) throw conflict('No hay una ronda en curso en esta sala.');
+
+      await http.post(`/rounds/${active.id}/bids`, { amount });
+      return live(roomId);
+    },
+
     buyNow: () => notConnected(),
     setAutoBid: () => notConnected(),
     roomSummary: () => notConnected(),
-    // Sin canal todavia: nadie avisa de cambios, y dejar de escuchar no tiene nada que cerrar.
-    subscribe: () => () => undefined,
+
+    /**
+     * Sondeo de la sala hasta que exista el canal en vivo de engagement. Un fallo puntual no
+     * corta la escucha: el siguiente intento vuelve a partir del estado del servidor.
+     */
+    subscribe(roomId, listener) {
+      let stopped = false;
+      let timer: ReturnType<typeof setTimeout>;
+
+      const tick = async () => {
+        try {
+          const state = await live(roomId);
+          if (!stopped) listener(state);
+        } catch {
+          // Se reintenta en el siguiente ciclo.
+        } finally {
+          if (!stopped) timer = setTimeout(tick, POLL_INTERVAL_MS);
+        }
+      };
+      timer = setTimeout(tick, POLL_INTERVAL_MS);
+
+      return () => {
+        stopped = true;
+        clearTimeout(timer);
+      };
+    },
     myBids: () => Promise.resolve([]),
     notifications: () => Promise.resolve([]),
     markNotificationsRead: () => Promise.resolve(),
@@ -127,9 +188,11 @@ export function createHttpAuctionGateway(deps: {
 }
 
 /**
- * Nombre, descripcion y foto de cada entrada, pedidos a catalog una sola vez por operacion:
- * un lote que aparece en dos salas no se pide dos veces. Si catalog no responde, la sala se
- * sigue viendo con un texto neutro en vez de romperse.
+ * Nombre, descripcion y foto de cada entrada, pedidos a catalog y guardados unos minutos: la
+ * sala en vivo se relee cada pocos segundos y no tiene sentido volver a pedir lo mismo. La
+ * vida de la cache es menor que la de las URL firmadas de las fotos (quince minutos), para
+ * no servirlas caducadas. Si catalog no responde, la sala se sigue viendo con un texto
+ * neutro en vez de romperse, y ese texto no se guarda.
  */
 function createEntryResolver({
   items,
@@ -138,7 +201,7 @@ function createEntryResolver({
   items: ItemGateway;
   lots: LotGateway;
 }) {
-  const cache = new Map<string, Promise<EntryInfo>>();
+  const cache = new Map<string, { at: number; info: Promise<EntryInfo> }>();
 
   async function resolve(entry: RoundEntry): Promise<EntryInfo> {
     try {
@@ -162,6 +225,7 @@ function createEntryResolver({
         imageUrl: null,
       };
     } catch {
+      cache.delete(`${entry.kind}:${entry.catalogId}`);
       return {
         name: entry.kind === 'ITEM' ? 'Objeto del catálogo' : 'Lote del catálogo',
         description: 'No se pudo cargar la descripción.',
@@ -175,10 +239,10 @@ function createEntryResolver({
   return (entry: RoundEntry): Promise<EntryInfo> => {
     const key = `${entry.kind}:${entry.catalogId}`;
     const cached = cache.get(key);
-    if (cached) return cached;
+    if (cached && Date.now() - cached.at < ENTRY_CACHE_MS) return cached.info;
 
     const info = resolve(entry);
-    cache.set(key, info);
+    cache.set(key, { at: Date.now(), info });
     return info;
   };
 }
@@ -193,6 +257,11 @@ function toRound(round: RoundDetail, itemName: string): Round {
     status: round.status,
     basePrice: Number(round.startingPrice),
     currentPrice: Number(round.currentPrice),
+    minimumBid: minimumBid({
+      startingPrice: Number(round.startingPrice),
+      currentPrice: Number(round.currentPrice),
+      hasBids: round.hasBids,
+    }),
     // El servicio no publica quien lidera, solo si es quien consulta.
     currentBidderId: null,
     startedAt: round.startedAt,
@@ -200,7 +269,8 @@ function toRound(round: RoundDetail, itemName: string): Round {
     maximumEndsAt: round.maximumEndsAt,
     buyNowPrice: null,
     leading: round.isLeading,
-    myHighestBid: null,
+    myHighestBid:
+      round.myHighestBid === null ? null : Number(round.myHighestBid),
     wonByMe: round.status === 'CLOSED' && round.isLeading,
   };
 }
@@ -222,7 +292,7 @@ function toAuctionItem(
     roomSize: room.rounds.length,
     status: itemStatus(room, round),
     currentPrice,
-    nextBid: minimumServiceBid({ startingPrice, currentPrice, hasBids: round.hasBids }),
+    nextBid: minimumBid({ startingPrice, currentPrice, hasBids: round.hasBids }),
     buyNowPrice: null,
     startsAt: room.startsAt,
     endsAt: round.endsAt,
@@ -236,6 +306,15 @@ function itemStatus(room: RoomDetail, round: RoundDetail): AuctionItemStatus {
   if (round.status === 'CLOSED') return 'CLOSED';
   if (round.status === 'ACTIVE') return 'LIVE';
   return 'UPCOMING';
+}
+
+function conflict(detail: string): ApiError {
+  return new ApiError({
+    type: '/problems/conflicto',
+    title: 'Conflict',
+    status: 409,
+    detail,
+  });
 }
 
 function notFound(detail: string): ApiError {
@@ -254,7 +333,7 @@ function notConnected(): Promise<never> {
       title: 'Todavía no disponible',
       status: 501,
       detail:
-        'La sala en vivo y las pujas todavía no están conectadas con el servicio de subastas.',
+        'La compra inmediata, la puja automática y el resumen de la sala todavía no están conectados con el servicio de subastas.',
     }),
   );
 }

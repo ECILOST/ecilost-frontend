@@ -2,8 +2,11 @@
  * Reglas de la subasta que la interfaz necesita conocer para no hacer adivinar a nadie.
  */
 
-/** Incremento minimo entre pujas: "la siguiente puja viene calculada". */
-export const BID_INCREMENT = 10;
+/**
+ * Lo minimo que una puja debe superar al precio vigente cuando la ronda ya tiene lider. Es
+ * la regla de ecilost-auction-service, y el demo la imita.
+ */
+export const BID_INCREMENT = 100;
 
 /** Por debajo de este margen el reloj pasa a "ultimos segundos". */
 export const LAST_SECONDS_MS = 10_000;
@@ -13,23 +16,16 @@ export function nextBidFor(currentPrice: number): number {
 }
 
 /**
- * Lo minimo que una puja debe superar al precio vigente en ecilost-auction-service, cuando
- * la ronda ya tiene lider. El demo sigue con `BID_INCREMENT` hasta que las pujas se
- * conecten al servicio.
+ * La puja minima: la primera de la ronda debe alcanzar el precio minimo; las siguientes, el
+ * vigente mas `BID_INCREMENT`. Por encima de eso el estudiante elige el monto.
  */
-export const SERVICE_BID_INCREMENT = 100;
-
-/**
- * La puja minima segun el servicio: la primera debe alcanzar el precio minimo de la ronda;
- * las siguientes, el vigente mas `SERVICE_BID_INCREMENT`.
- */
-export function minimumServiceBid(round: {
+export function minimumBid(round: {
   startingPrice: number;
   currentPrice: number;
   hasBids: boolean;
 }): number {
   return round.hasBids
-    ? round.currentPrice + SERVICE_BID_INCREMENT
+    ? round.currentPrice + BID_INCREMENT
     : round.startingPrice;
 }
 

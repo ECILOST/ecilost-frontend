@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useContainer } from '@/app/providers/container-provider';
+import { walletKeys } from '@/features/wallet/hooks/use-wallet';
 import type { LiveRoom } from '../model/auction';
 import { auctionKeys } from './auction-keys';
 
@@ -45,6 +46,8 @@ function useLiveMutation<TInput>(
       void queryClient.invalidateQueries({
         queryKey: auctionKeys.notifications(),
       });
+      // Pujar compromete ECICoin, y ser superado los libera: el saldo cambio en wallet.
+      void queryClient.invalidateQueries({ queryKey: walletKeys.all });
     },
   });
 }

@@ -48,6 +48,8 @@ export interface RoundDetail {
   hasBids: boolean;
   /** Si quien consulta lidera la ronda. El servicio no publica quien es el lider. */
   isLeading: boolean;
+  /** La mejor puja aceptada de quien consulta en esta ronda, o `null` si no pujo. */
+  myHighestBid: string | null;
   startedAt: string | null;
   endsAt: string | null;
   maximumEndsAt: string | null;

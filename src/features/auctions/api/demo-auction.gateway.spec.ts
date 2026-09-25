@@ -8,11 +8,17 @@ function clock(start = Date.parse('2030-01-01T10:00:00.000Z')) {
 }
 
 describe('Adaptador de demostracion de subastas', () => {
-  it('rechaza una puja que no supera el precio actual', async () => {
+  it('rechaza una puja por debajo del vigente mas 100, como el servicio', async () => {
     const gateway = createDemoAuctionGateway({ rivals: false, tickMs: 0 });
-    await expect(gateway.placeBid('sala-04', 380)).rejects.toThrow(
-      'La puja debe superar el precio actual.',
+    await expect(gateway.placeBid('sala-04', 479)).rejects.toThrow(
+      'La puja debe ser de al menos 480 ECICoin.',
     );
+  });
+
+  it('acepta cualquier monto entero por encima de la minima', async () => {
+    const gateway = createDemoAuctionGateway({ rivals: false, tickMs: 0 });
+    const after = await gateway.placeBid('sala-04', 1_234);
+    expect(after.round).toMatchObject({ currentPrice: 1_234, leading: true, minimumBid: 1_334 });
   });
 
   it('una puja en los ultimos 10 segundos extiende la ronda sin pasar del maximo', async () => {
@@ -26,7 +32,7 @@ describe('Adaptador de demostracion de subastas', () => {
     const endsAt = Date.parse(before.round!.endsAt!);
 
     time.advance(endsAt - time.now() - 5_000);
-    const after = await gateway.placeBid('sala-04', 390);
+    const after = await gateway.placeBid('sala-04', 480);
 
     expect(Date.parse(after.round!.endsAt!)).toBe(endsAt + 10_000);
   });
@@ -70,7 +76,7 @@ describe('Adaptador de demostracion de subastas', () => {
     });
     await gateway.setAutoBid('sala-04', { enabled: true, limit: 380 });
 
-    // El rival simulado puja 390; la siguiente respuesta (400) pasa el limite de 380.
+    // El rival simulado puja 480; la siguiente respuesta (580) pasa el limite de 380.
     time.advance(20_000);
     await gateway.liveRoom('sala-04');
     const state = await gateway.liveRoom('sala-04');

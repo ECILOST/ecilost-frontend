@@ -64,13 +64,13 @@ describe('Subastas', () => {
     renderApp({ route: '/salas/sala-04', container: student('950.00') });
 
     await userEvent.click(
-      await screen.findByRole('button', { name: /pujar 390 ecicoin/i }),
+      await screen.findByRole('button', { name: /pujar 480 ecicoin/i }),
     );
     const confirm = await screen.findByRole('dialog', {
       name: 'Confirmar puja',
     });
-    expect(confirm).toHaveTextContent('390 ECICoin');
-    expect(confirm).toHaveTextContent('560 ECICoin');
+    expect(confirm).toHaveTextContent('480 ECICoin');
+    expect(confirm).toHaveTextContent('470 ECICoin');
 
     await userEvent.click(
       within(confirm).getByRole('button', { name: /confirmar puja/i }),
@@ -80,17 +80,39 @@ describe('Subastas', () => {
     ).toBeInTheDocument();
   });
 
+  it('deja pujar una cantidad exacta, pero no por debajo de la minima', async () => {
+    renderApp({ route: '/salas/sala-04', container: student('950.00') });
+
+    const amount = await screen.findByLabelText(/otra cantidad/i);
+    await userEvent.type(amount, '479');
+    await userEvent.click(
+      screen.getByRole('button', { name: /pujar esta cantidad/i }),
+    );
+    expect(amount).toHaveAccessibleDescription(/al menos 480 ECICoin/i);
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await userEvent.clear(amount);
+    await userEvent.type(amount, '725');
+    await userEvent.click(
+      screen.getByRole('button', { name: /pujar esta cantidad/i }),
+    );
+    const confirm = await screen.findByRole('dialog', {
+      name: 'Confirmar puja',
+    });
+    expect(confirm).toHaveTextContent('725 ECICoin');
+  });
+
   it('sin saldo suficiente dice cuanto falta en lugar de enviar la puja', async () => {
     renderApp({ route: '/salas/sala-04', container: student('350.00') });
 
     await userEvent.click(
-      await screen.findByRole('button', { name: /pujar 390 ecicoin/i }),
+      await screen.findByRole('button', { name: /pujar 480 ecicoin/i }),
     );
     const dialog = await screen.findByRole('dialog', {
       name: 'Saldo insuficiente',
     });
     expect(dialog).toHaveTextContent('Te faltan');
-    expect(dialog).toHaveTextContent('40 ECICoin');
+    expect(dialog).toHaveTextContent('130 ECICoin');
     expect(
       within(dialog).getByRole('link', { name: 'Recargar ECICoin' }),
     ).toHaveAttribute('href', '/billetera');
