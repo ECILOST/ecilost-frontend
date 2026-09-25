@@ -2,8 +2,8 @@ import styles from './coin.module.css';
 
 /**
  * Como se escribe una cifra de ECICoin en las pantallas de subasta: sin decimales cuando no
- * los hay ("1.250"), con dos cuando si. El saldo de la billetera sigue usando
- * `formatEcicoin`, que siempre muestra los dos.
+ * los hay ("1.250"), con dos cuando si. Un ECICoin vale un peso y los servicios ya no
+ * aceptan fracciones, asi que en la practica siempre sale entero, como en `formatEcicoin`.
  */
 const SHORT = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 2 });
 

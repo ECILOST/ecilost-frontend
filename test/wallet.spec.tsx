@@ -107,7 +107,7 @@ describe('Billetera', () => {
     const dialog = await screen.findByRole('dialog', {
       name: /¿abonar esta cantidad\?/i,
     });
-    expect(dialog).toHaveTextContent('50.000,00');
+    expect(dialog).toHaveTextContent('50.000');
     expect(dialog).toHaveTextContent(ESTUDIANTE.fullName);
     expect(recharges).toEqual([]);
 
@@ -123,7 +123,7 @@ describe('Billetera', () => {
       },
     ]);
     expect(await screen.findByText(/recarga abonada/i)).toBeInTheDocument();
-    expect(screen.getByText('200.000,00')).toBeInTheDocument();
+    expect(screen.getByText('200.000')).toBeInTheDocument();
   });
 
   it('un correo sin cuenta se explica, y no llega a pedir la cantidad', async () => {
@@ -179,14 +179,14 @@ describe('Billetera', () => {
       }),
     });
 
-    // Tres decimales: el servicio admite dos.
-    await prepararRecarga(ESTUDIANTE.email, '10.005');
+    // Con centavos: un ECICoin vale un peso y el servicio solo admite enteros.
+    await prepararRecarga(ESTUDIANTE.email, '10.50');
     await userEvent.click(screen.getByRole('button', { name: 'Abonar' }));
 
     expect(recharges).toHaveLength(0);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(screen.getByLabelText(/^cantidad/i)).toHaveAccessibleDescription(
-      /dos decimales como máximo/i,
+      /sin centavos/i,
     );
   });
 

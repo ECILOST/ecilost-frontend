@@ -64,7 +64,7 @@ export function RechargePage() {
 
     if (!isValidAmount(amount)) {
       setAmountError(
-        'Escribe una cantidad mayor que cero, con dos decimales como máximo.',
+        'Escribe una cantidad entera mayor que cero: un ECICoin vale un peso, sin centavos.',
       );
       return;
     }
@@ -204,17 +204,17 @@ export function RechargePage() {
         <form className={styles.form} onSubmit={submit} noValidate>
           <Field
             label="Cantidad"
-            hint="En ECICoin, con dos decimales como máximo."
+            hint="En ECICoin, sin centavos: un ECICoin vale un peso colombiano."
             error={amountError}
             required
           >
             <Input
               value={amount}
-              // `decimal` y no `number`: el teclado del movil sale con la coma y el control
-              // no arrastra las flechas de incremento, que aqui no pintan nada.
-              inputMode="decimal"
+              // `numeric` y no `number`: el teclado del movil sale solo con digitos y el
+              // control no arrastra las flechas de incremento, que aqui no pintan nada.
+              inputMode="numeric"
               autoComplete="off"
-              placeholder="50000.00"
+              placeholder="50000"
               onChange={(event) => setAmount(event.target.value)}
             />
           </Field>

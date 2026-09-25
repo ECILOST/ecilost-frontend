@@ -1,13 +1,13 @@
 /**
  * Como se escribe una cantidad de ECICoin.
  *
- * Siempre con dos decimales, aunque sean ceros: es la moneda de la plataforma y el saldo se
- * lee para decidir si alcanza para pujar. "1.250" y "1.250,00" se leen distinto de un
- * vistazo, y el segundo no deja dudas de que no falta nada.
+ * Un ECICoin vale lo mismo que un peso colombiano, y como el peso se escribe sin centavos:
+ * "1.250.000" se lee de un vistazo, y dos ceros decimales que nunca cambian solo estorban.
+ * Los servicios siguen guardando `Decimal(18, 2)`, pero ya no aceptan fracciones.
  */
 const FORMAT = new Intl.NumberFormat('es-CO', {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
 });
 
 /**
@@ -25,12 +25,13 @@ export function formatEcicoin(amount: string): string {
 }
 
 /**
- * Cierto si la cadena es un importe positivo con dos decimales como mucho, que es lo que
- * acepta el servicio. Se comprueba sobre el texto y no sobre un `number` para que "0.005"
- * se rechace aqui en vez de redondearse a algo que el servicio no pidio.
+ * Cierto si la cadena es un importe entero y positivo, que es lo que aceptan los servicios.
+ * Se comprueba sobre el texto y no sobre un `number` para que "1500.5" se rechace aqui en
+ * vez de redondearse a algo que nadie pidio.
  */
 export function isValidAmount(input: string): boolean {
   const trimmed = input.trim();
-  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return false;
+  if (!/^\d+$/.test(trimmed)) return false;
+
   return Number(trimmed) > 0;
 }
