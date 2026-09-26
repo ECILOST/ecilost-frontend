@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.103.1",
+    "@vercel/functions": "^3.9.9",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4",

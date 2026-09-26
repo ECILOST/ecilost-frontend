@@ -33,6 +33,25 @@ servicios bajo el de la aplicacion:
 Cuando exista `ecilost-api-gateway`, las dos variables de `.env` pasan a ser su URL publica y
 el proxy deja de hacer falta.
 
+## Despliegue en Vercel
+
+En Vercel el papel del proxy lo cumple `middleware.ts` (Routing Middleware), con las mismas
+reglas de prefijos, y `vercel.json` sirve `index.html` para las rutas del `BrowserRouter`.
+Hay un proyecto por ambiente: `ecilost-frontend-dev` y `ecilost-frontend` (prod).
+
+Variables de cada proyecto (entorno *Production* del proyecto):
+
+| Variable | Uso | Valor |
+|---|---|---|
+| `AUTH_SERVICE_URL` | destino de `/auth/*` (solo servidor) | URL del Container App de auth |
+| `CATALOG_SERVICE_URL` | destino de `/api/catalog/*` | URL de catalog |
+| `WALLET_SERVICE_URL` | destino de `/api/wallet/*` | URL de wallet |
+| `AUCTION_SERVICE_URL` | destino de `/api/auction/*` | URL de auction |
+| `ENGAGEMENT_SERVICE_URL` | destino de `/api/engagement/*` | URL de engagement |
+| `VITE_REALTIME_URL` | Socket.IO directo (Vercel no reenvia WebSockets); se incrusta en el build | URL de engagement |
+
+Las URLs las imprime `terraform output service_urls` en `ecilost-terraform/environments/<env>`.
+
 ## Estructura
 
 Misma separacion que los servicios, con los nombres que usa una aplicacion de React. La tabla

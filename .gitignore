@@ -27,3 +27,6 @@ yarn-error.log*
 
 # Herramientas locales
 .claude/
+
+# Vercel CLI (vercel link)
+.vercel/
