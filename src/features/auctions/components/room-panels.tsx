@@ -120,7 +120,12 @@ export function NextItem({
     <section className={styles.next} aria-label="Siguiente objeto">
       <span className={styles.nextLabel}>Siguiente objeto</span>
       <div className={styles.nextRow}>
-        <ItemArt seed={next.itemId} label={next.itemName} variant="thumb" />
+        <ItemArt
+          seed={next.itemId}
+          label={next.itemName}
+          src={next.imageUrl}
+          variant="thumb"
+        />
         <div>
           <div className={styles.nextName}>{next.itemName}</div>
           <div className={styles.nextMeta}>
@@ -185,6 +190,7 @@ export function RoomItemsStrip({
                 <ItemArt
                   seed={round.itemId}
                   label={round.itemName}
+                  src={round.imageUrl}
                   variant="thumb"
                   className={styles.stripThumb}
                 />

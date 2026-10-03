@@ -6,6 +6,23 @@ import type { LiveRoom } from '../model/auction';
 import { auctionKeys } from './auction-keys';
 
 /**
+ * Wallet liquida por su cuenta, en paralelo con el aviso en vivo: la liberacion al ser
+ * superado y la liquidacion al cerrar la ronda pueden llegar un instante despues que el
+ * evento. Por eso el saldo se relee al momento y otra vez pasado este margen.
+ */
+const WALLET_SETTLE_DELAY_MS = 3_000;
+
+/**
+ * Lo que de la sala mueve el saldo de quien mira: liderar o no, su puja mas alta (tambien
+ * la que hace por el la puja automatica) y que cada ronda siga abierta o haya cerrado.
+ */
+function walletSignature(state: LiveRoom): string {
+  return state.room.rounds
+    .map((round) => `${round.id}:${round.status}:${round.leading}:${round.myHighestBid}`)
+    .join('|');
+}
+
+/**
  * Estado en vivo de una sala.
  *
  * Primero se consulta (lo que en auction-service es `GET /rooms/:id/state`) y despues se
@@ -18,14 +35,43 @@ export function useLiveRoom(roomId: string, enabled = true) {
 
   useEffect(() => {
     if (!enabled) return;
-    return auctions.subscribe(roomId, (state) => {
+    let lastSignature: string | null = null;
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    const refreshWallet = () =>
+      void queryClient.invalidateQueries({ queryKey: walletKeys.all });
+
+    const unsubscribe = auctions.subscribe(roomId, (state) => {
+      // La primera vez se compara con lo que pinto la consulta inicial, no con nada.
+      if (lastSignature === null) {
+        const shown = queryClient.getQueryData<LiveRoom>(auctionKeys.live(roomId));
+        if (shown) lastSignature = walletSignature(shown);
+      }
       queryClient.setQueryData(auctionKeys.live(roomId), state);
       // La transicion de ronda o el cierre de la sala tambien cambian la sala.
       queryClient.setQueryData(auctionKeys.room(roomId), state.room);
       // Un cambio en vivo puede traer un aviso personal (superado, ganado): la bandeja se
       // relee ya, sin esperar su propio intervalo.
       void queryClient.invalidateQueries({ queryKey: auctionKeys.notifications() });
+
+      // Ser superado libera la reserva, cerrar la ronda cobra o devuelve, y la puja
+      // automatica reserva sin que la persona haga nada: en todos esos casos cambio el
+      // saldo en wallet y la cabecera no puede seguir mostrando el anterior.
+      const signature = walletSignature(state);
+      if (lastSignature !== null && signature !== lastSignature) {
+        refreshWallet();
+        const timer = setTimeout(() => {
+          timers.delete(timer);
+          refreshWallet();
+        }, WALLET_SETTLE_DELAY_MS);
+        timers.add(timer);
+      }
+      lastSignature = signature;
     });
+
+    return () => {
+      timers.forEach(clearTimeout);
+      unsubscribe();
+    };
   }, [auctions, queryClient, roomId, enabled]);
 
   return useQuery({

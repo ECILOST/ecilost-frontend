@@ -33,6 +33,7 @@ function Row({ bid }: { bid: MyBid }) {
         <ItemArt
           seed={bid.itemId}
           label={bid.itemName}
+          src={bid.imageUrl}
           variant="thumb"
           className={styles.thumb}
         />

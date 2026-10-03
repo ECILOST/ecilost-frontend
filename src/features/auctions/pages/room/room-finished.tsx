@@ -90,7 +90,12 @@ export function RoomFinishedView({ room }: { room: Room }) {
                 .filter(Boolean)
                 .join(' ')}
             >
-              <ItemArt seed={row.itemId} label={row.itemName} variant="thumb" />
+              <ItemArt
+                seed={row.itemId}
+                label={row.itemName}
+                src={row.imageUrl}
+                variant="thumb"
+              />
               <div className={styles.resumeText}>
                 <span className={styles.resumeName}>{row.itemName}</span>
                 <span className={styles.resumeDetail}>{row.detail}</span>

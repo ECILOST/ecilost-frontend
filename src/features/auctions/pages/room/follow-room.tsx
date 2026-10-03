@@ -87,6 +87,7 @@ export function FollowRoomView({ room }: { room: Room }) {
                   <ItemArt
                     seed={round.itemId}
                     label={round.itemName}
+                    src={round.imageUrl}
                     variant="hero"
                     dimmed
                     className={styles.followArt}

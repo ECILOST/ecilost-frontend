@@ -30,11 +30,12 @@ export function useWallet() {
     queryFn: () => wallet.mine(),
     enabled: principal?.canBid === true,
     /*
-     * El saldo solo cambia cuando un funcionario recarga, que pasa en otra sesion y no se
-     * entera esta. Media hora evita repetir un alta idempotente en cada pantalla sin dejar
-     * el numero congelado toda la sesion.
+     * El saldo cambia fuera de esta sesion: una recarga del funcionario, la liberacion al
+     * ser superado, la liquidacion al cerrar una ronda o la puja automatica. La sala en vivo
+     * lo relee cuando pasa algo de eso; fuera de ella, medio minuto basta para no mostrar un
+     * numero viejo al cambiar de pantalla.
      */
-    staleTime: 30 * 60 * 1000,
+    staleTime: 30 * 1000,
     // Que falle la billetera no puede tumbar el catalogo: la cabecera simplemente no
     // enseña el saldo.
     retry: false,

@@ -259,6 +259,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                 <ItemArt
                   seed={round.itemId}
                   label={round.itemName}
+                  src={round.imageUrl}
                   variant="hero"
                   className={styles.art}
                 >
@@ -374,6 +375,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
             pending={placeBid.isPending || buyNow.isPending}
             itemId={round.itemId}
             itemName={round.itemName}
+            imageUrl={round.imageUrl}
             myHighestBid={round.myHighestBid}
             available={available}
           />
@@ -382,6 +384,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
             onClose={() => setInsufficient(null)}
             itemId={round.itemId}
             itemName={round.itemName}
+            imageUrl={round.imageUrl}
             available={available ?? 0}
           />
         </>
@@ -436,6 +439,7 @@ function OutcomeScreens({
     onClose,
     itemId: round.itemId,
     itemName: round.itemName,
+    imageUrl: round.imageUrl,
   };
   const myBids = (
     <Link className={buttonClass('secondary', 'lg')} to={routes.myBids}>
@@ -537,7 +541,7 @@ function OutcomeScreens({
         {...common}
         tone="yellow"
         heading="¡Últimos segundos!"
-        subtitle="La subasta está por finalizar. Una puja ahora extiende el reloj 10 segundos."
+        subtitle="La subasta está por finalizar. Una puja ahora extiende el cierre hasta 1 minuto."
         actions={
           <>
             <Button variant="bid" size="lg" onClick={() => onBid(next)}>

@@ -163,6 +163,18 @@ describe('createHttpAuctionGateway', () => {
     ]);
   });
 
+  it('cada ronda trae la primera foto del objeto para pintarla en la sala', async () => {
+    const { gateway } = setup(room({ isParticipant: true }));
+
+    const result = await gateway.room('room-1');
+
+    expect(result.rounds.map((r) => r.imageUrl)).toEqual([
+      'https://blob/item-1.png',
+      // Los lotes no tienen foto propia.
+      null,
+    ]);
+  });
+
   it('registrarse pide el cupo y devuelve la sala actualizada', async () => {
     const { gateway, http } = setup(room({ isParticipant: true, admittedCount: 4 }));
 

@@ -85,7 +85,7 @@ export function createHttpAuctionGateway(deps: {
       admitted: detail.admittedCount,
       isParticipant: detail.isParticipant,
       rounds: detail.rounds.map((round, index) =>
-        toRound(round, infos[index].name),
+        toRound(round, infos[index]),
       ),
       serverTime: detail.serverTime,
     };
@@ -206,6 +206,7 @@ export function createHttpAuctionGateway(deps: {
         return {
           itemId: round.entries[0].catalogId,
           itemName: room.rounds[index].itemName,
+          imageUrl: room.rounds[index].imageUrl,
           position: round.position,
           outcome,
           amount: won ? price : mine,
@@ -306,6 +307,7 @@ export function createHttpAuctionGateway(deps: {
               id: `${detail.id}.${round.id}`,
               itemId: `${detail.id}.${round.id}`,
               itemName: info.name,
+              imageUrl: info.imageUrl,
               roomId: detail.id,
               detail: `${detail.name} · Objeto ${round.position} de ${detail.rounds.length} · ${closed ? 'finalizado' : 'en curso'}`,
               amount: status === 'WON' ? price : mine,
@@ -402,13 +404,14 @@ function toAutoBid(detail: AutoBidDetail | null): AutoBid {
   };
 }
 
-function toRound(round: RoundDetail, itemName: string): Round {
+function toRound(round: RoundDetail, info: EntryInfo): Round {
   const entry = round.entries[0];
   return {
     id: round.id,
     position: round.position,
     itemId: entry.catalogId,
-    itemName,
+    itemName: info.name,
+    imageUrl: info.imageUrl,
     status: round.status,
     basePrice: Number(round.startingPrice),
     currentPrice: Number(round.currentPrice),

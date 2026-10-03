@@ -18,12 +18,14 @@ function Frame({
   onClose,
   itemId,
   itemName,
+  imageUrl,
   children,
 }: {
   title: string;
   onClose: () => void;
   itemId: string;
   itemName: string;
+  imageUrl?: string | null;
   children: ReactNode;
 }) {
   return (
@@ -43,6 +45,7 @@ function Frame({
         <ItemArt
           seed={itemId}
           label={itemName}
+          src={imageUrl}
           variant="plain"
           className={styles.art}
         />
@@ -65,6 +68,7 @@ export function ConfirmBidDialog({
   pending,
   itemId,
   itemName,
+  imageUrl,
   myHighestBid,
   available,
 }: {
@@ -74,6 +78,7 @@ export function ConfirmBidDialog({
   pending: boolean;
   itemId: string;
   itemName: string;
+  imageUrl?: string | null;
   myHighestBid: number | null;
   /** `null` si la billetera no respondio: se confirma sin cuentas en lugar de inventarlas. */
   available: number | null;
@@ -91,6 +96,7 @@ export function ConfirmBidDialog({
           onClose={onClose}
           itemId={itemId}
           itemName={itemName}
+          imageUrl={imageUrl}
         >
           <div className={styles.box}>
             <p className={styles.boxTitle}>{itemName}</p>
@@ -147,12 +153,14 @@ export function InsufficientDialog({
   onClose,
   itemId,
   itemName,
+  imageUrl,
   available,
 }: {
   intent: BidIntent | null;
   onClose: () => void;
   itemId: string;
   itemName: string;
+  imageUrl?: string | null;
   available: number;
 }) {
   return (
@@ -168,6 +176,7 @@ export function InsufficientDialog({
           onClose={onClose}
           itemId={itemId}
           itemName={itemName}
+          imageUrl={imageUrl}
         >
           <p className={styles.alert}>Saldo insuficiente</p>
           <p className={styles.alertText}>

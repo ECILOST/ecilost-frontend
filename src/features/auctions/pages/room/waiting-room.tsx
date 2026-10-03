@@ -108,6 +108,7 @@ export function WaitingRoomView({ room }: { room: Room }) {
                   <ItemArt
                     seed={round.itemId}
                     label={round.itemName}
+                    src={round.imageUrl}
                     variant="thumb"
                   />
                   <span className={styles.orderName}>{round.itemName}</span>
