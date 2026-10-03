@@ -3,7 +3,17 @@ import { io, type Socket } from 'socket.io-client';
 /** Lo que el canal de ecilost-engagement-service empuja sobre una sala. */
 export type RoomEvent =
   | { name: 'round.price'; roundId: string; sequence: number }
-  | { name: 'round.activated' | 'round.closed' | 'bid.outbid' | 'round.won'; roundId: string }
+  | {
+      name:
+        | 'round.activated'
+        | 'round.closed'
+        | 'round.extended'
+        | 'bid.outbid'
+        | 'round.won';
+      roundId: string;
+    }
+  /** La sala empezo o termino (HU-18): no es de ninguna ronda. */
+  | { name: 'room.status'; status: string }
   /** El canal se reconecto: lo que se tenia puede estar vencido. */
   | { name: 'resync' };
 
@@ -17,7 +27,13 @@ export interface RealtimeChannel {
   joinRoom(roomId: string, listener: (event: RoomEvent) => void): () => void;
 }
 
-const ROOM_EVENTS = ['round.price', 'round.activated', 'round.closed'] as const;
+const ROOM_EVENTS = [
+  'round.price',
+  'round.activated',
+  'round.closed',
+  'round.extended',
+  'room.status',
+] as const;
 const PERSONAL_EVENTS = ['bid.outbid', 'round.won'] as const;
 
 /** Cuantos `eventId` se recuerdan para descartar reemisiones. */
@@ -28,6 +44,7 @@ interface Payload {
   roomId?: string;
   roundId?: string;
   sequence?: string;
+  status?: string;
 }
 
 /**
@@ -80,21 +97,28 @@ export function createSocketRealtimeChannel({
 
     for (const name of [...ROOM_EVENTS, ...PERSONAL_EVENTS]) {
       socket.on(name, (payload: Payload) => {
-        if (!payload.roomId || !payload.roundId) return;
+        if (!payload.roomId) return;
+        if (name !== 'room.status' && !payload.roundId) return;
         // El mismo evento llega a la sala y al canal personal: se entrega una sola vez por
         // nombre, asi que la llave es nombre + eventId.
         if (!firstTime(payload.eventId && `${name}:${payload.eventId}`)) return;
 
-        dispatch(
-          payload.roomId,
-          name === 'round.price'
-            ? { name, roundId: payload.roundId, sequence: Number(payload.sequence ?? 0) }
-            : { name, roundId: payload.roundId },
-        );
+        dispatch(payload.roomId, toRoomEvent(name, payload));
       });
     }
 
     return socket;
+  }
+
+  function toRoomEvent(
+    name: (typeof ROOM_EVENTS)[number] | (typeof PERSONAL_EVENTS)[number],
+    payload: Payload,
+  ): RoomEvent {
+    const roundId = payload.roundId ?? '';
+    if (name === 'room.status') return { name, status: payload.status ?? '' };
+    if (name === 'round.price')
+      return { name, roundId, sequence: Number(payload.sequence ?? 0) };
+    return { name, roundId };
   }
 
   return {

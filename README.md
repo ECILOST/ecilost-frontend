@@ -117,5 +117,21 @@ Implementado de punta a punta: sesion con Google, guards por capacidad, catalogo
 y ficha con multimedia (HU-08).
 
 Pendiente, siguiendo la misma estructura: formulario de registro y edicion de objetos, subida
-de multimedia (HU-07, el puerto y el adaptador ya estan en `features/media`), lotes, y las
-salas de subasta cuando exista `ecilost-auction-service`.
+de multimedia (HU-07, el puerto y el adaptador ya estan en `features/media`) y lotes.
+
+### Salas en vivo (HU-18, HU-19, HU-22, HU-23)
+
+La sala la gobierna el reloj de `ecilost-auction-service`; la interfaz solo pinta y escucha:
+
+- **Estado inicial** por HTTP (`GET /rooms/:id` y `GET /rooms/:id/state`), y despues cada
+  evento del canal `/realtime` de engagement (`round.price`, `round.extended`,
+  `round.activated`, `round.closed`, `room.status`) dispara una relectura. Al reconectar se
+  relee todo; un sondeo lento cubre lo que se pierda.
+- **Contador**: `endsAt` del servidor corregido con `serverTime`. Llegar a cero no cierra nada;
+  la ronda cambia cuando el servidor lo anuncia. Una extension anti-sniping mueve el contador al
+  instante y muestra "Cierre extendido".
+- **Sala de espera**: quien esta inscrito escucha el canal y entra a la sala en cuanto empieza.
+- **Puja automatica**: `PUT /rounds/:id/auto-bid` con el limite; el panel muestra si esta
+  activa o por que se detuvo (limite alcanzado o saldo insuficiente).
+- **Sala terminada**: se muestra el resumen y desaparecen las acciones de puja; auction rechaza
+  igual cualquier puja tardia.

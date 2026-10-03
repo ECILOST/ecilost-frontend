@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
-import type { RoomDetail, RoundDetail } from '@/features/rooms/model/room';
+import type { AutoBidDetail, RoomDetail, RoundDetail } from '@/features/rooms/model/room';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
 import { createHttpAuctionGateway } from './http-auction.gateway';
@@ -47,7 +47,7 @@ const room = (overrides: Partial<RoomDetail> = {}): RoomDetail => ({
 
 const SERVER_TIME = '2030-10-01T21:01:00.000Z';
 
-function setup(detail: RoomDetail = room()) {
+function setup(detail: RoomDetail = room(), state: { autoBid: AutoBidDetail | null } = { autoBid: null }) {
   const http = {
     baseUrl: '/api/auction',
     get: vi.fn((path: string) =>
@@ -55,14 +55,19 @@ function setup(detail: RoomDetail = room()) {
         path === '/rooms'
           ? [{ id: detail.id }]
           : path.endsWith('/state')
-            ? { serverTime: SERVER_TIME }
+            ? { serverTime: SERVER_TIME, autoBid: state.autoBid }
             : detail,
       ),
     ),
     post: vi.fn(() => Promise.resolve({ alreadyAdmitted: false })),
     patch: vi.fn(),
+    put: vi.fn(() => Promise.resolve({})),
     delete: vi.fn(),
-  } as unknown as HttpClient & { get: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn> };
+  } as unknown as HttpClient & {
+    get: ReturnType<typeof vi.fn>;
+    post: ReturnType<typeof vi.fn>;
+    put: ReturnType<typeof vi.fn>;
+  };
   const items = {
     findById: vi.fn(() =>
       Promise.resolve({
@@ -230,6 +235,52 @@ describe('createHttpAuctionGateway', () => {
       expect(live.round?.id).toBe('round-2');
     });
 
+    it('trae la puja automatica de quien participa desde el estado de la sala (HU-22)', async () => {
+      const { gateway } = setup(activeRoom(true), {
+        autoBid: { enabled: true, maximumAmount: '90000.00', stopped: true, stoppedReason: 'INSUFFICIENT_FUNDS' },
+      });
+
+      const live = await gateway.liveRoom('room-1');
+
+      expect(live.autoBid).toEqual({ enabled: true, limit: 90000, stopped: true, stoppedReason: 'INSUFFICIENT_FUNDS' });
+    });
+
+    it('sin puja automatica declarada la muestra apagada', async () => {
+      const { gateway } = setup(activeRoom(true));
+      const live = await gateway.liveRoom('room-1');
+      expect(live.autoBid).toEqual({ enabled: false, limit: 0, stopped: false, stoppedReason: null });
+    });
+
+    it('quien solo sigue la sala cuenta con la hora que trae la sala, no con su reloj', async () => {
+      const { gateway } = setup({ ...activeRoom(false), serverTime: SERVER_TIME });
+      const live = await gateway.liveRoom('room-1');
+      expect(live.serverTime).toBe(SERVER_TIME);
+      expect(live.room.serverTime).toBe(SERVER_TIME);
+    });
+
+    it('declara el limite de la puja automatica sobre la ronda activa', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+
+      const live = await gateway.setAutoBid('room-1', { enabled: true, limit: 90000 });
+
+      expect(http.put).toHaveBeenCalledWith('/rounds/round-2/auto-bid', { enabled: true, maximumAmount: 90000 });
+      expect(live.round?.id).toBe('round-2');
+    });
+
+    it('desactivar la puja automatica no envia limite', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+      await gateway.setAutoBid('room-1', { enabled: false, limit: 90000 });
+      expect(http.put).toHaveBeenCalledWith('/rounds/round-2/auto-bid', { enabled: false });
+    });
+
+    it('sin ronda en curso no declara la puja automatica', async () => {
+      const { gateway, http } = setup();
+      await expect(gateway.setAutoBid('room-1', { enabled: true, limit: 90000 })).rejects.toSatisfy(
+        (error: unknown) => error instanceof ApiError && error.status === 409,
+      );
+      expect(http.put).not.toHaveBeenCalled();
+    });
+
     it('sin ronda en curso no envia la puja', async () => {
       const { gateway, http } = setup();
 
@@ -314,6 +365,18 @@ describe('createHttpAuctionGateway', () => {
       await new Promise((resolve) => setTimeout(resolve, 20));
 
       expect(detailReads()).toBe(1);
+    });
+
+    it('la extension del cierre y el fin de la sala tambien releen el estado (HU-18, HU-23)', async () => {
+      const { gateway, emit, detailReads } = withChannel();
+      const listener = vi.fn();
+      gateway.subscribe('room-1', listener);
+
+      emit({ name: 'round.extended', roundId: 'round-1' });
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledTimes(1));
+      emit({ name: 'room.status', status: 'CLOSED' });
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledTimes(2));
+      expect(detailReads()).toBe(2);
     });
 
     it('dejar de escuchar suelta la sala del canal', () => {

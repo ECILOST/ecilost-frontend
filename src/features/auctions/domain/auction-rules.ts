@@ -11,6 +11,15 @@ export const BID_INCREMENT = 100;
 /** Por debajo de este margen el reloj pasa a "ultimos segundos". */
 export const LAST_SECONDS_MS = 10_000;
 
+/**
+ * Anti-sniping (HU-23): una puja aceptada cuando falta menos que esto lleva el cierre a
+ * "ahora + este margen". Es la regla de ecilost-auction-service; aqui solo se avisa.
+ */
+export const ANTI_SNIPING_WINDOW_MS = 60_000;
+
+/** Cuanto se deja a la vista el aviso de que el cierre se extendio. */
+export const EXTENSION_NOTICE_MS = 6_000;
+
 export function nextBidFor(currentPrice: number): number {
   return currentPrice + BID_INCREMENT;
 }

@@ -8,6 +8,7 @@ import { ScreenHeader } from '@/shared/components/ui/screen-header';
 import { StatBox } from '@/shared/components/ui/stat-box';
 import { formatCountdown } from '../../domain/auction-rules';
 import { useCountdown } from '../../hooks/use-countdown';
+import { useLiveRoom } from '../../hooks/use-live-room';
 import { useJoinRoom } from '../../hooks/use-room';
 import type { Room } from '../../model/auction';
 import styles from './room.module.css';
@@ -15,10 +16,15 @@ import styles from './room.module.css';
 /**
  * Sala programada: cuenta atras, aforo, orden de los objetos y "Unirme". Solo quien entra
  * antes del inicio puede pujar, y eso se dice arriba, en amarillo, no en la letra pequeña.
+ *
+ * La cuenta atras solo pinta: la sala la abre el servidor a su hora (HU-18). Quien ya esta
+ * inscrito escucha el canal en vivo y pasa a la sala en cuanto llega el inicio; los demas se
+ * enteran con la relectura periodica de la sala.
  */
 export function WaitingRoomView({ room }: { room: Room }) {
   const join = useJoinRoom(room.id);
-  const remaining = useCountdown(room.startsAt);
+  useLiveRoom(room.id, room.isParticipant);
+  const remaining = useCountdown(room.startsAt, room.serverTime);
   const full = room.admitted >= room.capacity;
 
   return (
