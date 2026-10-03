@@ -20,6 +20,7 @@ function clientThat(
     get: answer('GET') as HttpClient['get'],
     post: answer('POST') as HttpClient['post'],
     patch: vi.fn(),
+    put: vi.fn(),
     delete: vi.fn(),
   };
 }
