@@ -32,7 +32,8 @@ describe('createSocketRealtimeChannel', () => {
 
   it('entra a la sala al escucharla', () => {
     listen();
-    expect(socket.emit).toHaveBeenCalledWith('room.join', { roomId: 'room-1' });
+    // Con el token vigente: el del handshake vence y la conexion puede durar mas.
+    expect(socket.emit).toHaveBeenCalledWith('room.join', { roomId: 'room-1', token: 'jwt' });
   });
 
   it('entrega la extension del cierre como evento de la ronda (HU-23)', () => {
