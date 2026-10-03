@@ -45,6 +45,8 @@ export interface Round {
   position: number;
   itemId: string;
   itemName: string;
+  /** Primera foto del objeto en catalog, o `null` si no tiene (o es un lote). */
+  imageUrl: string | null;
   status: RoundStatus;
   basePrice: number;
   currentPrice: number;
@@ -127,6 +129,7 @@ export interface MyBid {
   id: string;
   itemId: string;
   itemName: string;
+  imageUrl?: string | null;
   roomId: string;
   detail: string;
   amount: number;
@@ -160,6 +163,7 @@ export interface RoomSummary {
   rows: Array<{
     itemId: string;
     itemName: string;
+    imageUrl?: string | null;
     position: number;
     outcome: RoomOutcome;
     amount: number | null;

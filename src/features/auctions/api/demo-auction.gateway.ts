@@ -849,6 +849,7 @@ export function createDemoAuctionGateway(
       position: target.position,
       itemId: target.item.id,
       itemName: target.item.name,
+      imageUrl: null,
       status: target.status,
       basePrice: target.item.basePrice,
       currentPrice: target.currentPrice,

@@ -18,6 +18,7 @@ export function OutcomeDialog({
   subtitle,
   itemId,
   itemName,
+  imageUrl,
   confetti = false,
   children,
   actions,
@@ -29,6 +30,7 @@ export function OutcomeDialog({
   subtitle?: ReactNode;
   itemId: string;
   itemName: string;
+  imageUrl?: string | null;
   confetti?: boolean;
   children?: ReactNode;
   actions: ReactNode;
@@ -51,6 +53,7 @@ export function OutcomeDialog({
           <ItemArt
             seed={itemId}
             label={itemName}
+            src={imageUrl}
             variant="plain"
             className={styles.art}
           />
