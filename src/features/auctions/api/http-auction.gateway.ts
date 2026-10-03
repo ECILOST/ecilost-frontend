@@ -2,7 +2,9 @@ import { ITEM_CONDITION_LABELS } from '@/features/catalog/domain/item-condition'
 import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import type {
+  AutoBidDetail,
   RoomDetail,
+  RoomStateDetail,
   RoomSummary as RoomListing,
   RoundDetail,
   RoundEntry,
@@ -12,6 +14,7 @@ import { ApiError } from '@/shared/api/problem-details';
 import { minimumBid } from '../domain/auction-rules';
 import type {
   AppNotification,
+  AutoBid,
   AuctionItem,
   AuctionItemStatus,
   LiveRoom,
@@ -50,9 +53,9 @@ interface EntryInfo {
  * llevan puntos).
  *
  * Cubre descubrir salas, registrarse, la sala en vivo, la puja manual y el resumen al
- * cerrar (HU-15 a HU-21 y HU-28), con el canal en vivo y la bandeja de
- * ecilost-engagement-service (HU-26, HU-27), y "Mis pujas". Compra inmediata y puja
- * automatica fallan con un 501 explicito en vez de fingir datos.
+ * cerrar (HU-15 a HU-21 y HU-28), la puja automatica (HU-22), con el canal en vivo y la
+ * bandeja de ecilost-engagement-service (HU-26, HU-27), y "Mis pujas". La compra inmediata
+ * falla con un 501 explicito en vez de fingir datos.
  */
 export function createHttpAuctionGateway(deps: {
   http: HttpClient;
@@ -84,6 +87,7 @@ export function createHttpAuctionGateway(deps: {
       rounds: detail.rounds.map((round, index) =>
         toRound(round, infos[index].name),
       ),
+      serverTime: detail.serverTime,
     };
   }
 
@@ -96,16 +100,17 @@ export function createHttpAuctionGateway(deps: {
   }
 
   /**
-   * Lo que hay que pintar de una sala en curso. La hora del servidor sale de
-   * `GET /rooms/:id/state`, que solo responde a quien participa; quien solo sigue la sala
-   * usa su reloj, porque no puede pujar y un desfase no le cuesta nada.
+   * Lo que hay que pintar de una sala en curso. La hora del servidor y la puja automatica
+   * salen de `GET /rooms/:id/state`, que solo responde a quien participa; quien solo sigue
+   * la sala toma la hora que trae la sala misma. El reloj local nunca decide nada.
    */
   async function live(roomId: string): Promise<LiveRoom> {
     const detail = await roomDetail(roomId);
-    const serverTime = detail.isParticipant
-      ? (await http.get<{ serverTime: string }>(`/rooms/${roomId}/state`))
-          .serverTime
-      : new Date().toISOString();
+    const state = detail.isParticipant
+      ? await http.get<RoomStateDetail>(`/rooms/${roomId}/state`)
+      : null;
+    const serverTime =
+      state?.serverTime ?? detail.serverTime ?? new Date().toISOString();
     const room = await toRoom(detail);
 
     return {
@@ -114,7 +119,7 @@ export function createHttpAuctionGateway(deps: {
       // El servicio no publica todavia el historial de pujas ni la actividad de la sala.
       bids: [],
       activity: [],
-      autoBid: { enabled: false, limit: 0, stopped: false },
+      autoBid: toAutoBid(state?.autoBid ?? null),
       participants: detail.admittedCount,
       serverTime,
     };
@@ -163,7 +168,24 @@ export function createHttpAuctionGateway(deps: {
     },
 
     buyNow: () => notConnected(),
-    setAutoBid: () => notConnected(),
+
+    /**
+     * `PUT /rounds/:id/auto-bid` sobre la ronda activa (HU-22). El servicio valida el limite
+     * contra la puja minima y el saldo; si no alcanza responde 409 y no se guarda nada.
+     */
+    async setAutoBid(roomId: string, config: { enabled: boolean; limit: number }) {
+      const detail = await roomDetail(roomId);
+      const active = detail.rounds.find((round) => round.status === 'ACTIVE');
+      if (!active) throw conflict('No hay una ronda en curso en esta sala.');
+
+      await http.put(
+        `/rounds/${active.id}/auto-bid`,
+        config.enabled
+          ? { enabled: true, maximumAmount: config.limit }
+          : { enabled: false },
+      );
+      return live(roomId);
+    },
     /**
      * Lo que paso en cada ronda para quien consulta, a partir del resultado que auction
      * registra al cerrar: gano si la ronda se adjudico y lideraba; perdio si pujo y no
@@ -370,6 +392,16 @@ function createEntryResolver({
   };
 }
 
+function toAutoBid(detail: AutoBidDetail | null): AutoBid {
+  if (!detail) return { enabled: false, limit: 0, stopped: false, stoppedReason: null };
+  return {
+    enabled: detail.enabled,
+    limit: detail.maximumAmount === null ? 0 : Number(detail.maximumAmount),
+    stopped: detail.stopped,
+    stoppedReason: detail.stoppedReason,
+  };
+}
+
 function toRound(round: RoundDetail, itemName: string): Round {
   const entry = round.entries[0];
   return {
@@ -456,7 +488,7 @@ function notConnected(): Promise<never> {
       title: 'Todavía no disponible',
       status: 501,
       detail:
-        'La compra inmediata y la puja automática todavía no están conectadas con el servicio de subastas.',
+        'La compra inmediata todavía no está conectada con el servicio de subastas.',
     }),
   );
 }

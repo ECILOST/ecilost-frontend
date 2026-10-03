@@ -54,7 +54,10 @@ export function AutoBidPanel({
       ? {
           tone: styles.stopped,
           text: 'Puja automática detenida',
-          hint: 'La siguiente puja pasa tu límite',
+          hint:
+            autoBid.stoppedReason === 'INSUFFICIENT_FUNDS'
+              ? 'No tenías ECICoin disponibles para la siguiente puja'
+              : 'La siguiente puja pasa tu límite',
         }
       : {
           tone: styles.on,

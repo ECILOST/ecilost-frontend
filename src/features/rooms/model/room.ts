@@ -62,6 +62,23 @@ export interface RoundDetail {
 /** `GET /rooms/:id`: la sala con sus rondas en orden. */
 export interface RoomDetail extends Omit<RoomSummary, 'roundCount'> {
   rounds: RoundDetail[];
+  /** Hora del servidor al responder: corrige el reloj local del contador. */
+  serverTime?: string;
+}
+
+/** La puja automatica de quien consulta en la ronda vigente (HU-22). */
+export interface AutoBidDetail {
+  enabled: boolean;
+  /** Decimal como texto, igual que los demas importes. */
+  maximumAmount: string | null;
+  stopped: boolean;
+  stoppedReason: 'LIMIT_REACHED' | 'INSUFFICIENT_FUNDS' | null;
+}
+
+/** `GET /rooms/:id/state`: lo vigente para quien participa. */
+export interface RoomStateDetail {
+  serverTime: string;
+  autoBid: AutoBidDetail | null;
 }
 
 export const ROOM_NAME_MAX = 80;

@@ -78,6 +78,8 @@ export interface Room {
   /** Cierto si quien mira fue admitido antes del inicio y por tanto puede pujar. */
   isParticipant: boolean;
   rounds: Round[];
+  /** Hora del servidor al leer la sala, para contar hacia su inicio sin el reloj local. */
+  serverTime?: string;
 }
 
 export interface Bid {
@@ -102,6 +104,8 @@ export interface AutoBid {
   limit: number;
   /** Se detuvo porque la siguiente puja pasaba del limite. */
   stopped: boolean;
+  /** Por que se detuvo: limite alcanzado o saldo insuficiente al dispararse. */
+  stoppedReason?: 'LIMIT_REACHED' | 'INSUFFICIENT_FUNDS' | null;
 }
 
 /** Todo lo que pinta la sala en vivo. Es lo que empuja el canal en tiempo real. */
