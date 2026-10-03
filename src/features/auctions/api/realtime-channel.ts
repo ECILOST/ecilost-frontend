@@ -87,10 +87,12 @@ export function createSocketRealtimeChannel({
     });
 
     // Al (re)conectar se vuelve a entrar a cada sala y se pide releer: los eventos que
-    // pasaron mientras no habia conexion no se van a recibir.
+    // pasaron mientras no habia conexion no se van a recibir. Cada `room.join` lleva el token
+    // vigente: engagement lo usa para preguntarle a auction por la sala, y el del handshake
+    // vence a los quince minutos aunque la conexion siga abierta.
     socket.on('connect', () => {
       for (const roomId of listeners.keys()) {
-        socket?.emit('room.join', { roomId });
+        socket?.emit('room.join', { roomId, token: getToken() });
         dispatch(roomId, { name: 'resync' });
       }
     });
@@ -128,7 +130,8 @@ export function createSocketRealtimeChannel({
       if (!roomListeners) {
         roomListeners = new Set();
         listeners.set(roomId, roomListeners);
-        if (connection.connected) connection.emit('room.join', { roomId });
+        if (connection.connected)
+          connection.emit('room.join', { roomId, token: getToken() });
       }
       roomListeners.add(listener);
 
