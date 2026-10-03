@@ -32,6 +32,8 @@ import {
 } from '../../components/room-panels';
 import { CustomBidForm } from '../../components/custom-bid-form';
 import {
+  ANTI_SNIPING_WINDOW_MS,
+  EXTENSION_NOTICE_MS,
   LAST_SECONDS_MS,
   formatCountdown,
   roundProgress,
@@ -90,6 +92,8 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     round: Round;
   } | null>(null);
   const [editingLimit, setEditingLimit] = useState(false);
+  /** Cierre extendido por anti-sniping: se avisa un momento, el contador ya lo refleja. */
+  const [extended, setExtended] = useState(false);
 
   const round = live?.round ?? null;
   const remaining = useCountdown(round?.endsAt ?? null, live?.serverTime);
@@ -101,6 +105,15 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     const before = previous.current;
     previous.current = live;
     if (!live || !before) return;
+
+    if (
+      before.round?.endsAt &&
+      live.round?.endsAt &&
+      before.round.id === live.round.id &&
+      new Date(live.round.endsAt) > new Date(before.round.endsAt)
+    ) {
+      setExtended(true);
+    }
 
     const won = live.room.rounds.find(
       (candidate) =>
@@ -131,6 +144,12 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
       setOutcome({ kind: 'limit', round: live.round });
     }
   }, [live]);
+
+  useEffect(() => {
+    if (!extended) return;
+    const timer = setTimeout(() => setExtended(false), EXTENSION_NOTICE_MS);
+    return () => clearTimeout(timer);
+  }, [extended, round?.endsAt]);
 
   useEffect(() => {
     if (!round || remaining <= 0 || remaining > LAST_SECONDS_MS) return;
@@ -264,6 +283,15 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                     {round.myHighestBid !== null ? (
                       <span className={styles.myBid}>
                         Tu puja más alta: {formatCoins(round.myHighestBid)}
+                      </span>
+                    ) : null}
+                    {extended ? (
+                      <Pill tone="yellow" live>
+                        Cierre extendido: {formatCountdown(remaining)}
+                      </Pill>
+                    ) : remaining > 0 && remaining < ANTI_SNIPING_WINDOW_MS ? (
+                      <span className={styles.myBid}>
+                        Una puja ahora extiende el cierre hasta 1 minuto
                       </span>
                     ) : null}
                     {round.leading ? (
