@@ -1,5 +1,6 @@
 import { routes } from '@/app/routes';
 import { ErrorState } from '@/shared/components/error-state';
+import { Brand } from '@/shared/components/shell/brand';
 import { Button } from '@/shared/components/ui/button';
 import { CoinAmount } from '@/shared/components/ui/coin';
 import { ItemArt } from '@/shared/components/ui/item-art';
@@ -48,11 +49,14 @@ export function WaitingRoomView({ room }: { room: Room }) {
       <div className={styles.page}>
         <div className={`${styles.grid} ${styles.waitGrid}`}>
           <div className={styles.main}>
-            <ItemArt
-              seed={room.id}
-              label="Campus universitario"
-              variant="plain"
-            />
+            {/*
+              Logo provisional mientras no haya uno definitivo: el logotipo de la cabecera
+              en grande. Antes era un marcador con el texto fijo "Campus universitario".
+              Es decorativo; el nombre de la sala va justo debajo.
+            */}
+            <div className={styles.waitBanner} aria-hidden="true">
+              <Brand size="lg" asLink={false} />
+            </div>
             <h2 className={styles.waitTitle}>{room.title}</h2>
             <p className={styles.warning}>
               Solo podrás participar si ingresas antes del inicio.

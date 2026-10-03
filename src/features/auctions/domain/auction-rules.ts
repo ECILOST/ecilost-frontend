@@ -38,6 +38,20 @@ export function minimumBid(round: {
     : round.startingPrice;
 }
 
+/**
+ * Lo que una puja suma a lo reservado en wallet. Wallet guarda una sola reserva por persona
+ * y ronda, y cada puja la reemplaza por su monto: quien ya lidera solo compromete la
+ * diferencia con su puja vigente (de 500 a 600 reserva 100 mas, no 600). Quien fue superado
+ * ya tiene su reserva liberada y compromete el monto entero.
+ */
+export function coinsToCommit(
+  amount: number,
+  round: { leading: boolean; myHighestBid: number | null },
+): number {
+  if (!round.leading || round.myHighestBid === null) return amount;
+  return Math.max(0, amount - round.myHighestBid);
+}
+
 const pad = (value: number) => String(value).padStart(2, '0');
 
 /** `08:21` bajo una hora, `02:34:16` por encima. Nunca negativo. */

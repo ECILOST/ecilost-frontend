@@ -216,6 +216,31 @@
   grid-template-columns: 1.25fr 1fr;
 }
 
+/* Logo provisional sobre las manchas de la marca, del mismo alto que el antiguo marcador. */
+.waitBanner {
+  display: grid;
+  place-items: center;
+  height: 250px;
+  overflow: hidden;
+  border-radius: var(--r-xl);
+  background:
+    radial-gradient(55% 75% at 12% 18%, color-mix(in srgb, var(--eci-blue) 55%, transparent) 0, transparent 70%),
+    radial-gradient(50% 70% at 90% 85%, color-mix(in srgb, var(--eci-pink) 45%, transparent) 0, transparent 70%),
+    radial-gradient(35% 45% at 80% 15%, color-mix(in srgb, var(--eci-cyan) 35%, transparent) 0, transparent 70%),
+    var(--eci-surface-high);
+}
+
+/* El logotipo trae tamaños fijos; aqui crece con el recuadro y el rayo lo acompaña. */
+.waitBanner > span {
+  font-size: clamp(2.75rem, 9vw, 4.5rem);
+  text-shadow: 0 6px 30px rgb(0 0 0 / 35%);
+}
+
+.waitBanner svg {
+  width: auto;
+  height: 0.9em;
+}
+
 .waitTitle {
   margin-top: 22px;
   font-size: 1.75rem;

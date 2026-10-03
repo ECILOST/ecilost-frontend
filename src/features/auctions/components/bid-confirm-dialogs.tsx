@@ -11,6 +11,11 @@ import styles from './bid-confirm-dialogs.module.css';
 export interface BidIntent {
   kind: 'bid' | 'buy';
   amount: number;
+  /**
+   * Lo que la puja suma a lo ya reservado (ver `coinsToCommit`). Es igual a `amount` salvo
+   * cuando quien lidera mejora su propia puja: entonces solo se reserva la diferencia.
+   */
+  commit: number;
 }
 
 function Frame({
@@ -115,12 +120,21 @@ export function ConfirmBidDialog({
               <span>Saldo disponible</span>
               <strong>{available === null ? '—' : coins(available)}</strong>
             </div>
+            {intent.commit !== intent.amount ? (
+              <div className={styles.line}>
+                <span>
+                  Se reserva ahora (ya tenías{' '}
+                  {coins(intent.amount - intent.commit)})
+                </span>
+                <strong>{coins(intent.commit)}</strong>
+              </div>
+            ) : null}
             <div className={styles.line}>
               <span>
                 Saldo restante tras {buying ? 'la compra' : 'la puja'}
               </span>
               <strong className={styles.cyan}>
-                {available === null ? '—' : coins(available - intent.amount)}
+                {available === null ? '—' : coins(available - intent.commit)}
               </strong>
             </div>
           </div>
@@ -197,7 +211,7 @@ export function InsufficientDialog({
             <div className={styles.line}>
               <span>Te faltan</span>
               <strong className={`${styles.pink} ${styles.big}`}>
-                {coins(intent.amount - available)}
+                {coins(intent.commit - available)}
               </strong>
             </div>
           </div>

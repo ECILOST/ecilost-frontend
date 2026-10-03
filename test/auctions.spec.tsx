@@ -69,8 +69,12 @@ describe('Subastas', () => {
     const confirm = await screen.findByRole('dialog', {
       name: 'Confirmar puja',
     });
+    // En la sala 04 la persona ya lidera con 380: subir a 480 solo reserva 100 mas, asi que
+    // quedan 950 - 100 = 850 (no 950 - 480 = 470, como se calculaba antes).
     expect(confirm).toHaveTextContent('480 ECICoin');
-    expect(confirm).toHaveTextContent('470 ECICoin');
+    expect(confirm).toHaveTextContent('ya tenías 380 ECICoin');
+    expect(confirm).toHaveTextContent('850 ECICoin');
+    expect(confirm).not.toHaveTextContent('470 ECICoin');
 
     await userEvent.click(
       within(confirm).getByRole('button', { name: /confirmar puja/i }),
@@ -103,7 +107,8 @@ describe('Subastas', () => {
   });
 
   it('sin saldo suficiente dice cuanto falta en lugar de enviar la puja', async () => {
-    renderApp({ route: '/salas/sala-04', container: student('350.00') });
+    // Liderando con 380, subir a 480 necesita 100 mas: con 60 disponibles faltan 40.
+    renderApp({ route: '/salas/sala-04', container: student('60.00') });
 
     await userEvent.click(
       await screen.findByRole('button', { name: /pujar 480 ecicoin/i }),
@@ -112,10 +117,33 @@ describe('Subastas', () => {
       name: 'Saldo insuficiente',
     });
     expect(dialog).toHaveTextContent('Te faltan');
-    expect(dialog).toHaveTextContent('130 ECICoin');
+    expect(dialog).toHaveTextContent('40 ECICoin');
     expect(
       within(dialog).getByRole('link', { name: 'Recargar ECICoin' }),
     ).toHaveAttribute('href', '/billetera');
+  });
+
+  it('no bloquea una mejora de la propia puja que si alcanza con el saldo', async () => {
+    // Antes comparaba los 480 enteros contra 350 y decia "saldo insuficiente".
+    renderApp({ route: '/salas/sala-04', container: student('350.00') });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /pujar 480 ecicoin/i }),
+    );
+    expect(
+      await screen.findByRole('dialog', { name: 'Confirmar puja' }),
+    ).toHaveTextContent('250 ECICoin');
+    expect(
+      screen.queryByRole('dialog', { name: 'Saldo insuficiente' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('la sala de espera muestra el logotipo provisional, no el texto "Campus universitario"', async () => {
+    renderApp({ route: '/salas/sala-05', container: student() });
+
+    await screen.findByRole('button', { name: 'Unirme a la sala' });
+    expect(screen.queryByText('Campus universitario')).not.toBeInTheDocument();
+    expect(document.querySelector('[aria-label="ECI Lost"]')).not.toBeNull();
   });
 
   it('quien no entro antes del inicio solo sigue la sala, sin boton de pujar', async () => {

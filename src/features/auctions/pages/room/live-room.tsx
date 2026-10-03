@@ -33,6 +33,7 @@ import {
 import { CustomBidForm } from '../../components/custom-bid-form';
 import {
   ANTI_SNIPING_WINDOW_MS,
+  coinsToCommit,
   EXTENSION_NOTICE_MS,
   LAST_SECONDS_MS,
   formatCountdown,
@@ -162,8 +163,11 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
 
   function start(kind: BidIntent['kind'], amount: number) {
     setOutcome(null);
-    const next = { kind, amount };
-    if (available !== null && amount > available) setInsufficient(next);
+    // Mejorar la propia puja solo reserva la diferencia: compararla entera con el saldo
+    // bloqueaba mejoras que si alcanzaban.
+    const commit = round ? coinsToCommit(amount, round) : amount;
+    const next = { kind, amount, commit };
+    if (available !== null && commit > available) setInsufficient(next);
     else setIntent(next);
   }
 
