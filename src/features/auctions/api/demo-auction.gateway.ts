@@ -78,6 +78,8 @@ interface DemoRound {
   bids: DemoBid[];
   /** Hasta donde llegan los rivales simulados en esta ronda. */
   rivalCap: number;
+  /** Que la cerro, como en el servicio (HU-25). */
+  closeReason?: 'EXPIRED' | 'BUY_NOW';
 }
 
 interface DemoRoom {
@@ -863,6 +865,7 @@ export function createDemoAuctionGateway(
       leading: target.currentBidderId === ME,
       myHighestBid: mine.length ? Math.max(...mine) : null,
       wonByMe: target.status === 'CLOSED' && target.currentBidderId === ME,
+      closeReason: target.status === 'CLOSED' ? (target.closeReason ?? 'EXPIRED') : null,
     };
   }
 
@@ -1014,6 +1017,7 @@ export function createDemoAuctionGateway(
         if (active.item.buyNowPrice === null)
           throw conflict('Este objeto no tiene precio de compra inmediata.');
         recordBid(room, active, ME, active.item.buyNowPrice, now());
+        active.closeReason = 'BUY_NOW';
         active.endsAt = now();
         advance();
         return live(room);

@@ -9,6 +9,8 @@ import {
   createTestContainer,
   walletFixture,
 } from './helpers/fake-gateways';
+import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
+import type { LiveRoom } from '@/features/auctions/model/auction';
 import { renderApp } from './helpers/render-app';
 
 /**
@@ -161,6 +163,48 @@ describe('Subastas', () => {
       ).not.toBeInTheDocument(),
     );
     expect(placeBid).not.toHaveBeenCalled();
+  });
+
+  it('si otro participante compra lo que se estaba viendo, avisa que se vendio por compra inmediata (HU-25)', async () => {
+    // Se mira la sala como la ve otro participante: la compra la hace la demo, pero para
+    // quien mira la ronda no la gano el.
+    const demo = createDemoAuctionGateway({ rivals: false, tickMs: 0 });
+    const asOtherParticipant = (state: LiveRoom): LiveRoom => ({
+      ...state,
+      room: {
+        ...state.room,
+        rounds: state.room.rounds.map((round) =>
+          round.closeReason === 'BUY_NOW'
+            ? { ...round, wonByMe: false, leading: false }
+            : round,
+        ),
+      },
+    });
+    const container = createTestContainer({
+      auth: createFakeAuthGateway(STUDENT),
+      wallet: createFakeWalletGateway({ wallet: walletFixture({ availableBalance: '950.00' }) }),
+      auctions: {
+        ...demo,
+        liveRoom: async (roomId) => asOtherParticipant(await demo.liveRoom(roomId)),
+        subscribe: (roomId, listener) =>
+          demo.subscribe(roomId, (state) => listener(asOtherParticipant(state))),
+      },
+    });
+    renderApp({ route: '/salas/sala-04', container });
+    await screen.findByRole('button', { name: /pujar 480 ecicoin/i });
+
+    await act(async () => {
+      await demo.buyNow('sala-04', 'mochila-negra-round');
+    });
+
+    const sold = await screen.findByRole('dialog', {
+      name: 'Vendido por compra inmediata',
+    });
+    expect(sold).toHaveTextContent('Mochila negra');
+    expect(sold).toHaveTextContent('900');
+    // Lideraba con 380: se le dice que su reserva se libera.
+    expect(sold).toHaveTextContent('Se liberan');
+    expect(screen.queryByRole('dialog', { name: '¡Ganaste!' })).not.toBeInTheDocument();
   });
 
   it('comprar ahora pide confirmacion y compra la ronda que se estaba viendo (HU-24)', async () => {

@@ -17,6 +17,29 @@ export const LAST_SECONDS_MS = 10_000;
  */
 export const ANTI_SNIPING_WINDOW_MS = 60_000;
 
+/**
+ * HU-25: la ronda que se estaba viendo acaba de cerrarse porque otro participante la compro
+ * de inmediato. Devuelve esa ronda tal como quedo cerrada, para avisarlo; si no, `null`.
+ * Quien la compro no recibe este aviso: a el se le dice que gano.
+ */
+export function roundSoldToSomeoneElse<
+  R extends {
+    id: string;
+    status: string;
+    closeReason: string | null;
+    wonByMe: boolean;
+  },
+>(shownBefore: { id: string } | null, roundsNow: R[]): R | null {
+  if (!shownBefore) return null;
+  const closed = roundsNow.find((round) => round.id === shownBefore.id);
+  return closed &&
+    closed.status === 'CLOSED' &&
+    closed.closeReason === 'BUY_NOW' &&
+    !closed.wonByMe
+    ? closed
+    : null;
+}
+
 /** Cuanto se deja a la vista el aviso de que el cierre se extendio. */
 export const EXTENSION_NOTICE_MS = 6_000;
 

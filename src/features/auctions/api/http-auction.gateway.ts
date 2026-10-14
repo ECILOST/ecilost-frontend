@@ -432,6 +432,7 @@ function toRound(round: RoundDetail, info: EntryInfo): Round {
     myHighestBid:
       round.myHighestBid === null ? null : Number(round.myHighestBid),
     wonByMe: round.status === 'CLOSED' && round.isLeading,
+    closeReason: round.closeReason ?? null,
   };
 }
 

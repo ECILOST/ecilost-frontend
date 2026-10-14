@@ -38,6 +38,7 @@ import {
   LAST_SECONDS_MS,
   formatCountdown,
   roundProgress,
+  roundSoldToSomeoneElse,
 } from '../../domain/auction-rules';
 import { useCountdown } from '../../hooks/use-countdown';
 import {
@@ -52,7 +53,7 @@ import styles from './room.module.css';
 /** Duracion base de una ronda, para estimar lo que le queda a la sala. */
 const ROUND_ESTIMATE_MS = 3 * 60_000;
 
-type OutcomeKind = 'winning' | 'outbid' | 'last' | 'won' | 'limit';
+type OutcomeKind = 'winning' | 'outbid' | 'last' | 'won' | 'limit' | 'sold';
 
 const coins = (value: number) => `${formatCoins(value)} ECICoin`;
 
@@ -124,6 +125,12 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     );
     if (won) {
       setOutcome({ kind: 'won', round: won });
+      return;
+    }
+    // HU-25: otro participante compro lo que se estaba viendo; se dice, no solo se salta.
+    const sold = roundSoldToSomeoneElse(before.round, live.room.rounds);
+    if (sold) {
+      setOutcome({ kind: 'sold', round: sold });
       return;
     }
     if (before.round && live.round && before.round.id === live.round.id) {
@@ -584,6 +591,34 @@ function OutcomeScreens({
           </span>
         </OutcomeStrip>
         {price()}
+      </OutcomeDialog>
+    );
+  }
+
+  if (kind === 'sold') {
+    return (
+      <OutcomeDialog
+        {...common}
+        tone="pink"
+        heading="Vendido por compra inmediata"
+        subtitle="Otro participante compró este objeto. La sala continúa con el siguiente."
+        actions={
+          <Button size="lg" onClick={onClose}>
+            Ver siguiente objeto →
+          </Button>
+        }
+      >
+        {round.myHighestBid !== null ? (
+          <OutcomeRow>
+            <OutcomeFigure label="Tu última oferta">
+              {formatCoins(round.myHighestBid)}
+            </OutcomeFigure>
+            <OutcomeFigure label="Tus ECICoin reservados">
+              Se liberan
+            </OutcomeFigure>
+          </OutcomeRow>
+        ) : null}
+        {price('Precio de compra')}
       </OutcomeDialog>
     );
   }
