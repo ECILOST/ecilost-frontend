@@ -110,7 +110,9 @@ export function usePlaceBid(roomId: string) {
 
 export function useBuyNow(roomId: string) {
   const { auctions } = useContainer();
-  return useLiveMutation(roomId, () => auctions.buyNow(roomId));
+  return useLiveMutation(roomId, (roundId: string) =>
+    auctions.buyNow(roomId, roundId),
+  );
 }
 
 export function useAutoBid(roomId: string) {

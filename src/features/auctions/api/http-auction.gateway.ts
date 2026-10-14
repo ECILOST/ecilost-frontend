@@ -167,7 +167,11 @@ export function createHttpAuctionGateway(deps: {
       return live(roomId);
     },
 
-    buyNow: () => notConnected(),
+    async buyNow(roomId: string, roundId: string) {
+      // Sin cuerpo: el precio, el comprador y si la ronda sigue abierta los decide el servicio.
+      await http.post(`/rounds/${roundId}/buy-now`);
+      return live(roomId);
+    },
 
     /**
      * `PUT /rounds/:id/auto-bid` sobre la ronda activa (HU-22). El servicio valida el limite
@@ -425,7 +429,7 @@ function toRound(round: RoundDetail, info: EntryInfo): Round {
     startedAt: round.startedAt,
     endsAt: round.endsAt,
     maximumEndsAt: round.maximumEndsAt,
-    buyNowPrice: null,
+    buyNowPrice: toBuyNowPrice(round),
     leading: round.isLeading,
     myHighestBid:
       round.myHighestBid === null ? null : Number(round.myHighestBid),
@@ -451,7 +455,7 @@ function toAuctionItem(
     status: itemStatus(room, round),
     currentPrice,
     nextBid: minimumBid({ startingPrice, currentPrice, hasBids: round.hasBids }),
-    buyNowPrice: null,
+    buyNowPrice: toBuyNowPrice(round),
     startsAt: room.startsAt,
     endsAt: round.endsAt,
     roundStartedAt: round.startedAt,
@@ -484,16 +488,9 @@ function notFound(detail: string): ApiError {
   });
 }
 
-function notConnected(): Promise<never> {
-  return Promise.reject(
-    new ApiError({
-      type: '/problems/no-disponible',
-      title: 'Todavía no disponible',
-      status: 501,
-      detail:
-        'La compra inmediata todavía no está conectada con el servicio de subastas.',
-    }),
-  );
+/** Decimal como texto, o nada si la ronda no ofrece compra inmediata (HU-24). */
+function toBuyNowPrice(round: RoundDetail): number | null {
+  return round.buyNowPrice == null ? null : Number(round.buyNowPrice);
 }
 
 /**

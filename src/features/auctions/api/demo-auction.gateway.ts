@@ -1002,10 +1002,12 @@ export function createDemoAuctionGateway(
         return live(room);
       }),
 
-    buyNow: (roomId) =>
+    buyNow: (roomId, roundId) =>
       run(() => {
         const room = find(roomId);
         const active = activeRoundFor(room);
+        if (active.id !== roundId)
+          throw conflict('La ronda ya no esta activa.');
         if (active.item.buyNowPrice === null)
           throw conflict('Este objeto no tiene precio de compra inmediata.');
         recordBid(room, active, ME, active.item.buyNowPrice, now());

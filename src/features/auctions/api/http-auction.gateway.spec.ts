@@ -247,6 +247,45 @@ describe('createHttpAuctionGateway', () => {
       expect(live.round?.id).toBe('round-2');
     });
 
+    it('compra de inmediato la ronda que se estaba viendo, sin enviar precio, y devuelve la sala al dia (HU-24)', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+
+      const live = await gateway.buyNow('room-1', 'round-2');
+
+      expect(http.post).toHaveBeenCalledWith('/rounds/round-2/buy-now');
+      expect(live.round?.id).toBe('round-2');
+    });
+
+    it('compra la ronda indicada aunque la sala ya haya pasado a otra: el servicio decide (HU-24)', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+
+      await gateway.buyNow('room-1', 'round-1');
+
+      // No se cambia por la ronda activa: eso compraria otro objeto.
+      expect(http.post).toHaveBeenCalledWith('/rounds/round-1/buy-now');
+    });
+
+    it('si el servicio rechaza la compra, propaga el error sin releer la sala (HU-24)', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+      const rejected = new ApiError({ type: '/problems/conflict', title: 'Conflicto', status: 409, detail: 'No tienes ECICoin disponibles suficientes para la compra inmediata.' });
+      http.post.mockRejectedValueOnce(rejected);
+      http.get.mockClear();
+
+      await expect(gateway.buyNow('room-1', 'round-2')).rejects.toBe(rejected);
+      expect(http.get).not.toHaveBeenCalled();
+    });
+
+    it('publica el precio de compra inmediata de la ronda, o ninguno si no lo tiene (HU-24)', async () => {
+      const detail = activeRoom(true);
+      detail.rounds[1] = { ...detail.rounds[1], buyNowPrice: '80000.00' };
+      const { gateway } = setup(detail);
+
+      expect((await gateway.liveRoom('room-1')).round?.buyNowPrice).toBe(80000);
+      const [first, second] = await gateway.items();
+      expect(first.buyNowPrice).toBeNull();
+      expect(second.buyNowPrice).toBe(80000);
+    });
+
     it('trae la puja automatica de quien participa desde el estado de la sala (HU-22)', async () => {
       const { gateway } = setup(activeRoom(true), {
         autoBid: { enabled: true, maximumAmount: '90000.00', stopped: true, stoppedReason: 'INSUFFICIENT_FUNDS' },
@@ -472,12 +511,9 @@ describe('createHttpAuctionGateway', () => {
     expect(summary.closedAt).toBe('2030-10-01T21:09:00.000Z');
   });
 
-  it('lo que el servicio aun no ofrece falla con 501 explicito en vez de inventar datos', async () => {
+  it('lo que el servicio aun no ofrece responde vacio en vez de inventar datos', async () => {
     const { gateway } = setup();
 
-    await expect(gateway.buyNow('room-1')).rejects.toSatisfy(
-      (error: unknown) => error instanceof ApiError && error.status === 501,
-    );
     await expect(gateway.myBids()).resolves.toEqual([]);
   });
 });
