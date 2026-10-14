@@ -159,6 +159,14 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     setOutcome({ kind: 'last', round });
   }, [remaining, round]);
 
+  // HU-25: un dialogo abierto es para el objeto que se veia al abrirlo. Si la sala paso a
+  // otro (alguien lo compro o vencio), se cierra: confirmarlo ya no tiene a que ir.
+  useEffect(() => {
+    const shownId = round?.id ?? null;
+    if (intent && intent.roundId !== shownId) setIntent(null);
+    if (insufficient && insufficient.roundId !== shownId) setInsufficient(null);
+  }, [round?.id, intent, insufficient]);
+
   const available = wallet ? Number(wallet.availableBalance) : null;
 
   function start(kind: BidIntent['kind'], amount: number) {
@@ -178,18 +186,18 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
       if (intent.kind === 'bid' && state.round)
         setOutcome({ kind: 'winning', round: state.round });
     };
-    if (intent.kind === 'buy') {
-      // Sin ronda a la vista no hay que comprar; nunca cae en una puja.
-      if (!intent.roundId) return setIntent(null);
+    // Sin ronda a la vista no hay a que pujar ni que comprar.
+    if (!intent.roundId) return setIntent(null);
+    if (intent.kind === 'buy')
       buyNow.mutate(intent.roundId, {
         onSuccess: done,
         onSettled: () => setIntent(null),
       });
-    } else
-      placeBid.mutate(intent.amount, {
-        onSuccess: done,
-        onSettled: () => setIntent(null),
-      });
+    else
+      placeBid.mutate(
+        { roundId: intent.roundId, amount: intent.amount },
+        { onSuccess: done, onSettled: () => setIntent(null) },
+      );
   }
 
   const header = (
@@ -360,7 +368,9 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                 round={round}
                 nextBid={nextBid}
                 pending={autoBid.isPending}
-                onChange={(config) => autoBid.mutate(config)}
+                onChange={(config) =>
+                  autoBid.mutate({ roundId: round.id, config })
+                }
                 editing={editingLimit}
                 onEditingChange={setEditingLimit}
               />
@@ -410,8 +420,9 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
           }}
           onToggleAutoBid={(enabled) =>
             autoBid.mutate({
-              enabled,
-              limit: live.autoBid.limit || nextBid * 2,
+              // La ronda del aviso: si ya cerro, el servicio lo rechaza.
+              roundId: shownLive.id,
+              config: { enabled, limit: live.autoBid.limit || nextBid * 2 },
             })
           }
         />

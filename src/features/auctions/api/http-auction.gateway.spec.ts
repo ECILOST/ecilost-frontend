@@ -238,10 +238,10 @@ describe('createHttpAuctionGateway', () => {
       expect(http.get).not.toHaveBeenCalledWith('/rooms/room-1/state');
     });
 
-    it('puja sobre la ronda activa con el monto exacto y devuelve la sala al dia', async () => {
+    it('puja sobre la ronda vista con el monto exacto y devuelve la sala al dia', async () => {
       const { gateway, http } = setup(activeRoom(true));
 
-      const live = await gateway.placeBid('room-1', 73250);
+      const live = await gateway.placeBid('room-1', 'round-2', 73250);
 
       expect(http.post).toHaveBeenCalledWith('/rounds/round-2/bids', { amount: 73250 });
       expect(live.round?.id).toBe('round-2');
@@ -312,7 +312,7 @@ describe('createHttpAuctionGateway', () => {
     it('declara el limite de la puja automatica sobre la ronda activa', async () => {
       const { gateway, http } = setup(activeRoom(true));
 
-      const live = await gateway.setAutoBid('room-1', { enabled: true, limit: 90000 });
+      const live = await gateway.setAutoBid('room-1', 'round-2', { enabled: true, limit: 90000 });
 
       expect(http.put).toHaveBeenCalledWith('/rounds/round-2/auto-bid', { enabled: true, maximumAmount: 90000 });
       expect(live.round?.id).toBe('round-2');
@@ -320,25 +320,32 @@ describe('createHttpAuctionGateway', () => {
 
     it('desactivar la puja automatica no envia limite', async () => {
       const { gateway, http } = setup(activeRoom(true));
-      await gateway.setAutoBid('room-1', { enabled: false, limit: 90000 });
+      await gateway.setAutoBid('room-1', 'round-2', { enabled: false, limit: 90000 });
       expect(http.put).toHaveBeenCalledWith('/rounds/round-2/auto-bid', { enabled: false });
     });
 
-    it('sin ronda en curso no declara la puja automatica', async () => {
-      const { gateway, http } = setup();
-      await expect(gateway.setAutoBid('room-1', { enabled: true, limit: 90000 })).rejects.toSatisfy(
-        (error: unknown) => error instanceof ApiError && error.status === 409,
-      );
-      expect(http.put).not.toHaveBeenCalled();
+    it('declara la puja automatica en la ronda vista aunque la sala ya haya pasado a otra (HU-25)', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+      await gateway.setAutoBid('room-1', 'round-1', { enabled: true, limit: 90000 });
+      // No se cambia por la ronda activa: el servicio rechaza la ronda cerrada.
+      expect(http.put).toHaveBeenCalledWith('/rounds/round-1/auto-bid', { enabled: true, maximumAmount: 90000 });
     });
 
-    it('sin ronda en curso no envia la puja', async () => {
-      const { gateway, http } = setup();
+    it('puja en la ronda vista aunque la sala ya haya pasado a otra: nunca en el siguiente objeto (HU-25)', async () => {
+      const { gateway, http } = setup(activeRoom(true));
 
-      await expect(gateway.placeBid('room-1', 50000)).rejects.toSatisfy(
-        (error: unknown) => error instanceof ApiError && error.status === 409,
-      );
-      expect(http.post).not.toHaveBeenCalled();
+      await gateway.placeBid('room-1', 'round-1', 50000);
+
+      expect(http.post).toHaveBeenCalledWith('/rounds/round-1/bids', { amount: 50000 });
+      expect(http.post).not.toHaveBeenCalledWith('/rounds/round-2/bids', expect.anything());
+    });
+
+    it('si el servicio rechaza la puja por ronda cerrada, propaga el 409 (HU-25)', async () => {
+      const { gateway, http } = setup(activeRoom(true));
+      const closed = new ApiError({ type: '/problems/conflicto', title: 'Conflict', status: 409, detail: 'La ronda no esta activa.' });
+      http.post.mockRejectedValueOnce(closed);
+
+      await expect(gateway.placeBid('room-1', 'round-1', 50000)).rejects.toBe(closed);
     });
 
     it('mientras no hay canal en vivo, consulta la sala cada dos segundos hasta dejar de escuchar', async () => {

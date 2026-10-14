@@ -155,15 +155,12 @@ export function createHttpAuctionGateway(deps: {
     liveRoom: (roomId: string) => live(roomId),
 
     /**
-     * `POST /rounds/:id/bids` sobre la ronda activa. La ronda se busca en el momento: si
-     * cambio entre que se pinto y se pujo, el servicio responde 409 y no se reserva nada.
+     * `POST /rounds/:id/bids` sobre la ronda que se estaba viendo (HU-25). Antes se buscaba
+     * la ronda activa al confirmar: si alguien compraba el objeto en ese instante, la puja
+     * caia en el siguiente. Con la ronda vista, el servicio la rechaza con 409.
      */
-    async placeBid(roomId: string, amount: number) {
-      const detail = await roomDetail(roomId);
-      const active = detail.rounds.find((round) => round.status === 'ACTIVE');
-      if (!active) throw conflict('No hay una ronda en curso en esta sala.');
-
-      await http.post(`/rounds/${active.id}/bids`, { amount });
+    async placeBid(roomId: string, roundId: string, amount: number) {
+      await http.post(`/rounds/${roundId}/bids`, { amount });
       return live(roomId);
     },
 
@@ -174,16 +171,17 @@ export function createHttpAuctionGateway(deps: {
     },
 
     /**
-     * `PUT /rounds/:id/auto-bid` sobre la ronda activa (HU-22). El servicio valida el limite
-     * contra la puja minima y el saldo; si no alcanza responde 409 y no se guarda nada.
+     * `PUT /rounds/:id/auto-bid` sobre la ronda que se estaba viendo (HU-22, HU-25). El
+     * servicio valida el limite contra la puja minima y el saldo, y rechaza una ronda que ya
+     * no esta activa; si no alcanza responde 409 y no se guarda nada.
      */
-    async setAutoBid(roomId: string, config: { enabled: boolean; limit: number }) {
-      const detail = await roomDetail(roomId);
-      const active = detail.rounds.find((round) => round.status === 'ACTIVE');
-      if (!active) throw conflict('No hay una ronda en curso en esta sala.');
-
+    async setAutoBid(
+      roomId: string,
+      roundId: string,
+      config: { enabled: boolean; limit: number },
+    ) {
       await http.put(
-        `/rounds/${active.id}/auto-bid`,
+        `/rounds/${roundId}/auto-bid`,
         config.enabled
           ? { enabled: true, maximumAmount: config.limit }
           : { enabled: false },
@@ -468,15 +466,6 @@ function itemStatus(room: RoomDetail, round: RoundDetail): AuctionItemStatus {
   if (round.status === 'CLOSED') return 'CLOSED';
   if (round.status === 'ACTIVE') return 'LIVE';
   return 'UPCOMING';
-}
-
-function conflict(detail: string): ApiError {
-  return new ApiError({
-    type: '/problems/conflicto',
-    title: 'Conflict',
-    status: 409,
-    detail,
-  });
 }
 
 function notFound(detail: string): ApiError {

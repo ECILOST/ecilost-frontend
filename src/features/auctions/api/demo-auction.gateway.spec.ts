@@ -10,14 +10,14 @@ function clock(start = Date.parse('2030-01-01T10:00:00.000Z')) {
 describe('Adaptador de demostracion de subastas', () => {
   it('rechaza una puja por debajo del vigente mas 100, como el servicio', async () => {
     const gateway = createDemoAuctionGateway({ rivals: false, tickMs: 0 });
-    await expect(gateway.placeBid('sala-04', 479)).rejects.toThrow(
+    await expect(gateway.placeBid('sala-04', 'mochila-negra-round', 479)).rejects.toThrow(
       'La puja debe ser de al menos 480 ECICoin.',
     );
   });
 
   it('acepta cualquier monto entero por encima de la minima', async () => {
     const gateway = createDemoAuctionGateway({ rivals: false, tickMs: 0 });
-    const after = await gateway.placeBid('sala-04', 1_234);
+    const after = await gateway.placeBid('sala-04', 'mochila-negra-round', 1_234);
     expect(after.round).toMatchObject({ currentPrice: 1_234, leading: true, minimumBid: 1_334 });
   });
 
@@ -32,7 +32,7 @@ describe('Adaptador de demostracion de subastas', () => {
     const endsAt = Date.parse(before.round!.endsAt!);
 
     time.advance(endsAt - time.now() - 5_000);
-    const after = await gateway.placeBid('sala-04', 480);
+    const after = await gateway.placeBid('sala-04', 'mochila-negra-round', 480);
 
     expect(Date.parse(after.round!.endsAt!)).toBe(endsAt + 10_000);
   });
@@ -58,9 +58,35 @@ describe('Adaptador de demostracion de subastas', () => {
     });
   });
 
+  it('no puja por el siguiente objeto si la ronda que se veia ya cerro (HU-25)', async () => {
+    const time = clock();
+    const gateway = createDemoAuctionGateway({
+      rivals: false,
+      tickMs: 0,
+      now: time.now,
+    });
+    const before = await gateway.liveRoom('sala-04');
+    time.advance(Date.parse(before.round!.endsAt!) - time.now() + 1);
+
+    // La sala ya paso a los audifonos: la puja vista era para la mochila.
+    await expect(
+      gateway.placeBid('sala-04', 'mochila-negra-round', 900),
+    ).rejects.toThrow('La ronda no está activa.');
+    await expect(
+      gateway.setAutoBid('sala-04', 'mochila-negra-round', {
+        enabled: true,
+        limit: 2_000,
+      }),
+    ).rejects.toThrow('La ronda no está activa.');
+    const after = await gateway.liveRoom('sala-04');
+    expect(after.round).toMatchObject({ itemName: 'Audífonos Sony', leading: false });
+    // El limite que ya tenia no cambia: la orden era para la ronda cerrada.
+    expect(after.autoBid).toEqual(before.autoBid);
+  });
+
   it('solo puja quien fue admitido antes del inicio', async () => {
     const gateway = createDemoAuctionGateway({ rivals: false, tickMs: 0 });
-    await expect(gateway.placeBid('sala-07', 1_510)).rejects.toThrow(
+    await expect(gateway.placeBid('sala-07', 'cualquier-ronda', 1_510)).rejects.toThrow(
       /ingreso a esta sala cerró/,
     );
     await expect(gateway.joinRoom('sala-07')).rejects.toThrow('Sala cerrada.');
@@ -74,7 +100,10 @@ describe('Adaptador de demostracion de subastas', () => {
       now: time.now,
       random: () => 0,
     });
-    await gateway.setAutoBid('sala-04', { enabled: true, limit: 380 });
+    await gateway.setAutoBid('sala-04', 'mochila-negra-round', {
+      enabled: true,
+      limit: 380,
+    });
 
     // El rival simulado puja 480; la siguiente respuesta (580) pasa el limite de 380.
     time.advance(20_000);

@@ -932,12 +932,17 @@ export function createDemoAuctionGateway(
     };
   }
 
-  function activeRoundFor(room: DemoRoom): DemoRound {
+  /** La ronda activa, y solo si es la que se estaba viendo: igual que el servicio (HU-25). */
+  function activeRoundFor(room: DemoRoom, roundId: string): DemoRound {
     if (room.status !== 'ACTIVE') throw conflict('La sala no está en curso.');
     if (!room.isParticipant)
       throw forbidden('El ingreso a esta sala cerró al iniciar la subasta.');
     const active = room.rounds.find((r) => r.status === 'ACTIVE');
-    if (!active || (active.endsAt !== null && active.endsAt <= now()))
+    if (
+      !active ||
+      active.id !== roundId ||
+      (active.endsAt !== null && active.endsAt <= now())
+    )
       throw conflict('La ronda no está activa.');
     return active;
   }
@@ -989,10 +994,10 @@ export function createDemoAuctionGateway(
 
     liveRoom: (roomId) => run(() => live(find(roomId))),
 
-    placeBid: (roomId, amount) =>
+    placeBid: (roomId, roundId, amount) =>
       run(() => {
         const room = find(roomId);
-        const active = activeRoundFor(room);
+        const active = activeRoundFor(room, roundId);
         const minimum = minimumFor(active);
         if (!Number.isInteger(amount) || amount < minimum) {
           throw conflict(`La puja debe ser de al menos ${minimum} ECICoin.`);
@@ -1005,9 +1010,7 @@ export function createDemoAuctionGateway(
     buyNow: (roomId, roundId) =>
       run(() => {
         const room = find(roomId);
-        const active = activeRoundFor(room);
-        if (active.id !== roundId)
-          throw conflict('La ronda ya no esta activa.');
+        const active = activeRoundFor(room, roundId);
         if (active.item.buyNowPrice === null)
           throw conflict('Este objeto no tiene precio de compra inmediata.');
         recordBid(room, active, ME, active.item.buyNowPrice, now());
@@ -1016,9 +1019,10 @@ export function createDemoAuctionGateway(
         return live(room);
       }),
 
-    setAutoBid: (roomId, config) =>
+    setAutoBid: (roomId, roundId, config) =>
       run(() => {
         const room = find(roomId);
+        activeRoundFor(room, roundId);
         room.autoBid = {
           enabled: config.enabled,
           limit: config.limit,
