@@ -166,7 +166,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     // Mejorar la propia puja solo reserva la diferencia: compararla entera con el saldo
     // bloqueaba mejoras que si alcanzaban.
     const commit = round ? coinsToCommit(amount, round) : amount;
-    const next = { kind, amount, commit };
+    const next = { kind, amount, commit, roundId: round?.id ?? null };
     if (available !== null && commit > available) setInsufficient(next);
     else setIntent(next);
   }
@@ -178,12 +178,14 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
       if (intent.kind === 'bid' && state.round)
         setOutcome({ kind: 'winning', round: state.round });
     };
-    if (intent.kind === 'buy')
-      buyNow.mutate(undefined, {
+    if (intent.kind === 'buy') {
+      // Sin ronda a la vista no hay que comprar; nunca cae en una puja.
+      if (!intent.roundId) return setIntent(null);
+      buyNow.mutate(intent.roundId, {
         onSuccess: done,
         onSettled: () => setIntent(null),
       });
-    else
+    } else
       placeBid.mutate(intent.amount, {
         onSuccess: done,
         onSettled: () => setIntent(null),

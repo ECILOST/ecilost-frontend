@@ -16,6 +16,11 @@ export interface BidIntent {
    * cuando quien lidera mejora su propia puja: entonces solo se reserva la diferencia.
    */
   commit: number;
+  /**
+   * La ronda que se veia al decidir. La compra inmediata va a esa ronda y no a la activa al
+   * confirmar: si la sala cambio de objeto mientras el dialogo estaba abierto, se rechaza.
+   */
+  roundId: string | null;
 }
 
 function Frame({

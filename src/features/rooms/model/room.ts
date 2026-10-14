@@ -44,6 +44,11 @@ export interface RoundDetail {
   startingPrice: string;
   /** Arranca en `startingPrice` y sube con cada puja aceptada. */
   currentPrice: string;
+  /**
+   * Precio de compra inmediata (HU-24), o `null` si la ronda no la ofrece. Se puede comprar
+   * mientras `currentPrice` no lo alcance.
+   */
+  buyNowPrice?: string | null;
   /** Si alguien ya pujo. Decide la puja minima: el precio minimo o el vigente + 100. */
   hasBids: boolean;
   /** Si quien consulta lidera la ronda. El servicio no publica quien es el lider. */

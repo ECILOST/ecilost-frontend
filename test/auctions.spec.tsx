@@ -1,6 +1,6 @@
 import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   STAFF,
   STUDENT,
@@ -121,6 +121,30 @@ describe('Subastas', () => {
     expect(
       within(dialog).getByRole('link', { name: 'Recargar ECICoin' }),
     ).toHaveAttribute('href', '/billetera');
+  });
+
+  it('comprar ahora pide confirmacion y compra la ronda que se estaba viendo (HU-24)', async () => {
+    const container = student('950.00');
+    const buyNow = vi.spyOn(container.auctions, 'buyNow');
+    renderApp({ route: '/salas/sala-04', container });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /comprar ahora · 900/i }),
+    );
+    const confirm = await screen.findByRole('dialog', {
+      name: 'Confirmar compra',
+    });
+    // Lidera con 380: comprar a 900 solo reserva 520 mas, asi que quedan 950 - 520 = 430.
+    expect(confirm).toHaveTextContent('900 ECICoin');
+    expect(confirm).toHaveTextContent('430 ECICoin');
+
+    await userEvent.click(
+      within(confirm).getByRole('button', { name: /confirmar compra/i }),
+    );
+    expect(buyNow).toHaveBeenCalledWith('sala-04', 'mochila-negra-round');
+    expect(
+      await screen.findByRole('dialog', { name: '¡Ganaste!' }),
+    ).toBeInTheDocument();
   });
 
   it('no bloquea una mejora de la propia puja que si alcanza con el saldo', async () => {
