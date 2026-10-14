@@ -35,6 +35,9 @@ export interface RoundEntry {
   catalogId: string;
 }
 
+/** Que cerro una ronda: el vencimiento de su reloj o una compra inmediata. */
+export type RoundCloseReason = 'EXPIRED' | 'BUY_NOW';
+
 export interface RoundDetail {
   id: string;
   /** Orden en la sala, desde 1. */
@@ -58,6 +61,8 @@ export interface RoundDetail {
   /** Solo cerrada (HU-28): adjudicada a quien lideraba, o desierta si nadie pujo. */
   result: 'AWARDED' | 'DESERTED' | null;
   closedAt: string | null;
+  /** Solo cerrada: si vencio su reloj o alguien la compro de inmediato (HU-24, HU-25). */
+  closeReason?: RoundCloseReason | null;
   startedAt: string | null;
   endsAt: string | null;
   maximumEndsAt: string | null;

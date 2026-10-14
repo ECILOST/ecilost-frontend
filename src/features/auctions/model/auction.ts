@@ -67,6 +67,8 @@ export interface Round {
   myHighestBid: number | null;
   /** Solo cerrada: si la gano quien mira. */
   wonByMe: boolean;
+  /** Solo cerrada: `BUY_NOW` si alguien la compro de inmediato (HU-25). */
+  closeReason: 'EXPIRED' | 'BUY_NOW' | null;
 }
 
 export interface Room {

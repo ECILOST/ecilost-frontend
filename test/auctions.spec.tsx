@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import {
@@ -9,6 +9,8 @@ import {
   createTestContainer,
   walletFixture,
 } from './helpers/fake-gateways';
+import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
+import type { LiveRoom } from '@/features/auctions/model/auction';
 import { renderApp } from './helpers/render-app';
 
 /**
@@ -121,6 +123,88 @@ describe('Subastas', () => {
     expect(
       within(dialog).getByRole('link', { name: 'Recargar ECICoin' }),
     ).toHaveAttribute('href', '/billetera');
+  });
+
+  it('pujar envia la ronda que se estaba viendo (HU-25)', async () => {
+    const container = student('950.00');
+    const placeBid = vi.spyOn(container.auctions, 'placeBid');
+    renderApp({ route: '/salas/sala-04', container });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /pujar 480 ecicoin/i }),
+    );
+    const confirm = await screen.findByRole('dialog', { name: 'Confirmar puja' });
+    await userEvent.click(
+      within(confirm).getByRole('button', { name: /confirmar puja/i }),
+    );
+    expect(placeBid).toHaveBeenCalledWith('sala-04', 'mochila-negra-round', 480);
+  });
+
+  it('si la sala pasa a otro objeto con el dialogo de puja abierto, lo cierra sin pujar (HU-25)', async () => {
+    const container = student('950.00');
+    const placeBid = vi.spyOn(container.auctions, 'placeBid');
+    renderApp({ route: '/salas/sala-04', container });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /pujar 480 ecicoin/i }),
+    );
+    expect(
+      await screen.findByRole('dialog', { name: 'Confirmar puja' }),
+    ).toBeInTheDocument();
+
+    // La mochila se vende por compra inmediata mientras el dialogo sigue abierto.
+    await act(async () => {
+      await container.auctions.buyNow('sala-04', 'mochila-negra-round');
+    });
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: 'Confirmar puja' }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(placeBid).not.toHaveBeenCalled();
+  });
+
+  it('si otro participante compra lo que se estaba viendo, avisa que se vendio por compra inmediata (HU-25)', async () => {
+    // Se mira la sala como la ve otro participante: la compra la hace la demo, pero para
+    // quien mira la ronda no la gano el.
+    const demo = createDemoAuctionGateway({ rivals: false, tickMs: 0 });
+    const asOtherParticipant = (state: LiveRoom): LiveRoom => ({
+      ...state,
+      room: {
+        ...state.room,
+        rounds: state.room.rounds.map((round) =>
+          round.closeReason === 'BUY_NOW'
+            ? { ...round, wonByMe: false, leading: false }
+            : round,
+        ),
+      },
+    });
+    const container = createTestContainer({
+      auth: createFakeAuthGateway(STUDENT),
+      wallet: createFakeWalletGateway({ wallet: walletFixture({ availableBalance: '950.00' }) }),
+      auctions: {
+        ...demo,
+        liveRoom: async (roomId) => asOtherParticipant(await demo.liveRoom(roomId)),
+        subscribe: (roomId, listener) =>
+          demo.subscribe(roomId, (state) => listener(asOtherParticipant(state))),
+      },
+    });
+    renderApp({ route: '/salas/sala-04', container });
+    await screen.findByRole('button', { name: /pujar 480 ecicoin/i });
+
+    await act(async () => {
+      await demo.buyNow('sala-04', 'mochila-negra-round');
+    });
+
+    const sold = await screen.findByRole('dialog', {
+      name: 'Vendido por compra inmediata',
+    });
+    expect(sold).toHaveTextContent('Mochila negra');
+    expect(sold).toHaveTextContent('900');
+    // Lideraba con 380: se le dice que su reserva se libera.
+    expect(sold).toHaveTextContent('Se liberan');
+    expect(screen.queryByRole('dialog', { name: '¡Ganaste!' })).not.toBeInTheDocument();
   });
 
   it('comprar ahora pide confirmacion y compra la ronda que se estaba viendo (HU-24)', async () => {

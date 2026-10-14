@@ -26,16 +26,22 @@ export interface AuctionGateway {
 
   /** `GET /rooms/:id/state`: lo que hay que pintar al entrar o al reconectar. */
   liveRoom(id: string): Promise<LiveRoom>;
-  /** `POST /rounds/:id/bids` sobre la ronda activa de la sala. */
-  placeBid(roomId: string, amount: number): Promise<LiveRoom>;
+  /**
+   * `POST /rounds/:roundId/bids` sobre la ronda que el estudiante estaba viendo (HU-25). Si
+   * la sala ya paso a otro objeto (por ejemplo, alguien lo compro), el servicio la rechaza en
+   * vez de pujar por el siguiente.
+   */
+  placeBid(roomId: string, roundId: string, amount: number): Promise<LiveRoom>;
   /**
    * `POST /rounds/:roundId/buy-now` (HU-24). Va a la ronda que el estudiante estaba viendo,
    * no a la activa al confirmar: si la sala ya cambio de objeto, el servicio la rechaza en vez
    * de comprar otro objeto.
    */
   buyNow(roomId: string, roundId: string): Promise<LiveRoom>;
+  /** `PUT /rounds/:roundId/auto-bid` sobre la ronda que se estaba viendo, como `placeBid`. */
   setAutoBid(
     roomId: string,
+    roundId: string,
     config: { enabled: boolean; limit: number },
   ): Promise<LiveRoom>;
   /**

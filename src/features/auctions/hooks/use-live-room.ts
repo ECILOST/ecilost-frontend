@@ -103,8 +103,10 @@ function useLiveMutation<TInput>(
 
 export function usePlaceBid(roomId: string) {
   const { auctions } = useContainer();
-  return useLiveMutation(roomId, (amount: number) =>
-    auctions.placeBid(roomId, amount),
+  return useLiveMutation(
+    roomId,
+    ({ roundId, amount }: { roundId: string; amount: number }) =>
+      auctions.placeBid(roomId, roundId, amount),
   );
 }
 
@@ -119,7 +121,12 @@ export function useAutoBid(roomId: string) {
   const { auctions } = useContainer();
   return useLiveMutation(
     roomId,
-    (config: { enabled: boolean; limit: number }) =>
-      auctions.setAutoBid(roomId, config),
+    ({
+      roundId,
+      config,
+    }: {
+      roundId: string;
+      config: { enabled: boolean; limit: number };
+    }) => auctions.setAutoBid(roomId, roundId, config),
   );
 }

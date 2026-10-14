@@ -38,6 +38,7 @@ import {
   LAST_SECONDS_MS,
   formatCountdown,
   roundProgress,
+  roundSoldToSomeoneElse,
 } from '../../domain/auction-rules';
 import { useCountdown } from '../../hooks/use-countdown';
 import {
@@ -52,7 +53,7 @@ import styles from './room.module.css';
 /** Duracion base de una ronda, para estimar lo que le queda a la sala. */
 const ROUND_ESTIMATE_MS = 3 * 60_000;
 
-type OutcomeKind = 'winning' | 'outbid' | 'last' | 'won' | 'limit';
+type OutcomeKind = 'winning' | 'outbid' | 'last' | 'won' | 'limit' | 'sold';
 
 const coins = (value: number) => `${formatCoins(value)} ECICoin`;
 
@@ -126,6 +127,12 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
       setOutcome({ kind: 'won', round: won });
       return;
     }
+    // HU-25: otro participante compro lo que se estaba viendo; se dice, no solo se salta.
+    const sold = roundSoldToSomeoneElse(before.round, live.room.rounds);
+    if (sold) {
+      setOutcome({ kind: 'sold', round: sold });
+      return;
+    }
     if (before.round && live.round && before.round.id === live.round.id) {
       // Con la puja automatica activa, responder es cosa suya: se avisa una vez por ronda
       // y no cada vez que un rival puja.
@@ -159,6 +166,14 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     setOutcome({ kind: 'last', round });
   }, [remaining, round]);
 
+  // HU-25: un dialogo abierto es para el objeto que se veia al abrirlo. Si la sala paso a
+  // otro (alguien lo compro o vencio), se cierra: confirmarlo ya no tiene a que ir.
+  useEffect(() => {
+    const shownId = round?.id ?? null;
+    if (intent && intent.roundId !== shownId) setIntent(null);
+    if (insufficient && insufficient.roundId !== shownId) setInsufficient(null);
+  }, [round?.id, intent, insufficient]);
+
   const available = wallet ? Number(wallet.availableBalance) : null;
 
   function start(kind: BidIntent['kind'], amount: number) {
@@ -178,18 +193,18 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
       if (intent.kind === 'bid' && state.round)
         setOutcome({ kind: 'winning', round: state.round });
     };
-    if (intent.kind === 'buy') {
-      // Sin ronda a la vista no hay que comprar; nunca cae en una puja.
-      if (!intent.roundId) return setIntent(null);
+    // Sin ronda a la vista no hay a que pujar ni que comprar.
+    if (!intent.roundId) return setIntent(null);
+    if (intent.kind === 'buy')
       buyNow.mutate(intent.roundId, {
         onSuccess: done,
         onSettled: () => setIntent(null),
       });
-    } else
-      placeBid.mutate(intent.amount, {
-        onSuccess: done,
-        onSettled: () => setIntent(null),
-      });
+    else
+      placeBid.mutate(
+        { roundId: intent.roundId, amount: intent.amount },
+        { onSuccess: done, onSettled: () => setIntent(null) },
+      );
   }
 
   const header = (
@@ -360,7 +375,9 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                 round={round}
                 nextBid={nextBid}
                 pending={autoBid.isPending}
-                onChange={(config) => autoBid.mutate(config)}
+                onChange={(config) =>
+                  autoBid.mutate({ roundId: round.id, config })
+                }
                 editing={editingLimit}
                 onEditingChange={setEditingLimit}
               />
@@ -410,8 +427,9 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
           }}
           onToggleAutoBid={(enabled) =>
             autoBid.mutate({
-              enabled,
-              limit: live.autoBid.limit || nextBid * 2,
+              // La ronda del aviso: si ya cerro, el servicio lo rechaza.
+              roundId: shownLive.id,
+              config: { enabled, limit: live.autoBid.limit || nextBid * 2 },
             })
           }
         />
@@ -573,6 +591,34 @@ function OutcomeScreens({
           </span>
         </OutcomeStrip>
         {price()}
+      </OutcomeDialog>
+    );
+  }
+
+  if (kind === 'sold') {
+    return (
+      <OutcomeDialog
+        {...common}
+        tone="pink"
+        heading="Vendido por compra inmediata"
+        subtitle="Otro participante compró este objeto. La sala continúa con el siguiente."
+        actions={
+          <Button size="lg" onClick={onClose}>
+            Ver siguiente objeto →
+          </Button>
+        }
+      >
+        {round.myHighestBid !== null ? (
+          <OutcomeRow>
+            <OutcomeFigure label="Tu última oferta">
+              {formatCoins(round.myHighestBid)}
+            </OutcomeFigure>
+            <OutcomeFigure label="Tus ECICoin reservados">
+              Se liberan
+            </OutcomeFigure>
+          </OutcomeRow>
+        ) : null}
+        {price('Precio de compra')}
       </OutcomeDialog>
     );
   }
