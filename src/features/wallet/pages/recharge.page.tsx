@@ -131,7 +131,7 @@ export function RechargePage() {
           title="No hay ninguna cuenta con ese correo"
         >
           Comprueba que esté bien escrito. La cuenta se crea la primera vez que
-          la persona entra a ECILOST con su correo institucional.
+          la persona entra a ECILOST con su correo.
         </Notice>
       ) : null}
 
@@ -172,7 +172,7 @@ export function RechargePage() {
         <form className={styles.form} onSubmit={search} noValidate>
           <Field
             label="Correo de la persona"
-            hint="El correo institucional con el que entra a ECILOST."
+            hint="El correo con el que entra a ECILOST."
             required
           >
             <Input
@@ -180,7 +180,7 @@ export function RechargePage() {
               type="email"
               autoComplete="off"
               spellCheck={false}
-              placeholder="estudiante@escuelaing.edu.co"
+              placeholder="estudiante@gmail.com"
               onChange={(event) => setEmail(event.target.value)}
             />
           </Field>

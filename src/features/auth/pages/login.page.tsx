@@ -12,7 +12,7 @@ import styles from './login.page.module.css';
 /**
  * Entrada de la aplicacion, con el diseño de "Escritorio · Acceso".
  *
- * El diseño dibuja correo y contraseña, pero la cuenta es la institucional de Google: el
+ * El diseño dibuja correo y contraseña, pero la cuenta es la de Google (Gmail): el
  * boton manda el navegador a `GET /auth/google`, que responde un 302 hacia Google. ECILOST
  * nunca ve ni guarda contraseñas, y conviene que se vea: por eso la tarjeta no tiene campos.
  *
@@ -84,7 +84,7 @@ export function LoginPage() {
             ) : (
               <>
                 <h2 className={styles.cardTitle}>
-                  Entra con tu correo institucional
+                  Entra con tu correo
                 </h2>
 
                 {/*
@@ -102,7 +102,7 @@ export function LoginPage() {
                 ) : null}
 
                 <p className={styles.hint}>
-                  Usa tu cuenta <strong>@escuelaing.edu.co</strong>. La
+                  Usa tu cuenta de <strong>Gmail</strong>. La
                   contraseña la pide Google: ECILOST nunca la ve.
                 </p>
 

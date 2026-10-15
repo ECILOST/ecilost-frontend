@@ -6,7 +6,7 @@ import type { UserLookup } from '../model/session';
  * Caso de uso "encontrar a alguien por su correo" (operacion de funcionario).
  *
  * Existe porque los dos lados hablan idiomas distintos: un funcionario conoce a una persona
- * por su correo institucional, y wallet, auction-core y engagement solo guardan su `userId`.
+ * por su correo, y wallet, auction-core y engagement solo guardan su `userId`.
  * Sin esta traduccion, cualquier operacion sobre la cuenta de otra persona se quedaria en
  * pedir un identificador que nadie tiene a mano.
  *

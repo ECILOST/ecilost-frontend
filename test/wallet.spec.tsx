@@ -26,7 +26,7 @@ import { renderApp } from './helpers/render-app';
  * abono: son las tres cosas que el servicio resuelve de una forma poco evidente.
  */
 
-const ESTUDIANTE = DIRECTORY['estudiante@escuelaing.edu.co'];
+const ESTUDIANTE = DIRECTORY['estudiante@gmail.com'];
 
 /** Busca a la persona y escribe la cantidad. Es el camino entero hasta el boton de abonar. */
 async function prepararRecarga(
@@ -167,7 +167,7 @@ describe('Billetera', () => {
 
     await userEvent.type(
       await screen.findByLabelText(/correo/i),
-      'nadie@escuelaing.edu.co',
+      'nadie@gmail.com',
     );
     await userEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 
@@ -188,7 +188,7 @@ describe('Billetera', () => {
 
     await userEvent.type(
       await screen.findByLabelText(/correo/i),
-      'suspendida@escuelaing.edu.co',
+      'suspendida@gmail.com',
     );
     await userEvent.click(screen.getByRole('button', { name: 'Buscar' }));
 

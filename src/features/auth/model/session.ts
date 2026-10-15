@@ -41,7 +41,7 @@ export interface Principal {
 /**
  * Respuesta de `GET /auth/users?email=`. Operacion de funcionario.
  *
- * Es lo que permite traducir lo que un funcionario conoce (un correo institucional) a lo
+ * Es lo que permite traducir lo que un funcionario conoce (un correo) a lo
  * que el resto de la plataforma guarda (`userId`): wallet, auction-core y engagement no
  * almacenan correos.
  *

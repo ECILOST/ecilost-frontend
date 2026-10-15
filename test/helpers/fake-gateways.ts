@@ -160,16 +160,16 @@ export function detailFixture(overrides: Partial<ItemDetail> = {}): ItemDetail {
 
 /** Las personas que el doble de identidad sabe encontrar, por su correo. */
 export const DIRECTORY: Record<string, UserLookup> = {
-  'estudiante@escuelaing.edu.co': {
+  'estudiante@gmail.com': {
     userId: '3f2504e0-4f89-41d3-9a0c-0305e82c3301',
-    email: 'estudiante@escuelaing.edu.co',
+    email: 'estudiante@gmail.com',
     fullName: 'Mariana Parra',
     role: Role.STUDENT,
     status: 'ACTIVE',
   },
-  'suspendida@escuelaing.edu.co': {
+  'suspendida@gmail.com': {
     userId: '7c9e6679-7425-40de-944b-e07fc1f90ae7',
-    email: 'suspendida@escuelaing.edu.co',
+    email: 'suspendida@gmail.com',
     fullName: 'Cuenta Inactiva',
     role: Role.STUDENT,
     status: 'SUSPENDED',
@@ -195,7 +195,7 @@ export function createFakeAuthGateway(
       principal
         ? Promise.resolve({
             userId: principal.userId,
-            email: 'persona@escuelaing.edu.co',
+            email: 'persona@gmail.com',
             fullName: 'Andrea Parra',
             // Sin avatar a proposito: es el caso que hay que ver funcionando, porque la
             // direccion que da Google caduca y deja de servirse.
