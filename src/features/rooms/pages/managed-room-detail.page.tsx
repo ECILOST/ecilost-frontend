@@ -7,6 +7,7 @@ import { Loading } from '@/shared/components/loading';
 import { Pill } from '@/shared/components/ui/pill';
 import { BackLink, Page, PageHeader } from '@/shared/components/ui/page';
 import { formatDateTime } from '@/shared/format/date';
+import { DynamicModesPanel } from '../components/dynamic-modes-panel';
 import { EntryName } from '../components/entry-name';
 import { RoomStatusBadge } from '../components/room-status-badge';
 import {
@@ -65,6 +66,8 @@ export function ManagedRoomDetailPage() {
           </span>
         </div>
       </div>
+
+      {room.isOwner ? <DynamicModesPanel room={room} /> : null}
 
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>Rondas ({room.rounds.length})</h2>

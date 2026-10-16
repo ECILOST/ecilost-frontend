@@ -21,6 +21,8 @@ export interface ScheduleDraft {
   startsAt: string;
   capacity: string;
   rounds: RoundDraft[];
+  /** Subastas dinamicas: activar la ruleta de modalidades desde que se programa. */
+  dynamicModes?: boolean;
 }
 
 export interface ScheduleErrors {
@@ -88,6 +90,8 @@ export function toScheduleRequest(draft: ScheduleDraft): ScheduleRoomRequest {
       entries: [parseEntry(round.entry)],
       startingPrice: Number(round.startingPrice.trim()),
     })),
+    // Solo se manda si se activo: un servicio anterior no conoce el campo y lo rechazaria.
+    ...(draft.dynamicModes ? { dynamicModes: true } : {}),
   };
 }
 
