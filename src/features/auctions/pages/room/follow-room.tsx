@@ -35,7 +35,7 @@ export function FollowRoomView({ room }: { room: Room }) {
     refetch,
   } = useLiveRoom(room.id);
   const round = live?.round ?? null;
-  const remaining = useCountdown(round?.endsAt ?? null, live?.serverTime);
+  const remaining = useCountdown(round?.endsAt ?? null);
   const pending = room.rounds.filter((r) => r.status === 'SCHEDULED').length;
 
   return (

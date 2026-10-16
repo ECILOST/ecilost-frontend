@@ -524,6 +524,107 @@ describe('createHttpAuctionGateway', () => {
     await expect(gateway.myBids()).resolves.toEqual([]);
   });
 
+  describe('detalle de las salas en el listado', () => {
+    const detailCalls = (get: ReturnType<typeof vi.fn>) =>
+      get.mock.calls.filter(([path]) => path === '/rooms/room-1').length;
+
+    it('una sala cerrada se pide una sola vez: ya no cambia', async () => {
+      const { gateway, http } = setup(room({ status: 'CLOSED', rounds: [round({ status: 'CLOSED' })] }));
+
+      await gateway.items();
+      await gateway.items();
+      await gateway.myBids();
+
+      expect(detailCalls(http.get)).toBe(1);
+    });
+
+    it('una sala abierta se relee en cada listado', async () => {
+      const { gateway, http } = setup(room({ status: 'ACTIVE', rounds: [round({ status: 'ACTIVE' })] }));
+
+      await gateway.items();
+      await gateway.items();
+
+      expect(detailCalls(http.get)).toBe(2);
+    });
+  });
+
+  describe('listado en lote (GET /rooms?include=rounds, GET /items?ids=)', () => {
+    const openRoom = room({
+      status: 'ACTIVE',
+      rounds: [
+        round({ status: 'ACTIVE' }),
+        round({ id: 'round-2', position: 2, entries: [{ kind: 'ITEM', catalogId: 'item-2' }] }),
+      ],
+    });
+
+    function batchSetup({ auctionKnowsInclude = true, catalogKnowsIds = true } = {}) {
+      const { gateway, http, items } = setup(openRoom);
+      http.get.mockImplementation((path: string, options?: { query?: Record<string, unknown> }) => {
+        if (path === '/rooms' && options?.query?.include === 'rounds') {
+          return Promise.resolve(auctionKnowsInclude ? [openRoom] : [{ id: openRoom.id, status: 'ACTIVE' }]);
+        }
+        if (path === '/rooms') return Promise.resolve([{ id: openRoom.id, status: 'ACTIVE' }]);
+        return Promise.resolve(openRoom);
+      });
+      const list = vi.fn((query: { ids?: string[] }) =>
+        catalogKnowsIds
+          ? Promise.resolve(
+              (query.ids ?? []).map((id) => ({
+                id,
+                name: `Objeto ${id}`,
+                description: '',
+                category: 'Electrónica',
+                condition: 'GOOD',
+                coverUrl: `https://blob/${id}.png`,
+              })),
+            )
+          : Promise.reject(new ApiError({ type: 'about:blank', title: 'Bad Request', status: 400 })),
+      );
+      (items as unknown as { list: typeof list }).list = list;
+      return { gateway, http, items, list };
+    }
+
+    const detailCalls = (get: ReturnType<typeof vi.fn>) =>
+      get.mock.calls.filter(([path]) => path === `/rooms/${openRoom.id}`).length;
+
+    it('trae las salas abiertas con sus rondas sin pedir el detalle sala por sala', async () => {
+      const { gateway, http } = batchSetup();
+
+      const result = await gateway.items();
+
+      expect(result).toHaveLength(2);
+      expect(detailCalls(http.get)).toBe(0);
+    });
+
+    it('pide las fichas de todas las rondas en una sola llamada a catalog', async () => {
+      const { gateway, items, list } = batchSetup();
+
+      const [first, second] = await gateway.items();
+
+      expect(list).toHaveBeenCalledOnce();
+      expect(list.mock.calls[0][0].ids).toEqual(['item-1', 'item-2']);
+      expect(items.findById).not.toHaveBeenCalled();
+      expect(first.imageUrl).toBe('https://blob/item-1.png');
+      expect(second.name).toBe('Objeto item-2');
+    });
+
+    it('con un auction que aun no conoce include, pide el detalle sala por sala', async () => {
+      const { gateway, http } = batchSetup({ auctionKnowsInclude: false });
+
+      await expect(gateway.items()).resolves.toHaveLength(2);
+      expect(detailCalls(http.get)).toBe(1);
+    });
+
+    it('con un catalog que aun no conoce ids, resuelve cada ficha por separado', async () => {
+      const { gateway, items } = batchSetup({ catalogKnowsIds: false });
+
+      const [first] = await gateway.items();
+
+      expect(items.findById).toHaveBeenCalledTimes(2);
+      expect(first.name).toBe('Portatil Lenovo');
+    });
+  });
+
   describe('cache de las fichas de catalog', () => {
     const inMinutes = (minutes: number) =>
       `https://blob/item-1.png?se=${encodeURIComponent(new Date(Date.now() + minutes * 60_000).toISOString())}&sig=x`;

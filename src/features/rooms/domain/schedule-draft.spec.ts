@@ -6,7 +6,8 @@ import {
   type ScheduleDraft,
 } from './schedule-draft';
 
-const NOW = new Date('2026-09-25T12:00:00');
+// Mediodia en Bogota: el formulario se lee en esa zona, este donde este el equipo.
+const NOW = new Date('2026-09-25T12:00:00-05:00');
 
 const draft = (overrides: Partial<ScheduleDraft> = {}): ScheduleDraft => ({
   name: 'Sala de electrónica',
@@ -78,6 +79,7 @@ describe('toScheduleRequest', () => {
       ],
     });
     // La hora local del control se envia como instante absoluto.
-    expect(request.startsAt).toBe(new Date('2026-10-01T16:00').toISOString());
+    // 16:00 en Bogota son las 21:00 UTC.
+    expect(request.startsAt).toBe('2026-10-01T21:00:00.000Z');
   });
 });

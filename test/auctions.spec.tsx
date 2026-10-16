@@ -308,7 +308,7 @@ describe('Subastas', () => {
       await screen.findByRole('link', { name: /notificaciones, 2 sin leer/i }),
     ).toBeInTheDocument();
     await userEvent.click(
-      screen.getByRole('button', { name: 'Marcar todas como leídas' }),
+      await screen.findByRole('button', { name: 'Marcar todas como leídas' }),
     );
     expect(
       await screen.findByRole('link', { name: 'Notificaciones' }),

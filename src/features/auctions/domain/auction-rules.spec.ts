@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { coinsToCommit, roundSoldToSomeoneElse } from './auction-rules';
+import { claimDeadline, coinsToCommit, roundSoldToSomeoneElse } from './auction-rules';
 
 describe('coinsToCommit', () => {
   it('quien lidera y mejora su propia puja solo reserva la diferencia', () => {
@@ -42,5 +42,13 @@ describe('roundSoldToSomeoneElse (HU-25)', () => {
   it('no avisa si la ronda vista sigue abierta o no habia ronda a la vista', () => {
     expect(roundSoldToSomeoneElse({ id: 'r1' }, [round({ status: 'ACTIVE', closeReason: null })])).toBeNull();
     expect(roundSoldToSomeoneElse(null, [round()])).toBeNull();
+  });
+});
+
+describe('claimDeadline', () => {
+  it('da la fecha de Bogota a siete dias, aunque el navegador este en otra zona', () => {
+    // 15 de octubre, 23:30 en Bogota (ya 16 en UTC).
+    const wonAt = Date.parse('2026-10-16T04:30:00.000Z');
+    expect(claimDeadline(wonAt)).toBe('22 de octubre');
   });
 });

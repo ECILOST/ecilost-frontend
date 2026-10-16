@@ -1,5 +1,9 @@
-import { ITEM_CONDITION_LABELS } from '@/features/catalog/domain/item-condition';
+import {
+  ITEM_CONDITION_LABELS,
+  type ItemCondition,
+} from '@/features/catalog/domain/item-condition';
 import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
+import type { Lot } from '@/features/lots/model/lot';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import type {
   AutoBidDetail,
@@ -11,6 +15,7 @@ import type {
 } from '@/features/rooms/model/room';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
+import { recordServerTime } from '@/shared/api/server-clock';
 import { isSignedUrlFresh } from '@/shared/api/signed-url';
 import { minimumBid } from '../domain/auction-rules';
 import type {
@@ -70,9 +75,70 @@ export function createHttpAuctionGateway(deps: {
   const { http } = deps;
   const entryInfo = createEntryResolver(deps);
 
-  const roomDetail = (id: string) => http.get<RoomDetail>(`/rooms/${id}`);
+  // Cada respuesta que trae la hora del servidor ajusta el reloj de las cuentas atras.
+  const roomDetail = async (id: string) => {
+    const detail = await http.get<RoomDetail>(`/rooms/${id}`);
+    recordServerTime(detail.serverTime);
+    return detail;
+  };
+
+  /**
+   * Una sala cerrada o cancelada ya no cambia: ni rondas, ni precios, ni lo que hizo quien
+   * consulta. El listado se relee cada quince segundos y antes volvia a pedir el detalle de
+   * todas las salas que alguna vez existieron; las terminadas se piden una sola vez. Iniciar
+   * sesion recarga la pagina, asi que esta memoria no cruza de una persona a otra.
+   */
+  const finishedDetails = new Map<string, RoomDetail>();
+  const detailFor = async (listing: RoomListing) => {
+    const known = finishedDetails.get(listing.id);
+    if (known) return known;
+    const detail = await roomDetail(listing.id);
+    if (detail.status === 'CLOSED' || detail.status === 'CANCELLED') {
+      finishedDetails.set(listing.id, detail);
+    }
+    return detail;
+  };
+
+  /**
+   * El detalle de todas las salas del listado con dos peticiones, no una por sala: el
+   * listado dice cuales hay, y `?include=rounds&status=SCHEDULED,ACTIVE` trae las abiertas
+   * con sus rondas. Las terminadas salen de `finishedDetails`, o se piden una sola vez.
+   *
+   * Si auction todavia no conoce `include`, responde salas sin `rounds` y se vuelve a pedir
+   * sala por sala, como antes: el front puede desplegarse antes que el servicio.
+   */
+  async function detailsOf(listings: RoomListing[]): Promise<RoomDetail[]> {
+    const open = new Map<string, RoomDetail>();
+    const anyOpen = listings.some(
+      (listing) =>
+        listing.status === 'SCHEDULED' || listing.status === 'ACTIVE',
+    );
+    if (anyOpen) {
+      const batch = await http.get<Array<RoomDetail | RoomListing>>('/rooms', {
+        query: { include: 'rounds', status: 'SCHEDULED,ACTIVE' },
+      });
+      const withRounds = batch.filter((room): room is RoomDetail =>
+        Array.isArray((room as RoomDetail).rounds),
+      );
+      if (withRounds.length === batch.length) {
+        recordServerTime(withRounds[0]?.serverTime);
+        for (const detail of withRounds) open.set(detail.id, detail);
+      }
+    }
+    // Una sala que se abrio o cerro entre las dos lecturas no viene en el lote: se pide sola.
+    const details = await Promise.all(
+      listings.map((listing) => open.get(listing.id) ?? detailFor(listing)),
+    );
+    await entryInfo.prefetch(
+      details.flatMap((detail) =>
+        detail.rounds.map((round) => round.entries[0]),
+      ),
+    );
+    return details;
+  }
 
   async function toRoom(detail: RoomDetail): Promise<Room> {
+    await entryInfo.prefetch(detail.rounds.map((round) => round.entries[0]));
     const infos = await Promise.all(
       detail.rounds.map((round) => entryInfo(round.entries[0])),
     );
@@ -110,6 +176,7 @@ export function createHttpAuctionGateway(deps: {
     const state = detail.isParticipant
       ? await http.get<RoomStateDetail>(`/rooms/${roomId}/state`)
       : null;
+    recordServerTime(state?.serverTime);
     const serverTime =
       state?.serverTime ?? detail.serverTime ?? new Date().toISOString();
     const room = await toRoom(detail);
@@ -129,7 +196,7 @@ export function createHttpAuctionGateway(deps: {
   return {
     async items() {
       const rooms = await http.get<RoomListing[]>('/rooms');
-      const details = await Promise.all(rooms.map((room) => roomDetail(room.id)));
+      const details = await detailsOf(rooms);
       const items = await Promise.all(details.map(toItems));
       return items.flat();
     },
@@ -290,8 +357,8 @@ export function createHttpAuctionGateway(deps: {
      */
     async myBids() {
       const rooms = await http.get<RoomListing[]>('/rooms');
-      const details = await Promise.all(
-        rooms.filter((room) => room.isParticipant).map((room) => roomDetail(room.id)),
+      const details = await detailsOf(
+        rooms.filter((room) => room.isParticipant),
       );
 
       const bids = details.flatMap((detail) =>
@@ -336,13 +403,16 @@ export function createHttpAuctionGateway(deps: {
     },
   };
 }
-
 /**
  * Nombre, descripcion y foto de cada entrada, pedidos a catalog y guardados unos minutos: la
- * sala en vivo se relee cada pocos segundos y no tiene sentido volver a pedir lo mismo. La
- * vida de la cache es menor que la de las URL firmadas de las fotos (quince minutos), para
- * no servirlas caducadas. Si catalog no responde, la sala se sigue viendo con un texto
- * neutro en vez de romperse, y ese texto no se guarda.
+ * sala en vivo se relee cada pocos segundos y no tiene sentido volver a pedir lo mismo. Una
+ * entrada se vuelve a pedir si su foto esta por caducar (ver `isSignedUrlFresh`). Si catalog
+ * no responde, la sala se sigue viendo con un texto neutro en vez de romperse, y ese texto
+ * no se guarda.
+ *
+ * `prefetch` llena la cache de muchas entradas con una peticion por tipo
+ * (`GET /items?ids=`, `GET /lots?ids=`) en vez de una por entrada. Si catalog todavia no
+ * admite `ids`, no pasa nada: cada entrada se resuelve una por una como antes.
  */
 function createEntryResolver({
   items,
@@ -355,30 +425,62 @@ function createEntryResolver({
     string,
     { at: number; info: Promise<EntryInfo>; imageUrl: string | null }
   >();
+  const keyOf = (entry: RoundEntry) => `${entry.kind}:${entry.catalogId}`;
+
+  function isFresh(key: string): boolean {
+    const cached = cache.get(key);
+    // La foto puede caducar antes que la entrada: catalog reutiliza la firma mientras le
+    // queda vida, asi que el enlace recibido ya puede traer minutos gastados. Servirlo
+    // vencido hacia desaparecer la imagen al volver a montar la tarjeta.
+    return Boolean(
+      cached &&
+      Date.now() - cached.at < ENTRY_CACHE_MS &&
+      isSignedUrlFresh(cached.imageUrl),
+    );
+  }
+
+  function store(key: string, info: Promise<EntryInfo>): Promise<EntryInfo> {
+    const slot = { at: Date.now(), info, imageUrl: null as string | null };
+    cache.set(key, slot);
+    void info.then((value) => {
+      slot.imageUrl = value.imageUrl;
+    });
+    return info;
+  }
+
+  const fromItem = (
+    item: {
+      name: string;
+      description: string;
+      category: string;
+      condition: ItemCondition;
+    },
+    imageUrl: string | null,
+  ): EntryInfo => ({
+    name: item.name,
+    description: item.description,
+    category: item.category,
+    condition: ITEM_CONDITION_LABELS[item.condition],
+    imageUrl,
+  });
+
+  const fromLot = (lot: Lot): EntryInfo => ({
+    name: lot.name,
+    description: `Lote con ${lot.items.map((item) => item.name).join(', ')}.`,
+    category: 'Lote',
+    condition: `${lot.items.length} objetos`,
+    imageUrl: null,
+  });
 
   async function resolve(entry: RoundEntry): Promise<EntryInfo> {
     try {
       if (entry.kind === 'ITEM') {
         const item = await items.findById(entry.catalogId);
-        return {
-          name: item.name,
-          description: item.description,
-          category: item.category,
-          condition: ITEM_CONDITION_LABELS[item.condition],
-          imageUrl: item.photos[0]?.url ?? null,
-        };
+        return fromItem(item, item.photos[0]?.url ?? null);
       }
-
-      const lot = await lots.findById(entry.catalogId);
-      return {
-        name: lot.name,
-        description: `Lote con ${lot.items.map((item) => item.name).join(', ')}.`,
-        category: 'Lote',
-        condition: `${lot.items.length} objetos`,
-        imageUrl: null,
-      };
+      return fromLot(await lots.findById(entry.catalogId));
     } catch {
-      cache.delete(`${entry.kind}:${entry.catalogId}`);
+      cache.delete(keyOf(entry));
       return {
         name: entry.kind === 'ITEM' ? 'Objeto del catálogo' : 'Lote del catálogo',
         description: 'No se pudo cargar la descripción.',
@@ -389,28 +491,63 @@ function createEntryResolver({
     }
   }
 
-  return (entry: RoundEntry): Promise<EntryInfo> => {
-    const key = `${entry.kind}:${entry.catalogId}`;
-    const cached = cache.get(key);
-    // La foto puede caducar antes que la entrada: catalog reutiliza la firma mientras le
-    // queda vida, asi que el enlace recibido ya puede traer minutos gastados. Servirlo
-    // vencido hacia desaparecer la imagen al volver a montar la tarjeta.
-    if (
-      cached &&
-      Date.now() - cached.at < ENTRY_CACHE_MS &&
-      isSignedUrlFresh(cached.imageUrl)
-    ) {
-      return cached.info;
-    }
+  async function prefetch(entries: RoundEntry[]): Promise<void> {
+    const missing = (kind: RoundEntry['kind']) => [
+      ...new Set(
+        entries
+          .filter((entry) => entry.kind === kind && !isFresh(keyOf(entry)))
+          .map((entry) => entry.catalogId),
+      ),
+    ];
+    const itemIds = missing('ITEM');
+    const lotIds = missing('LOT');
 
-    const info = resolve(entry);
-    const slot = { at: Date.now(), info, imageUrl: null as string | null };
-    cache.set(key, slot);
-    void info.then((value) => {
-      slot.imageUrl = value.imageUrl;
-    });
-    return info;
+    await Promise.all([
+      ...chunks(itemIds, IDS_PER_REQUEST).map(async (ids) => {
+        try {
+          for (const item of await items.list({ ids, limit: ids.length })) {
+            store(
+              `ITEM:${item.id}`,
+              Promise.resolve(fromItem(item, item.coverUrl)),
+            );
+          }
+        } catch {
+          // Catalog sin `ids`, o caido: cada entrada se resolvera una por una.
+        }
+      }),
+      ...chunks(lotIds, IDS_PER_REQUEST).map(async (ids) => {
+        try {
+          const wanted = new Set(ids);
+          // Un catalog que no conoce `ids` devuelve todos los lotes: se toman los pedidos.
+          for (const lot of await lots.list(ids)) {
+            if (wanted.has(lot.id))
+              store(`LOT:${lot.id}`, Promise.resolve(fromLot(lot)));
+          }
+        } catch {
+          // Igual que arriba.
+        }
+      }),
+    ]);
+  }
+
+  const resolveEntry = (entry: RoundEntry): Promise<EntryInfo> => {
+    const key = keyOf(entry);
+    if (isFresh(key)) return cache.get(key)!.info;
+    return store(key, resolve(entry));
   };
+
+  return Object.assign(resolveEntry, { prefetch });
+}
+
+/** Tope de ids por peticion: el mismo `MAX_PAGE_SIZE` de catalog. */
+const IDS_PER_REQUEST = 200;
+
+function chunks<T>(values: T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let index = 0; index < values.length; index += size) {
+    result.push(values.slice(index, index + size));
+  }
+  return result;
 }
 
 function toAutoBid(detail: AutoBidDetail | null): AutoBid {

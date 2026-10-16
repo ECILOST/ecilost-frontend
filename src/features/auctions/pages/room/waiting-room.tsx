@@ -25,7 +25,7 @@ import styles from './room.module.css';
 export function WaitingRoomView({ room }: { room: Room }) {
   const join = useJoinRoom(room.id);
   useLiveRoom(room.id, room.isParticipant);
-  const remaining = useCountdown(room.startsAt, room.serverTime);
+  const remaining = useCountdown(room.startsAt);
   const full = room.admitted >= room.capacity;
 
   return (

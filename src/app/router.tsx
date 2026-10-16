@@ -1,31 +1,109 @@
+import { lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { AuctionDetailPage } from '@/features/auctions/pages/auction-detail.page';
-import { AuctionsPage } from '@/features/auctions/pages/auctions.page';
-import { HomePage } from '@/features/auctions/pages/home.page';
-import { MyBidsPage } from '@/features/auctions/pages/my-bids.page';
-import { NotificationsPage } from '@/features/auctions/pages/notifications.page';
-import { RoomPage } from '@/features/auctions/pages/room/room.page';
 import { useSession } from '@/features/auth/hooks/use-session';
 import { LoginPage } from '@/features/auth/pages/login.page';
-import { ItemDetailPage } from '@/features/catalog/pages/item-detail.page';
-import {
-  EditItemPage,
-  NewItemPage,
-} from '@/features/catalog/pages/item-form.page';
-import { ItemsPage } from '@/features/catalog/pages/items.page';
-import { LotDetailPage } from '@/features/lots/pages/lot-detail.page';
-import { LotFormPage } from '@/features/lots/pages/lot-form.page';
-import { LotsPage } from '@/features/lots/pages/lots.page';
-import { ManagedRoomDetailPage } from '@/features/rooms/pages/managed-room-detail.page';
-import { ManagedRoomsPage } from '@/features/rooms/pages/managed-rooms.page';
-import { ScheduleRoomPage } from '@/features/rooms/pages/schedule-room.page';
-import { RechargePage } from '@/features/wallet/pages/recharge.page';
-import { WalletPage } from '@/features/wallet/pages/wallet.page';
 import { NotFound } from '@/shared/components/not-found';
 import { PageShell } from '@/shared/components/shell/page-shell';
 import { RequireAuth } from '@/shared/guards/require-auth';
 import { RequireCapability } from '@/shared/guards/require-capability';
 import { routePatterns, routes } from './routes';
+
+/*
+ * Cada pantalla se descarga cuando se visita, no al abrir la aplicacion: un estudiante no
+ * baja las de funcionario, ni nadie la sala en vivo hasta entrar en una. El login va en el
+ * paquete inicial porque es la primera pantalla de quien llega sin sesion. La espera y los
+ * errores de carga los atiende `RouteBoundary`, dentro del marco.
+ */
+const AuctionDetailPage = lazy(() =>
+  import('@/features/auctions/pages/auction-detail.page').then((m) => ({
+    default: m.AuctionDetailPage,
+  })),
+);
+const AuctionsPage = lazy(() =>
+  import('@/features/auctions/pages/auctions.page').then((m) => ({
+    default: m.AuctionsPage,
+  })),
+);
+const HomePage = lazy(() =>
+  import('@/features/auctions/pages/home.page').then((m) => ({
+    default: m.HomePage,
+  })),
+);
+const MyBidsPage = lazy(() =>
+  import('@/features/auctions/pages/my-bids.page').then((m) => ({
+    default: m.MyBidsPage,
+  })),
+);
+const NotificationsPage = lazy(() =>
+  import('@/features/auctions/pages/notifications.page').then((m) => ({
+    default: m.NotificationsPage,
+  })),
+);
+const RoomPage = lazy(() =>
+  import('@/features/auctions/pages/room/room.page').then((m) => ({
+    default: m.RoomPage,
+  })),
+);
+const ItemDetailPage = lazy(() =>
+  import('@/features/catalog/pages/item-detail.page').then((m) => ({
+    default: m.ItemDetailPage,
+  })),
+);
+const EditItemPage = lazy(() =>
+  import('@/features/catalog/pages/item-form.page').then((m) => ({
+    default: m.EditItemPage,
+  })),
+);
+const NewItemPage = lazy(() =>
+  import('@/features/catalog/pages/item-form.page').then((m) => ({
+    default: m.NewItemPage,
+  })),
+);
+const ItemsPage = lazy(() =>
+  import('@/features/catalog/pages/items.page').then((m) => ({
+    default: m.ItemsPage,
+  })),
+);
+const LotDetailPage = lazy(() =>
+  import('@/features/lots/pages/lot-detail.page').then((m) => ({
+    default: m.LotDetailPage,
+  })),
+);
+const LotFormPage = lazy(() =>
+  import('@/features/lots/pages/lot-form.page').then((m) => ({
+    default: m.LotFormPage,
+  })),
+);
+const LotsPage = lazy(() =>
+  import('@/features/lots/pages/lots.page').then((m) => ({
+    default: m.LotsPage,
+  })),
+);
+const ManagedRoomDetailPage = lazy(() =>
+  import('@/features/rooms/pages/managed-room-detail.page').then((m) => ({
+    default: m.ManagedRoomDetailPage,
+  })),
+);
+const ManagedRoomsPage = lazy(() =>
+  import('@/features/rooms/pages/managed-rooms.page').then((m) => ({
+    default: m.ManagedRoomsPage,
+  })),
+);
+const ScheduleRoomPage = lazy(() =>
+  import('@/features/rooms/pages/schedule-room.page').then((m) => ({
+    default: m.ScheduleRoomPage,
+  })),
+);
+const RechargePage = lazy(() =>
+  import('@/features/wallet/pages/recharge.page').then((m) => ({
+    default: m.RechargePage,
+  })),
+);
+const WalletPage = lazy(() =>
+  import('@/features/wallet/pages/wallet.page').then((m) => ({
+    default: m.WalletPage,
+  })),
+);
 
 /**
  * La portada depende de quien entra: quien puja ve las subastas; un funcionario no puja, y

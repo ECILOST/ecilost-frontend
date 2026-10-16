@@ -6,6 +6,7 @@ import { buttonClass } from '@/shared/components/ui/button';
 import { CoinAmount } from '@/shared/components/ui/coin';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import { Pill } from '@/shared/components/ui/pill';
+import { APP_TIME_ZONE } from '@/shared/format/date';
 import { useRoomSummary } from '../../hooks/use-room';
 import type { Room, RoomOutcome } from '../../model/auction';
 import styles from './room.module.css';
@@ -24,6 +25,7 @@ const WHEN = new Intl.DateTimeFormat('es-CO', {
   month: 'short',
   hour: 'numeric',
   minute: '2-digit',
+  timeZone: APP_TIME_ZONE,
 });
 
 /** Resumen al cerrar la sala: que se gano, que se perdio y cuanto se gasto. */

@@ -1,4 +1,5 @@
 import { isValidAmount } from '@/features/wallet/domain/ecicoin';
+import { parseBogotaLocal } from '@/shared/format/date';
 import { ROOM_NAME_MAX, type RoundEntry, type ScheduleRoomRequest } from '../model/room';
 
 /**
@@ -16,7 +17,7 @@ export interface RoundDraft {
 
 export interface ScheduleDraft {
   name: string;
-  /** Valor de un `<input type="datetime-local">`: hora local, sin zona. */
+  /** Valor de un `<input type="datetime-local">`, sin zona: se lee como hora de Bogota. */
   startsAt: string;
   capacity: string;
   rounds: RoundDraft[];
@@ -48,7 +49,7 @@ export function validateDraft(draft: ScheduleDraft, now = new Date()): ScheduleE
   else if (name.length > ROOM_NAME_MAX)
     errors.name = `El nombre admite ${ROOM_NAME_MAX} caracteres como máximo.`;
 
-  const startsAt = new Date(draft.startsAt);
+  const startsAt = parseBogotaLocal(draft.startsAt);
   if (!draft.startsAt || Number.isNaN(startsAt.getTime()))
     errors.startsAt = 'Indica la fecha y la hora de inicio.';
   else if (startsAt.getTime() <= now.getTime())
@@ -82,7 +83,7 @@ export function toScheduleRequest(draft: ScheduleDraft): ScheduleRoomRequest {
   return {
     name: draft.name.trim(),
     maximumCapacity: Number(draft.capacity.trim()),
-    startsAt: new Date(draft.startsAt).toISOString(),
+    startsAt: parseBogotaLocal(draft.startsAt).toISOString(),
     rounds: draft.rounds.map((round) => ({
       entries: [parseEntry(round.entry)],
       startingPrice: Number(round.startingPrice.trim()),

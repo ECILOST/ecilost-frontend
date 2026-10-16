@@ -14,8 +14,9 @@ export function createHttpItemGateway(http: HttpClient): ItemGateway {
   return {
     list: (query: ListItemsQuery = {}) =>
       http.get<ItemSummary[]>('/items', {
-        // El cliente descarta los filtros sin valor, asi que aqui se pasan tal cual.
-        query: { ...query },
+        // El cliente descarta los filtros sin valor, asi que aqui se pasan tal cual; los ids
+        // viajan separados por comas, como los lee el servicio.
+        query: { ...query, ids: query.ids?.join(',') },
       }),
 
     findById: (id: string) => http.get<ItemView>(`/items/${id}`),

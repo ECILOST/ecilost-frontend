@@ -5,7 +5,8 @@ import type { LotGateway } from '../ports/lot.gateway';
 /** Adaptador HTTP de lotes, contra ecilost-catalog-service. */
 export function createHttpLotGateway(http: HttpClient): LotGateway {
   return {
-    list: () => http.get<Lot[]>('/lots'),
+    list: (ids?: string[]) =>
+      http.get<Lot[]>('/lots', { query: { ids: ids?.join(',') } }),
 
     findById: (id: string) => http.get<Lot>(`/lots/${id}`),
 

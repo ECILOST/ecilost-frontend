@@ -1,3 +1,5 @@
+import { APP_TIME_ZONE, bogotaDay } from '@/shared/format/date';
+
 /**
  * Reglas de la subasta que la interfaz necesita conocer para no hacer adivinar a nadie.
  */
@@ -91,18 +93,19 @@ export function formatCountdown(ms: number, forceHours = false): string {
 const TIME = new Intl.DateTimeFormat('es-CO', {
   hour: 'numeric',
   minute: '2-digit',
+  timeZone: APP_TIME_ZONE,
 });
 const DAY = new Intl.DateTimeFormat('es-CO', {
   day: 'numeric',
   month: 'short',
+  timeZone: APP_TIME_ZONE,
 });
 
 /** "Mañana · 10:00 a. m.", "Hoy · 3:00 p. m.", "12 abr · 11:20 a. m." */
 export function formatWhen(iso: string, now = new Date()): string {
   const date = new Date(iso);
-  const startOfDay = (value: Date) =>
-    new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
-  const days = Math.round((startOfDay(date) - startOfDay(now)) / 86_400_000);
+  // Hoy y mañana son los de Bogota, como la hora que se muestra al lado.
+  const days = bogotaDay(date.getTime()) - bogotaDay(now.getTime());
   const time = TIME.format(date);
   if (days === 0) return `Hoy · ${time}`;
   if (days === 1) return `Mañana · ${time}`;
@@ -134,4 +137,24 @@ export function roundProgress(
   if (!startedAt || !endsAt) return 0;
   const total = new Date(endsAt).getTime() - new Date(startedAt).getTime();
   return total > 0 ? remainingMs / total : 0;
+}
+
+/**
+ * Dias que tiene quien gana para reclamar el objeto en la oficina, como lo dice el aviso del
+ * diseño. Ningun servicio publica ni hace cumplir este plazo todavia: si se vuelve una regla
+ * del negocio, debe salir de auction o engagement y no de aqui.
+ */
+export const CLAIM_WINDOW_DAYS = 7;
+
+const CLAIM_DATE_FORMAT = new Intl.DateTimeFormat('es-CO', {
+  day: 'numeric',
+  month: 'long',
+  timeZone: APP_TIME_ZONE,
+});
+
+/** Fecha limite para reclamar un objeto ganado en `wonAt` (milisegundos, hora del servidor). */
+export function claimDeadline(wonAt: number): string {
+  return CLAIM_DATE_FORMAT.format(
+    new Date(wonAt + CLAIM_WINDOW_DAYS * 86_400_000),
+  );
 }

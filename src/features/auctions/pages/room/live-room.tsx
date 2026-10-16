@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { useWallet } from '@/features/wallet/hooks/use-wallet';
+import { serverNow } from '@/shared/api/server-clock';
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
 import { Button, buttonClass } from '@/shared/components/ui/button';
@@ -34,13 +35,13 @@ import { CustomBidForm } from '../../components/custom-bid-form';
 import {
   ANTI_SNIPING_WINDOW_MS,
   coinsToCommit,
-  EXTENSION_NOTICE_MS,
-  LAST_SECONDS_MS,
   formatCountdown,
   roundProgress,
-  roundSoldToSomeoneElse,
+  claimDeadline,
 } from '../../domain/auction-rules';
+import type { OutcomeKind } from '../../domain/live-room-changes';
 import { useCountdown } from '../../hooks/use-countdown';
+import { useLiveOutcomes } from '../../hooks/use-live-outcomes';
 import {
   useAutoBid,
   useBuyNow,
@@ -53,18 +54,7 @@ import styles from './room.module.css';
 /** Duracion base de una ronda, para estimar lo que le queda a la sala. */
 const ROUND_ESTIMATE_MS = 3 * 60_000;
 
-type OutcomeKind = 'winning' | 'outbid' | 'last' | 'won' | 'limit' | 'sold';
-
 const coins = (value: number) => `${formatCoins(value)} ECICoin`;
-
-/** Plazo para reclamar un objeto ganado, como lo dice el aviso del diseño. */
-function claimDeadline(): string {
-  const date = new Date(Date.now() + 7 * 86_400_000);
-  return new Intl.DateTimeFormat('es-CO', {
-    day: 'numeric',
-    month: 'long',
-  }).format(date);
-}
 
 /**
  * Sala en curso para quien participa: el objeto en subasta, precio y reloj, pujar, puja
@@ -89,82 +79,11 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
 
   const [intent, setIntent] = useState<BidIntent | null>(null);
   const [insufficient, setInsufficient] = useState<BidIntent | null>(null);
-  const [outcome, setOutcome] = useState<{
-    kind: OutcomeKind;
-    round: Round;
-  } | null>(null);
   const [editingLimit, setEditingLimit] = useState(false);
-  /** Cierre extendido por anti-sniping: se avisa un momento, el contador ya lo refleja. */
-  const [extended, setExtended] = useState(false);
 
   const round = live?.round ?? null;
-  const remaining = useCountdown(round?.endsAt ?? null, live?.serverTime);
-  const previous = useRef<LiveRoom | undefined>(undefined);
-  const lastSecondsShown = useRef<string | null>(null);
-  const outbidShown = useRef<string | null>(null);
-
-  useEffect(() => {
-    const before = previous.current;
-    previous.current = live;
-    if (!live || !before) return;
-
-    if (
-      before.round?.endsAt &&
-      live.round?.endsAt &&
-      before.round.id === live.round.id &&
-      new Date(live.round.endsAt) > new Date(before.round.endsAt)
-    ) {
-      setExtended(true);
-    }
-
-    const won = live.room.rounds.find(
-      (candidate) =>
-        candidate.wonByMe &&
-        before.room.rounds.find((old) => old.id === candidate.id)?.status ===
-          'ACTIVE',
-    );
-    if (won) {
-      setOutcome({ kind: 'won', round: won });
-      return;
-    }
-    // HU-25: otro participante compro lo que se estaba viendo; se dice, no solo se salta.
-    const sold = roundSoldToSomeoneElse(before.round, live.room.rounds);
-    if (sold) {
-      setOutcome({ kind: 'sold', round: sold });
-      return;
-    }
-    if (before.round && live.round && before.round.id === live.round.id) {
-      // Con la puja automatica activa, responder es cosa suya: se avisa una vez por ronda
-      // y no cada vez que un rival puja.
-      const autoResponds = live.autoBid.enabled && !live.autoBid.stopped;
-      const alreadyWarned = outbidShown.current === live.round.id;
-      if (
-        before.round.leading &&
-        !live.round.leading &&
-        !(autoResponds && alreadyWarned)
-      ) {
-        outbidShown.current = live.round.id;
-        setOutcome({ kind: 'outbid', round: live.round });
-        return;
-      }
-    }
-    if (!before.autoBid.stopped && live.autoBid.stopped && live.round) {
-      setOutcome({ kind: 'limit', round: live.round });
-    }
-  }, [live]);
-
-  useEffect(() => {
-    if (!extended) return;
-    const timer = setTimeout(() => setExtended(false), EXTENSION_NOTICE_MS);
-    return () => clearTimeout(timer);
-  }, [extended, round?.endsAt]);
-
-  useEffect(() => {
-    if (!round || remaining <= 0 || remaining > LAST_SECONDS_MS) return;
-    if (lastSecondsShown.current === round.id) return;
-    lastSecondsShown.current = round.id;
-    setOutcome({ kind: 'last', round });
-  }, [remaining, round]);
+  const remaining = useCountdown(round?.endsAt ?? null);
+  const { outcome, setOutcome, extended } = useLiveOutcomes(live, remaining);
 
   // HU-25: un dialogo abierto es para el objeto que se veia al abrirlo. Si la sala paso a
   // otro (alguien lo compro o vencio), se cierra: confirmarlo ya no tiene a que ir.
@@ -649,7 +568,7 @@ function OutcomeScreens({
             }}
           >
             Reclámalo en la Oficina de Objetos Perdidos, Biblioteca Central,
-            antes del {claimDeadline()}.
+            antes del {claimDeadline(serverNow())}.
           </span>
         </OutcomeFigure>
         {price('Precio final')}

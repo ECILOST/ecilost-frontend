@@ -139,7 +139,8 @@ describe('Salas del funcionario', () => {
       {
         name: 'Subasta de octubre',
         maximumCapacity: 25,
-        startsAt: new Date('2030-10-01T16:00').toISOString(),
+        // Lo escrito en el formulario es hora de Bogota: 16:00 alla, 21:00 UTC.
+        startsAt: '2030-10-01T21:00:00.000Z',
         rounds: [
           { entries: [{ kind: 'ITEM', catalogId: 'item-1' }], startingPrice: 50000 },
         ],

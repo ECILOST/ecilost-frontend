@@ -1,6 +1,6 @@
 import { config, type AppConfig } from '@/config/env';
-import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
 import { createHttpAuctionGateway } from '@/features/auctions/api/http-auction.gateway';
+import { createLazyAuctionGateway } from '@/features/auctions/api/lazy-auction.gateway';
 import { createSocketRealtimeChannel } from '@/features/auctions/api/realtime-channel';
 import type { AuctionGateway } from '@/features/auctions/ports/auction.gateway';
 import { createHttpAuthGateway } from '@/features/auth/api/http-auth.gateway';
@@ -106,7 +106,12 @@ export function createContainer(appConfig: AppConfig = config): Container {
     media: createHttpMediaGateway(catalogHttp),
     wallet: createHttpWalletGateway(walletHttp),
     auctions: appConfig.auctionsDemo
-      ? createDemoAuctionGateway({ latencyMs: 150 })
+      ? // Solo quien arranca en modo demo descarga sus rivales simulados.
+        createLazyAuctionGateway(() =>
+          import('@/features/auctions/api/demo-auction.gateway').then((m) =>
+            m.createDemoAuctionGateway({ latencyMs: 150 }),
+          ),
+        )
       : createHttpAuctionGateway({
           http: auctionHttp,
           items: itemGateway,

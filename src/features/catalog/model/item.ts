@@ -91,6 +91,8 @@ export interface ListItemsQuery {
   category?: string;
   limit?: number;
   offset?: number;
+  /** Solo estos objetos. Con ids el servicio no pagina: devuelve todos los que existan. */
+  ids?: string[];
 }
 
 /**

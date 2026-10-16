@@ -9,7 +9,8 @@ import type { CreateLotRequest, Lot } from '../model/lot';
  */
 export interface LotGateway {
   /** `GET /lots`. Cualquier sesion valida puede consultarlos. */
-  list(): Promise<Lot[]>;
+  /** `GET /lots`; con `ids`, solo esos lotes. */
+  list(ids?: string[]): Promise<Lot[]>;
 
   /** `GET /lots/:id`. Trae el lote con sus objetos, en id y nombre. */
   findById(id: string): Promise<Lot>;
