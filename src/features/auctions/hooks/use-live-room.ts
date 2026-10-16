@@ -130,3 +130,32 @@ export function useAutoBid(roomId: string) {
     }) => auctions.setAutoBid(roomId, roundId, config),
   );
 }
+
+/** Subastas dinamicas, holandesa: "Lo quiero" sobre la ronda que se estaba viendo. */
+export function useDutchClaim(roomId: string) {
+  const { auctions } = useContainer();
+  return useLiveMutation(roomId, (roundId: string) =>
+    auctions.dutchClaim(roomId, roundId),
+  );
+}
+
+/** Subastas dinamicas, sobre cerrado: la unica puja de quien mira en la ronda. */
+export function useSealBid(roomId: string) {
+  const { auctions } = useContainer();
+  return useLiveMutation(
+    roomId,
+    ({ roundId, amount }: { roundId: string; amount: number }) =>
+      auctions.sealBid(roomId, roundId, amount),
+  );
+}
+
+/** Subastas dinamicas: la apertura de sobres de una ronda ya cerrada. No cambia: no se relee. */
+export function useSealedResults(roundId: string | null) {
+  const { auctions } = useContainer();
+  return useQuery({
+    queryKey: [...auctionKeys.all, 'sealed-results', roundId],
+    queryFn: () => auctions.sealedResults(roundId as string),
+    enabled: roundId !== null,
+    staleTime: Infinity,
+  });
+}

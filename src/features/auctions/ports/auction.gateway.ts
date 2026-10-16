@@ -5,6 +5,7 @@ import type {
   MyBid,
   Room,
   RoomSummary,
+  SealedResults,
 } from '../model/auction';
 
 /**
@@ -44,6 +45,12 @@ export interface AuctionGateway {
     roundId: string,
     config: { enabled: boolean; limit: number },
   ): Promise<LiveRoom>;
+  /** Subastas dinamicas, holandesa: `POST /rounds/:roundId/dutch-claim` ("Lo quiero"). */
+  dutchClaim(roomId: string, roundId: string): Promise<LiveRoom>;
+  /** Subastas dinamicas, sobre cerrado: `POST /rounds/:roundId/sealed-bid`. Una sola vez. */
+  sealBid(roomId: string, roundId: string, amount: number): Promise<LiveRoom>;
+  /** Subastas dinamicas: `GET /rounds/:roundId/sealed-results`, cuando la ronda ya cerro. */
+  sealedResults(roundId: string): Promise<SealedResults>;
   /**
    * Cambios en vivo de la sala (precio, contador, transicion de ronda). Devuelve la funcion
    * para dejar de escuchar. Es el equivalente del canal de Socket.IO de engagement.
