@@ -34,9 +34,10 @@ export function roundSoldToSomeoneElse<
 >(shownBefore: { id: string } | null, roundsNow: R[]): R | null {
   if (!shownBefore) return null;
   const closed = roundsNow.find((round) => round.id === shownBefore.id);
+  // Una holandesa que otro pidio ("Lo quiero") tambien se vendio antes de que venciera.
   return closed &&
     closed.status === 'CLOSED' &&
-    closed.closeReason === 'BUY_NOW' &&
+    (closed.closeReason === 'BUY_NOW' || closed.closeReason === 'DUTCH_CLAIM') &&
     !closed.wonByMe
     ? closed
     : null;

@@ -21,6 +21,12 @@ const round = (overrides: Partial<Round> = {}): Round => ({
   myHighestBid: null,
   wonByMe: false,
   closeReason: null,
+  mode: 'CLASSIC',
+  modeLocked: false,
+  wildcardSpins: 0,
+  dutch: null,
+  sealed: null,
+  mystery: null,
   ...overrides,
 });
 
@@ -38,6 +44,7 @@ const live = (
     capacity: 10,
     admitted: 3,
     isParticipant: true,
+    dynamicModesEnabled: false,
     rounds,
   },
   round: shown,
@@ -63,6 +70,33 @@ describe('detectLiveRoomChange', () => {
       null,
     );
     expect(change.outcome).toEqual({ kind: 'won', round: closed });
+  });
+
+  it('subastas dinamicas: al cerrar un sobre cerrado en el que sello, abre los sobres aunque gane', () => {
+    const sealed = round({ mode: 'SEALED', sealed: { count: 4, mine: 4750 } });
+    const closed = { ...sealed, status: 'CLOSED' as const, wonByMe: true };
+    expect(detectLiveRoomChange(live(sealed), live(null, [closed]), null).outcome)
+      .toEqual({ kind: 'sealed', round: closed });
+  });
+
+  it('subastas dinamicas: quien no sello no recibe la apertura de sobres', () => {
+    const sealed = round({ mode: 'SEALED', sealed: { count: 4, mine: null } });
+    const closed = { ...sealed, status: 'CLOSED' as const };
+    expect(detectLiveRoomChange(live(sealed), live(null, [closed]), null).outcome).toBeNull();
+  });
+
+  it('subastas dinamicas: un lote misterioso en el que pujo y no gano avisa que no gano', () => {
+    const mystery = round({ mode: 'MYSTERY', myHighestBid: 3400, mystery: { entries: [] } });
+    const closed = { ...mystery, status: 'CLOSED' as const };
+    expect(detectLiveRoomChange(live(mystery), live(null, [closed]), null).outcome)
+      .toEqual({ kind: 'lost', round: closed });
+  });
+
+  it('subastas dinamicas: una holandesa que pidio otro se avisa como vendida', () => {
+    const dutch = round({ mode: 'DUTCH' });
+    const closed = { ...dutch, status: 'CLOSED' as const, closeReason: 'DUTCH_CLAIM' as const };
+    expect(detectLiveRoomChange(live(dutch), live(null, [closed]), null).outcome)
+      .toEqual({ kind: 'sold', round: closed });
   });
 
   it('avisa que te superaron al perder el liderato', () => {
