@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useContainer } from '@/app/providers/container-provider';
+import { signedUrlsStaleTime } from '@/shared/api/signed-url';
 import type { ItemSummary, ListItemsQuery } from '../model/item';
 
 /**
@@ -51,7 +52,13 @@ export function useItems(query: ListItemsQuery = {}) {
     initialPageParam: 0,
     getNextPageParam: (lastPage, allPages) =>
       lastPage.length < PAGE_SIZE ? undefined : allPages.length * PAGE_SIZE,
-    staleTime: SIGNED_URL_SAFE_WINDOW_MS,
+    // Contra la caducidad de las portadas, no contra la edad de la respuesta: catalog
+    // reutiliza firmas que ya traen minutos gastados.
+    staleTime: (query) =>
+      signedUrlsStaleTime(
+        (query.state.data?.pages ?? []).flat().map((item) => item.coverUrl),
+        SIGNED_URL_SAFE_WINDOW_MS,
+      ),
     gcTime: SIGNED_URL_SAFE_WINDOW_MS,
   });
 }

@@ -11,6 +11,7 @@ import type {
 } from '@/features/rooms/model/room';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
+import { isSignedUrlFresh } from '@/shared/api/signed-url';
 import { minimumBid } from '../domain/auction-rules';
 import type {
   AppNotification,
@@ -350,7 +351,10 @@ function createEntryResolver({
   items: ItemGateway;
   lots: LotGateway;
 }) {
-  const cache = new Map<string, { at: number; info: Promise<EntryInfo> }>();
+  const cache = new Map<
+    string,
+    { at: number; info: Promise<EntryInfo>; imageUrl: string | null }
+  >();
 
   async function resolve(entry: RoundEntry): Promise<EntryInfo> {
     try {
@@ -388,10 +392,23 @@ function createEntryResolver({
   return (entry: RoundEntry): Promise<EntryInfo> => {
     const key = `${entry.kind}:${entry.catalogId}`;
     const cached = cache.get(key);
-    if (cached && Date.now() - cached.at < ENTRY_CACHE_MS) return cached.info;
+    // La foto puede caducar antes que la entrada: catalog reutiliza la firma mientras le
+    // queda vida, asi que el enlace recibido ya puede traer minutos gastados. Servirlo
+    // vencido hacia desaparecer la imagen al volver a montar la tarjeta.
+    if (
+      cached &&
+      Date.now() - cached.at < ENTRY_CACHE_MS &&
+      isSignedUrlFresh(cached.imageUrl)
+    ) {
+      return cached.info;
+    }
 
     const info = resolve(entry);
-    cache.set(key, { at: Date.now(), info });
+    const slot = { at: Date.now(), info, imageUrl: null as string | null };
+    cache.set(key, slot);
+    void info.then((value) => {
+      slot.imageUrl = value.imageUrl;
+    });
     return info;
   };
 }

@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Icon } from './icon';
 import styles from './item-art.module.css';
 
@@ -71,6 +71,10 @@ export function ItemArt({
   children?: ReactNode;
 }) {
   const [c1, c2, c3, c4] = artColors(seed);
+  // Un enlace firmado vencido responde 403: en vez de una imagen rota se pinta el marcador.
+  // Se recuerda que URL fallo, asi que un enlace nuevo vuelve a intentarse solo.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const image = src && src !== failedSrc ? src : null;
   const style = {
     '--c1': c1,
     '--c2': c2,
@@ -103,8 +107,14 @@ export function ItemArt({
         </>
       ) : null}
 
-      {src ? (
-        <img className={styles.image} src={src} alt={label} loading="lazy" />
+      {image ? (
+        <img
+          className={styles.image}
+          src={image}
+          alt={label}
+          loading="lazy"
+          onError={() => setFailedSrc(image)}
+        />
       ) : variant === 'thumb' ? null : (
         // Decorativo: el nombre del objeto siempre esta escrito al lado, en su titulo.
         <span className={styles.placeholder} aria-hidden="true">

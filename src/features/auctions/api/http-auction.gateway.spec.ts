@@ -523,4 +523,40 @@ describe('createHttpAuctionGateway', () => {
 
     await expect(gateway.myBids()).resolves.toEqual([]);
   });
+
+  describe('cache de las fichas de catalog', () => {
+    const inMinutes = (minutes: number) =>
+      `https://blob/item-1.png?se=${encodeURIComponent(new Date(Date.now() + minutes * 60_000).toISOString())}&sig=x`;
+
+    const withPhotos = (...urls: string[]) => {
+      const { gateway, items } = setup();
+      const findById = vi.mocked(items.findById);
+      const ficha = { name: 'Portatil Lenovo', description: '', category: 'Electrónica', condition: 'GOOD', video: null };
+      for (const url of urls) findById.mockResolvedValueOnce({ ...ficha, photos: [{ url }] } as never);
+      return { gateway, findById };
+    };
+
+    it('reutiliza la ficha mientras la foto siga vigente', async () => {
+      const { gateway, findById } = withPhotos(inMinutes(14));
+
+      await gateway.items();
+      await gateway.items();
+
+      expect(findById).toHaveBeenCalledTimes(1);
+    });
+
+    it('relee la ficha si la foto cacheada esta por caducar, en vez de servirla vencida', async () => {
+      // catalog entrega una firma reutilizada a la que le queda un minuto de vida.
+      const casiVencida = inMinutes(1);
+      const nueva = inMinutes(15);
+      const { gateway, findById } = withPhotos(casiVencida, nueva);
+
+      const [first] = await gateway.items();
+      const [again] = await gateway.items();
+
+      expect(findById).toHaveBeenCalledTimes(2);
+      expect(first.imageUrl).toBe(casiVencida);
+      expect(again.imageUrl).toBe(nueva);
+    });
+  });
 });
