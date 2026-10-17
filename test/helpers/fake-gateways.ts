@@ -344,10 +344,7 @@ export interface FakeLots {
   lots?: Lot[];
   /** Lo que se mando crear, en orden. */
   created?: CreateLotRequest[];
-  /** Fotografias subidas y quitadas, para comprobar que llamo. */
-  uploaded?: { lotId: string; name: string }[];
-  removed?: { lotId: string; photoId: string }[];
-  rejects?: { create?: ApiError; upload?: ApiError };
+  rejects?: { create?: ApiError };
 }
 
 export function createFakeLotGateway(catalog: FakeLots = {}): LotGateway {
@@ -383,22 +380,6 @@ export function createFakeLotGateway(catalog: FakeLots = {}): LotGateway {
       lots.push(lot);
 
       return Promise.resolve(lot);
-    },
-    uploadPhoto: (lotId: string, file: File) => {
-      if (catalog.rejects?.upload) return Promise.reject(catalog.rejects.upload);
-      catalog.uploaded?.push({ lotId, name: file.name });
-      return Promise.resolve({
-        id: `photo-${file.name}`,
-        contentType: file.type,
-        sizeBytes: file.size,
-        position: 0,
-        url: `https://blob/lots/${lotId}/${file.name}`,
-        uploadedAt: '2026-10-17T10:00:00.000Z',
-      });
-    },
-    removePhoto: (lotId: string, photoId: string) => {
-      catalog.removed?.push({ lotId, photoId });
-      return Promise.resolve();
     },
   };
 }
