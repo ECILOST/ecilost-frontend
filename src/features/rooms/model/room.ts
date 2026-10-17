@@ -167,5 +167,7 @@ export interface ScheduleRoomRequest {
     entries: RoundEntry[];
     /** Entero: un ECICoin vale un peso colombiano. */
     startingPrice: number;
+    /** Compra inmediata (HU-24): entero mayor que `startingPrice`. Sin el campo, no se ofrece. */
+    buyNowPrice?: number;
   }>;
 }

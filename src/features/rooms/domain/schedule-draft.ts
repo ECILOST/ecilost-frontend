@@ -13,6 +13,8 @@ export interface RoundDraft {
   entry: string;
   /** Precio minimo en ECICoin, tal como se escribio. */
   startingPrice: string;
+  /** Precio de compra inmediata (HU-24), opcional: vacio si la ronda no la ofrece. */
+  buyNowPrice?: string;
 }
 
 export interface ScheduleDraft {
@@ -29,8 +31,10 @@ export interface ScheduleErrors {
   name?: string;
   startsAt?: string;
   capacity?: string;
-  rounds: Record<string, { entry?: string; startingPrice?: string }>;
+  rounds: Record<string, RoundErrors>;
 }
+
+type RoundErrors = { entry?: string; startingPrice?: string; buyNowPrice?: string };
 
 export const hasErrors = (errors: ScheduleErrors): boolean =>
   Boolean(errors.name || errors.startsAt || errors.capacity) ||
@@ -62,7 +66,7 @@ export function validateDraft(draft: ScheduleDraft, now = new Date()): ScheduleE
 
   const used = new Set<string>();
   for (const round of draft.rounds) {
-    const roundErrors: { entry?: string; startingPrice?: string } = {};
+    const roundErrors: RoundErrors = {};
 
     if (!round.entry) roundErrors.entry = 'Elige un objeto o un lote.';
     else if (used.has(round.entry))
@@ -73,7 +77,15 @@ export function validateDraft(draft: ScheduleDraft, now = new Date()): ScheduleE
       roundErrors.startingPrice =
         'Escribe un precio entero mayor que cero, sin centavos.';
 
-    if (roundErrors.entry || roundErrors.startingPrice)
+    // Como en el servicio: entero, y mayor que el minimo para que comprar no salga mas
+    // barato que pujar.
+    const buyNow = round.buyNowPrice?.trim() ?? '';
+    if (buyNow && !isValidAmount(buyNow))
+      roundErrors.buyNowPrice = 'Escribe un precio entero mayor que cero, sin centavos.';
+    else if (buyNow && isValidAmount(round.startingPrice) && Number(buyNow) <= Number(round.startingPrice.trim()))
+      roundErrors.buyNowPrice = 'Tiene que ser mayor que el precio mínimo.';
+
+    if (roundErrors.entry || roundErrors.startingPrice || roundErrors.buyNowPrice)
       errors.rounds[round.id] = roundErrors;
   }
 
@@ -89,6 +101,8 @@ export function toScheduleRequest(draft: ScheduleDraft): ScheduleRoomRequest {
     rounds: draft.rounds.map((round) => ({
       entries: [parseEntry(round.entry)],
       startingPrice: Number(round.startingPrice.trim()),
+      // Solo viaja si se escribio: sin el campo, la ronda no ofrece compra inmediata.
+      ...(round.buyNowPrice?.trim() ? { buyNowPrice: Number(round.buyNowPrice.trim()) } : {}),
     })),
     // Solo se manda si se activo: un servicio anterior no conoce el campo y lo rechazaria.
     ...(draft.dynamicModes ? { dynamicModes: true } : {}),

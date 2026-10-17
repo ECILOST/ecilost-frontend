@@ -275,6 +275,25 @@ export function ScheduleRoomPage() {
                       }
                     />
                   </Field>
+
+                  <Field
+                    label="Compra inmediata"
+                    hint="Opcional. Mayor que el precio mínimo: quien lo pague se lleva la ronda al instante."
+                    error={errors.rounds[round.id]?.buyNowPrice}
+                  >
+                    <Input
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="Sin compra inmediata"
+                      value={round.buyNowPrice ?? ''}
+                      disabled={schedule.isPending}
+                      onChange={(event) =>
+                        updateRound(round.id, {
+                          buyNowPrice: event.target.value,
+                        })
+                      }
+                    />
+                  </Field>
                 </div>
                 {draft.rounds.length > 1 ? (
                   <Button
@@ -347,7 +366,7 @@ export function ScheduleRoomPage() {
           {draft.rounds
             .map(
               (round, index) =>
-                `${index + 1}. ${byKey.get(round.entry)?.name ?? '—'} (desde ${formatEcicoin(round.startingPrice.trim())})`,
+                `${index + 1}. ${byKey.get(round.entry)?.name ?? '—'} (desde ${formatEcicoin(round.startingPrice.trim())}${round.buyNowPrice?.trim() ? `, compra inmediata ${formatEcicoin(round.buyNowPrice.trim())}` : ''})`,
             )
             .join(' · ')}
         </strong>

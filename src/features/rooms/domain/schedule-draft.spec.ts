@@ -64,6 +64,24 @@ describe('validateDraft', () => {
     expect(errors.rounds.r1.startingPrice).toBeDefined();
     expect(errors.rounds.r2.startingPrice).toBeDefined();
   });
+
+  it('la compra inmediata es opcional, pero si se escribe es entera y mayor que el minimo', () => {
+    const errors = validateDraft(
+      draft({
+        rounds: [
+          { id: 'r1', entry: 'ITEM:item-1', startingPrice: '50000', buyNowPrice: '50000' },
+          { id: 'r2', entry: 'LOT:lot-1', startingPrice: '120000', buyNowPrice: '150000.5' },
+          { id: 'r3', entry: 'ITEM:item-2', startingPrice: '1000', buyNowPrice: '  ' },
+          { id: 'r4', entry: 'ITEM:item-3', startingPrice: '1000', buyNowPrice: '5000' },
+        ],
+      }),
+      NOW,
+    );
+    expect(errors.rounds.r1.buyNowPrice).toMatch(/mayor que el precio mínimo/);
+    expect(errors.rounds.r2.buyNowPrice).toMatch(/entero/);
+    expect(errors.rounds.r3).toBeUndefined();
+    expect(errors.rounds.r4).toBeUndefined();
+  });
 });
 
 describe('toScheduleRequest', () => {
@@ -81,5 +99,18 @@ describe('toScheduleRequest', () => {
     // La hora local del control se envia como instante absoluto.
     // 16:00 en Bogota son las 21:00 UTC.
     expect(request.startsAt).toBe('2026-10-01T21:00:00.000Z');
+  });
+
+  it('manda la compra inmediata solo en las rondas que la ofrecen', () => {
+    const request = toScheduleRequest(
+      draft({
+        rounds: [
+          { id: 'r1', entry: 'ITEM:item-1', startingPrice: '50000', buyNowPrice: ' 90000 ' },
+          { id: 'r2', entry: 'LOT:lot-1', startingPrice: '120000', buyNowPrice: '' },
+        ],
+      }),
+    );
+    expect(request.rounds[0].buyNowPrice).toBe(90000);
+    expect(request.rounds[1]).not.toHaveProperty('buyNowPrice');
   });
 });
