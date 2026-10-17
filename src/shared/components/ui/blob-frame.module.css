@@ -108,39 +108,91 @@
   left: 2%;
 }
 
-.image {
-  position: relative;
-  z-index: 2;
-  width: 84%;
-  height: 84%;
-  filter: drop-shadow(0 22px 26px rgb(0 0 0 / 60%));
+/*
+ * --- Con fotografia: placa redondeada sobre las manchas -------------------------------
+ *
+ * Antes la foto se recortaba con la forma de la mancha. Las fotos de producto traen su
+ * propio fondo, asi que la foto tapaba casi todo el color, y como la mancha esta girada y el
+ * recorte no, quedaban bordes de color sueltos que no coincidian. Ahora la foto va en una
+ * placa de esquinas suaves y las manchas se apartan a dos esquinas opuestas, detras.
+ */
+.frame.withPhoto .blobA {
+  inset: auto;
+  top: 0;
+  left: 0;
+  width: 66%;
+  height: 66%;
 }
 
-/* Objetos recortados: se apoyan en la mancha y la desbordan un poco. */
-.contain {
-  object-fit: contain;
+.frame.withPhoto .blobB {
+  top: auto;
+  left: auto;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  height: 58%;
+  mix-blend-mode: normal;
+  opacity: 0.9;
+}
+
+/* En la esquina libre: arriba a la derecha va la etiqueta de estado de la tarjeta. */
+.frame.withPhoto .chip {
+  bottom: 6%;
+  left: 4%;
+  width: 14%;
+  height: 14%;
+}
+
+.frame.withPhoto .halo {
+  opacity: 0.35;
 }
 
 /*
- * Fotografias reales: la mancha deja de ser fondo y pasa a ser el recorte, para que una foto
- * rectangular con su propio fondo no rompa el lenguaje de formas.
+ * La placa toma la proporcion de la foto (`--plate-ratio`, ya acotada entre 3:4 y 4:3 en
+ * `plateRatio`): el lado largo ocupa el 74% del marco y el otro sale de la proporcion. Asi
+ * una foto horizontal da una placa horizontal y una vertical, una vertical, sin recortes.
  */
+.plate {
+  position: relative;
+  z-index: 2;
+  aspect-ratio: var(--plate-ratio, 1);
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: var(--eci-photo-plate);
+  /* Aro fino separado de la placa: el mismo gesto que el anillo de foco del resto del front. */
+  outline: 2px solid var(--eci-line-strong);
+  outline-offset: 4px;
+  box-shadow: 0 18px 32px rgb(0 0 0 / 45%);
+}
+
+.plate[data-orientation='landscape'] {
+  width: 74%;
+}
+
+.plate[data-orientation='portrait'] {
+  height: 74%;
+}
+
+/*
+ * La foto nunca se recorta: en un objeto perdido el detalle que lo identifica puede estar en
+ * el borde. Dentro del rango 3:4–4:3 la placa ya tiene su proporcion y la llena entera; una
+ * mas alargada (panoramica) queda con margen del color de la placa.
+ */
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Fotografias reales: llenan la placa de borde a borde. */
 .cover {
-  width: 88%;
-  height: 88%;
-  object-fit: cover;
+  padding: 0;
 }
 
-.frame[data-shape='a'] .cover {
-  border-radius: var(--blob-a);
-}
-
-.frame[data-shape='b'] .cover {
-  border-radius: var(--blob-b);
-}
-
-.frame[data-shape='c'] .cover {
-  border-radius: var(--blob-c);
+/* Objetos recortados: respiran dentro de la placa en vez de tocar sus bordes. */
+.contain {
+  padding: 10%;
 }
 
 /* Sin fotografia: el listado del catalogo no trae multimedia, y aun asi debe verse algo. */
