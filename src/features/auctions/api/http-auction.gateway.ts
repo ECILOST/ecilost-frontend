@@ -528,7 +528,9 @@ function createEntryResolver({
     description: `Lote con ${lot.items.map((item) => item.name).join(', ')}.`,
     category: 'Lote',
     condition: `${lot.items.length} objetos`,
-    imageUrl: null,
+    // La portada del lote (su primera fotografia), o el marcador si todavia no tiene. Un
+    // catalog anterior a las fotos de lote no manda `coverUrl`: tambien cae en el marcador.
+    imageUrl: lot.coverUrl ?? null,
   });
 
   async function resolve(entry: RoundEntry): Promise<EntryInfo> {

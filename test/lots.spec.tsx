@@ -160,4 +160,55 @@ describe('Lotes', () => {
       await screen.findByRole('link', { name: 'Kit de electronica extraviada' }),
     ).toHaveAttribute('href', '/lots/lot-1');
   });
+
+  describe('fotografias del lote', () => {
+    const photo = (id: string) => ({
+      id,
+      contentType: 'image/jpeg',
+      sizeBytes: 2048,
+      position: 0,
+      url: `https://blob/lots/lot-1/${id}.jpg`,
+      uploadedAt: '2026-10-17T10:00:00.000Z',
+    });
+
+    it('el funcionario sube fotografias desde la ficha del lote', async () => {
+      const uploaded: { lotId: string; name: string }[] = [];
+      renderApp({
+        route: '/lots/lot-1',
+        container: staff({ lots: createFakeLotGateway({ lots: [lotFixture({ photos: [] })], uploaded }) }),
+      });
+
+      const manager = await screen.findByRole('region', { name: 'Fotografías del lote' });
+      await userEvent.upload(
+        within(manager).getByLabelText(/añadir fotografías/i),
+        new File(['x'], 'kit.jpg', { type: 'image/jpeg' }),
+      );
+
+      expect(await within(manager).findByText('Se adjuntó 1 fotografía')).toBeInTheDocument();
+      expect(uploaded).toEqual([{ lotId: 'lot-1', name: 'kit.jpg' }]);
+    });
+
+    it('la ficha muestra la portada, y el estudiante no ve el gestor', async () => {
+      renderApp({
+        route: '/lots/lot-1',
+        container: createTestContainer({
+          auth: createFakeAuthGateway(STUDENT),
+          lots: createFakeLotGateway({ lots: [lotFixture({ photos: [photo('p1')], coverUrl: photo('p1').url })] }),
+        }),
+      });
+
+      expect(await screen.findByRole('img', { name: /fotograf/i })).toHaveAttribute('src', photo('p1').url);
+      expect(screen.queryByRole('region', { name: 'Fotografías del lote' })).toBeNull();
+    });
+
+    it('el listado de lotes enseña la portada de cada uno', async () => {
+      const { container } = renderApp({
+        route: '/lots',
+        container: staff({ lots: createFakeLotGateway({ lots: [lotFixture({ coverUrl: photo('p1').url })] }) }),
+      });
+
+      await screen.findByRole('heading', { name: 'Kit de electronica extraviada' });
+      expect(container.querySelector(`img[src="${photo('p1').url}"]`)).not.toBeNull();
+    });
+  });
 });
