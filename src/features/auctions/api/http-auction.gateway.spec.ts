@@ -121,6 +121,20 @@ describe('createHttpAuctionGateway', () => {
     expect(second).toMatchObject({ name: 'Kit de oficina', category: 'Lote', imageUrl: null });
   });
 
+  it('un lote con fotografias se ve en la subasta con su portada', async () => {
+    const { gateway, lots } = setup();
+    vi.mocked(lots.findById).mockResolvedValue({
+      id: 'lot-1',
+      name: 'Kit de oficina',
+      items: [{ id: 'a', name: 'Grapadora' }],
+      coverUrl: 'https://blob/lots/lot-1/portada.jpg',
+    } as never);
+
+    const [, lotItem] = await gateway.items();
+
+    expect(lotItem).toMatchObject({ category: 'Lote', imageUrl: 'https://blob/lots/lot-1/portada.jpg' });
+  });
+
   it('con pujas, la siguiente minima es el precio vigente mas 100', async () => {
     const { gateway } = setup(
       room({

@@ -75,3 +75,13 @@
   font-size: var(--text-sm);
   max-width: 62ch;
 }
+
+.photoOf {
+  color: var(--eci-text);
+  font-weight: 600;
+}
+
+.photoLink {
+  color: var(--eci-cyan);
+  font-weight: 600;
+}

@@ -108,39 +108,43 @@
   left: 2%;
 }
 
-.image {
-  position: relative;
-  z-index: 2;
-  width: 84%;
-  height: 84%;
-  filter: drop-shadow(0 22px 26px rgb(0 0 0 / 60%));
-}
-
-/* Objetos recortados: se apoyan en la mancha y la desbordan un poco. */
-.contain {
-  object-fit: contain;
-}
-
 /*
- * Fotografias reales: la mancha deja de ser fondo y pasa a ser el recorte, para que una foto
- * rectangular con su propio fondo no rompa el lenguaje de formas.
+ * --- Con fotografia: placa redondeada sobre las manchas -------------------------------
+ *
+ * Antes la foto se recortaba con la forma de la mancha. Las fotos de producto traen su
+ * propio fondo, asi que la foto tapaba casi todo el color, y como la mancha esta girada y el
+ * recorte no, quedaban bordes de color sueltos que no coincidian. Ahora la foto va en una
+ * placa de esquinas suaves y las manchas se apartan a dos esquinas opuestas, detras.
  */
-.cover {
-  width: 88%;
-  height: 88%;
-  object-fit: cover;
+.frame.withPhoto .blobA {
+  inset: auto;
+  top: 0;
+  left: 0;
+  width: 66%;
+  height: 66%;
 }
 
-.frame[data-shape='a'] .cover {
-  border-radius: var(--blob-a);
+.frame.withPhoto .blobB {
+  top: auto;
+  left: auto;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  height: 58%;
+  mix-blend-mode: normal;
+  opacity: 0.9;
 }
 
-.frame[data-shape='b'] .cover {
-  border-radius: var(--blob-b);
+/* En la esquina libre: arriba a la derecha va la etiqueta de estado de la tarjeta. */
+.frame.withPhoto .chip {
+  bottom: 6%;
+  left: 4%;
+  width: 14%;
+  height: 14%;
 }
 
-.frame[data-shape='c'] .cover {
-  border-radius: var(--blob-c);
+.frame.withPhoto .halo {
+  opacity: 0.35;
 }
 
 /* Sin fotografia: el listado del catalogo no trae multimedia, y aun asi debe verse algo. */

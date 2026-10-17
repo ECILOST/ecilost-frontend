@@ -33,6 +33,17 @@
   font-size: var(--text-xs);
 }
 
+.caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-4);
+  margin-top: calc(-1 * var(--s-2));
+  color: var(--eci-text-dim);
+  font-size: var(--text-sm);
+}
+
 .thumbs {
   display: flex;
   gap: var(--s-2);

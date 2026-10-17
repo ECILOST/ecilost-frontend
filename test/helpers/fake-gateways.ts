@@ -335,6 +335,7 @@ export function lotFixture(overrides: Partial<Lot> = {}): Lot {
     ],
     createdBy: STAFF.userId,
     createdAt: '2026-09-18T10:00:00.000Z',
+    coverUrl: null,
     ...overrides,
   };
 }

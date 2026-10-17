@@ -160,4 +160,56 @@ describe('Lotes', () => {
       await screen.findByRole('link', { name: 'Kit de electronica extraviada' }),
     ).toHaveAttribute('href', '/lots/lot-1');
   });
+
+  describe('fotografias del lote', () => {
+    const photo = (id: string, itemId = 'item-1', itemName = 'Portatil Lenovo ThinkPad') => ({
+      id,
+      itemId,
+      itemName,
+      contentType: 'image/jpeg',
+      sizeBytes: 2048,
+      position: 0,
+      url: `https://blob/lots/lot-1/${id}.jpg`,
+      uploadedAt: '2026-10-17T10:00:00.000Z',
+    });
+
+    it('la ficha muestra las fotos de sus objetos y se cambia de una a otra con un clic', async () => {
+      const fotos = [photo('p1'), photo('p2', 'item-2', 'Audifonos Sony')];
+      renderApp({
+        route: '/lots/lot-1',
+        container: createTestContainer({
+          auth: createFakeAuthGateway(STUDENT),
+          lots: createFakeLotGateway({ lots: [lotFixture({ photos: fotos, coverUrl: fotos[0].url })] }),
+        }),
+      });
+
+      const grande = await screen.findByRole('img', { name: 'Fotografía 1 de Portatil Lenovo ThinkPad' });
+      expect(grande).toHaveAttribute('src', fotos[0].url);
+
+      await userEvent.click(screen.getByRole('button', { name: 'Ver fotografía 1 de Audifonos Sony' }));
+
+      expect(screen.getByRole('img', { name: 'Fotografía 1 de Audifonos Sony' })).toHaveAttribute('src', fotos[1].url);
+      expect(screen.getByRole('link', { name: 'Ver objeto →' })).toHaveAttribute('href', '/items/item-2');
+    });
+
+    it('no ofrece subir fotografias al lote: salen de sus objetos', async () => {
+      renderApp({
+        route: '/lots/lot-1',
+        container: staff({ lots: createFakeLotGateway({ lots: [lotFixture({ photos: [] })] }) }),
+      });
+
+      expect(await screen.findByText('Los objetos de este lote todavía no tienen fotografías')).toBeInTheDocument();
+      expect(screen.queryByLabelText(/añadir fotografías/i)).toBeNull();
+    });
+
+    it('el listado de lotes enseña la portada de cada uno', async () => {
+      const { container } = renderApp({
+        route: '/lots',
+        container: staff({ lots: createFakeLotGateway({ lots: [lotFixture({ coverUrl: photo('p1').url })] }) }),
+      });
+
+      await screen.findByRole('heading', { name: 'Kit de electronica extraviada' });
+      expect(container.querySelector(`img[src="${photo('p1').url}"]`)).not.toBeNull();
+    });
+  });
 });

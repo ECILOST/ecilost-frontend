@@ -20,6 +20,8 @@
   --eci-surface-glow: #0f2a4c; /* fila propia en la lista de pujas */
   --eci-line: rgb(255 255 255 / 8%);
   --eci-line-strong: rgb(255 255 255 / 16%);
+  /* Placa de las fotografias: blanca, porque casi todas las fotos de producto lo son. */
+  --eci-photo-plate: #ffffff;
 
   /* --- Texto ---------------------------------------------------------------- */
   --eci-text: #ffffff;
