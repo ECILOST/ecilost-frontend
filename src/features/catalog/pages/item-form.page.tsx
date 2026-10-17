@@ -158,6 +158,8 @@ export function EditItemPage() {
           description: item.description,
           condition: item.condition,
           category: item.category,
+          // Solo la ficha del funcionario trae pistas; editar no las borra si no vienen.
+          clues: 'clues' in item ? item.clues : undefined,
         }}
         submitLabel="Guardar cambios"
         pendingLabel="Guardando..."

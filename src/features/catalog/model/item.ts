@@ -35,6 +35,11 @@ export interface ItemAdminTrail {
   registeredBy: string;
   lastModifiedBy: string;
   lastModifiedAt: string;
+  /**
+   * Pistas para el lote misterioso: lo unico que vera el estudiante si la ruleta oculta el
+   * objeto. Solo las recibe el funcionario; los servicios anteriores no las traen.
+   */
+  clues?: string[];
 }
 
 /**
@@ -103,6 +108,9 @@ export const ITEM_LIMITS = {
   name: 120,
   description: 2000,
   category: 60,
+  /** Pistas del lote misterioso: cuantas y de que largo cada una. */
+  clues: 5,
+  clue: 60,
 } as const;
 
 /** Cuerpo de `POST /items`. Operacion de funcionario. */
@@ -111,7 +119,16 @@ export interface CreateItemRequest {
   description: string;
   condition: ItemCondition;
   category: string;
+  clues?: string[];
 }
+
+/**
+ * Lo que se puede saber de una entrada de una ronda que salio como lote misterioso
+ * (`GET /mystery/rounds/:roundId`): nunca su nombre, sus fotos ni su id.
+ */
+export type MysteryEntry =
+  | { kind: 'ITEM'; category: string; condition: ItemCondition; clues: string[] }
+  | { kind: 'LOT'; itemCount: number; categories: string[]; clues: string[] };
 
 /**
  * Cuerpo de `PATCH /items/:id`. Operacion de funcionario.
@@ -126,4 +143,5 @@ export interface UpdateItemRequest {
   condition?: ItemCondition;
   category?: string;
   status?: ItemStatus;
+  clues?: string[];
 }

@@ -12,6 +12,10 @@ export type RoomEvent =
         | 'round.won';
       roundId: string;
     }
+  /** Subastas dinamicas: el dueño giro la ruleta de una ronda; la sala lo anima. */
+  | { name: 'round.mode'; roundId: string; segment: string | null; mode: string | null }
+  /** Subastas dinamicas: alguien sello su puja en un sobre cerrado (solo el conteo). */
+  | { name: 'round.sealed'; roundId: string; sealedCount: number }
   /** La sala empezo o termino (HU-18): no es de ninguna ronda. */
   | { name: 'room.status'; status: string }
   /** El canal se reconecto: lo que se tenia puede estar vencido. */
@@ -33,6 +37,8 @@ const ROOM_EVENTS = [
   'round.closed',
   'round.extended',
   'room.status',
+  'round.mode',
+  'round.sealed',
 ] as const;
 const PERSONAL_EVENTS = ['bid.outbid', 'round.won'] as const;
 
@@ -45,6 +51,9 @@ interface Payload {
   roundId?: string;
   sequence?: string;
   status?: string;
+  segment?: string | null;
+  mode?: string | null;
+  sealedCount?: number;
 }
 
 /**
@@ -120,6 +129,10 @@ export function createSocketRealtimeChannel({
     if (name === 'room.status') return { name, status: payload.status ?? '' };
     if (name === 'round.price')
       return { name, roundId, sequence: Number(payload.sequence ?? 0) };
+    if (name === 'round.mode')
+      return { name, roundId, segment: payload.segment ?? null, mode: payload.mode ?? null };
+    if (name === 'round.sealed')
+      return { name, roundId, sealedCount: Number(payload.sealedCount ?? 0) };
     return { name, roundId };
   }
 

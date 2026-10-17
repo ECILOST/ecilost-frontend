@@ -12,6 +12,7 @@ import { Field, FormActions, Input, Select } from '@/shared/components/ui/field'
 import { Icon } from '@/shared/components/ui/icon';
 import { Notice } from '@/shared/components/ui/notice';
 import { Page, PageHeader } from '@/shared/components/ui/page';
+import { Toggle } from '@/shared/components/ui/toggle';
 import {
   hasErrors,
   toScheduleRequest,
@@ -189,6 +190,22 @@ export function ScheduleRoomPage() {
               onChange={(event) => update({ capacity: event.target.value })}
             />
           </Field>
+        </div>
+
+        <div className={styles.dynamicModes}>
+          <Toggle
+            checked={draft.dynamicModes ?? false}
+            label="Subastas dinámicas"
+            onChange={(dynamicModes) => update({ dynamicModes })}
+          />
+          <span>
+            <strong>🎡 Subastas dinámicas</strong>
+            <br />
+            <small>
+              Antes de cada ronda girarás una ruleta: holandesa, sobre cerrado o lote
+              misterioso. Puedes activarlas después desde la sala.
+            </small>
+          </span>
         </div>
 
         <fieldset className={styles.rounds}>

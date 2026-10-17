@@ -2,6 +2,7 @@ import {
   ITEM_CONDITION_LABELS,
   type ItemCondition,
 } from '@/features/catalog/domain/item-condition';
+import type { MysteryEntry as CatalogMysteryEntry } from '@/features/catalog/model/item';
 import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
 import type { Lot } from '@/features/lots/model/lot';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
@@ -12,6 +13,7 @@ import type {
   RoomSummary as RoomListing,
   RoundDetail,
   RoundEntry,
+  SealedResultsDetail,
 } from '@/features/rooms/model/room';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
@@ -23,11 +25,14 @@ import type {
   AutoBid,
   AuctionItem,
   AuctionItemStatus,
+  DutchSchedule,
   LiveRoom,
   MyBid,
   Room,
   RoomSummary,
   Round,
+  MysteryEntry,
+  SealedResults,
 } from '../model/auction';
 import type { AuctionGateway } from '../ports/auction.gateway';
 import type { RealtimeChannel } from './realtime-channel';
@@ -74,6 +79,30 @@ export function createHttpAuctionGateway(deps: {
 }): AuctionGateway {
   const { http } = deps;
   const entryInfo = createEntryResolver(deps);
+
+  /*
+   * Lote misterioso (subastas dinamicas): catalog oculta el objeto a quien no lo gano, asi
+   * que ni se le pide. En su lugar se piden las pistas de la ronda, que cambian poco: se
+   * reutilizan un rato para no pedirlas en cada evento en vivo.
+   */
+  const clueCache = new Map<string, { at: number; entries: Promise<MysteryEntry[]> }>();
+  const cluesFor = (roundId: string): Promise<MysteryEntry[]> => {
+    const cached = clueCache.get(roundId);
+    if (cached && Date.now() - cached.at < CLUE_CACHE_MS) return cached.entries;
+    const entries = deps.items
+      .mysteryClues(roundId)
+      .then(({ entries }) => entries.map(toMysteryEntry))
+      .catch(() => {
+        clueCache.delete(roundId);
+        return [] as MysteryEntry[];
+      });
+    clueCache.set(roundId, { at: Date.now(), entries });
+    return entries;
+  };
+  const roundInfo = (round: RoundDetail): Promise<EntryInfo> =>
+    hidesItem(round) ? Promise.resolve(MYSTERY_INFO) : entryInfo(round.entries[0]);
+  const visibleEntries = (rounds: RoundDetail[]) =>
+    rounds.filter((round) => !hidesItem(round)).map((round) => round.entries[0]);
 
   // Cada respuesta que trae la hora del servidor ajusta el reloj de las cuentas atras.
   const roomDetail = async (id: string) => {
@@ -130,18 +159,21 @@ export function createHttpAuctionGateway(deps: {
       listings.map((listing) => open.get(listing.id) ?? detailFor(listing)),
     );
     await entryInfo.prefetch(
-      details.flatMap((detail) =>
-        detail.rounds.map((round) => round.entries[0]),
-      ),
+      details.flatMap((detail) => visibleEntries(detail.rounds)),
     );
     return details;
   }
 
   async function toRoom(detail: RoomDetail): Promise<Room> {
-    await entryInfo.prefetch(detail.rounds.map((round) => round.entries[0]));
-    const infos = await Promise.all(
-      detail.rounds.map((round) => entryInfo(round.entries[0])),
-    );
+    await entryInfo.prefetch(visibleEntries(detail.rounds));
+    const [infos, clues] = await Promise.all([
+      Promise.all(detail.rounds.map(roundInfo)),
+      Promise.all(
+        detail.rounds.map((round) =>
+          hidesItem(round) ? cluesFor(round.id) : Promise.resolve(null),
+        ),
+      ),
+    ]);
     return {
       id: detail.id,
       name: detail.name,
@@ -151,8 +183,9 @@ export function createHttpAuctionGateway(deps: {
       capacity: detail.maximumCapacity,
       admitted: detail.admittedCount,
       isParticipant: detail.isParticipant,
+      dynamicModesEnabled: detail.dynamicModesEnabled ?? false,
       rounds: detail.rounds.map((round, index) =>
-        toRound(round, infos[index]),
+        toRound(round, infos[index], clues[index]),
       ),
       serverTime: detail.serverTime,
     };
@@ -161,7 +194,7 @@ export function createHttpAuctionGateway(deps: {
   async function toItems(detail: RoomDetail): Promise<AuctionItem[]> {
     return Promise.all(
       detail.rounds.map(async (round) =>
-        toAuctionItem(detail, round, await entryInfo(round.entries[0])),
+        toAuctionItem(detail, round, await roundInfo(round)),
       ),
     );
   }
@@ -206,7 +239,7 @@ export function createHttpAuctionGateway(deps: {
       const detail = await roomDetail(roomId);
       const round = detail.rounds.find((candidate) => candidate.id === roundId);
       if (!round) throw notFound('Ese objeto no está en ninguna sala.');
-      return toAuctionItem(detail, round, await entryInfo(round.entries[0]));
+      return toAuctionItem(detail, round, await roundInfo(round));
     },
 
     room: async (id: string) => toRoom(await roomDetail(id)),
@@ -255,6 +288,32 @@ export function createHttpAuctionGateway(deps: {
           : { enabled: false },
       );
       return live(roomId);
+    },
+
+    /**
+     * Subastas dinamicas, holandesa: "Lo quiero". Sin cuerpo: el precio es el que diga el
+     * reloj del servidor al cerrar, nunca el que se pinto aqui.
+     */
+    async dutchClaim(roomId: string, roundId: string) {
+      await http.post(`/rounds/${roundId}/dutch-claim`);
+      return live(roomId);
+    },
+
+    /** Subastas dinamicas, sobre cerrado: la unica puja de quien mira, a ciegas. */
+    async sealBid(roomId: string, roundId: string, amount: number) {
+      await http.post(`/rounds/${roundId}/sealed-bid`, { amount });
+      return live(roomId);
+    },
+
+    /** Apertura de sobres de una ronda de sobre cerrado que ya cerro. */
+    async sealedResults(roundId: string): Promise<SealedResults> {
+      const results = await http.get<SealedResultsDetail>(
+        `/rounds/${roundId}/sealed-results`,
+      );
+      return {
+        ...results,
+        ranking: results.ranking.map((row) => ({ ...row, amount: Number(row.amount) })),
+      };
     },
     /**
      * Lo que paso en cada ronda para quien consulta, a partir del resultado que auction
@@ -365,7 +424,7 @@ export function createHttpAuctionGateway(deps: {
         detail.rounds
           .filter((round) => round.myHighestBid !== null)
           .map(async (round): Promise<MyBid> => {
-            const info = await entryInfo(round.entries[0]);
+            const info = await roundInfo(round);
             const price = Number(round.currentPrice);
             const mine = Number(round.myHighestBid);
             const closed = round.status === 'CLOSED';
@@ -560,9 +619,57 @@ function toAutoBid(detail: AutoBidDetail | null): AutoBid {
   };
 }
 
-function toRound(round: RoundDetail, info: EntryInfo): Round {
-  const entry = round.entries[0];
+/** Cuanto se reutilizan las pistas de una ronda misteriosa. */
+const CLUE_CACHE_MS = 60_000;
+
+/** Lo que se pinta de una ronda misteriosa en lugar del objeto que catalog oculta. */
+const MYSTERY_INFO: EntryInfo = {
+  name: 'Lote misterioso',
+  description: 'Solo se conocen sus pistas: el objeto se revela a quien lo gane.',
+  category: 'Misterio',
+  condition: '—',
+  imageUrl: null,
+};
+
+/**
+ * Catalog oculta el objeto de un lote misterioso a quien no lo gano. Quien lo gano si lo ve:
+ * es justo a quien se le revela.
+ */
+function hidesItem(round: RoundDetail): boolean {
+  return round.mode === 'MYSTERY' && !(round.status === 'CLOSED' && round.isLeading);
+}
+
+function toMysteryEntry(entry: CatalogMysteryEntry): MysteryEntry {
+  return entry.kind === 'ITEM'
+    ? { ...entry, condition: ITEM_CONDITION_LABELS[entry.condition] }
+    : entry;
+}
+
+function toDutchSchedule(round: RoundDetail): DutchSchedule | null {
+  if (!round.dutch) return null;
   return {
+    startPrice: Number(round.dutch.startPrice),
+    floorPrice: Number(round.dutch.floorPrice),
+    step: Number(round.dutch.step),
+    intervalSeconds: round.dutch.intervalSeconds,
+  };
+}
+
+function toRound(round: RoundDetail, info: EntryInfo, clues: MysteryEntry[] | null = null): Round {
+  const entry = round.entries[0];
+  const mode = round.mode ?? 'CLASSIC';
+  return {
+    mode,
+    modeLocked: round.modeLocked ?? false,
+    wildcardSpins: round.wildcardSpins ?? 0,
+    dutch: toDutchSchedule(round),
+    sealed: round.sealed
+      ? {
+          count: round.sealed.count,
+          mine: round.sealed.mine ? Number(round.sealed.mine.amount) : null,
+        }
+      : null,
+    mystery: clues ? { entries: clues } : null,
     id: round.id,
     position: round.position,
     itemId: entry.catalogId,

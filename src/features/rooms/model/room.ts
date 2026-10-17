@@ -24,6 +24,10 @@ export interface RoomSummary {
   roundCount: number;
   /** Si quien consulta ya esta registrado. Para el funcionario siempre es `false`. */
   isParticipant: boolean;
+  /** Subastas dinamicas: si la ruleta de modalidades esta activa en la sala. */
+  dynamicModesEnabled?: boolean;
+  /** Si quien consulta programo la sala: solo el puede activar la ruleta y girarla. */
+  isOwner?: boolean;
 }
 
 /**
@@ -35,8 +39,54 @@ export interface RoundEntry {
   catalogId: string;
 }
 
-/** Que cerro una ronda: el vencimiento de su reloj o una compra inmediata. */
-export type RoundCloseReason = 'EXPIRED' | 'BUY_NOW';
+/**
+ * Que cerro una ronda: el vencimiento de su reloj, una compra inmediata o, en una ronda
+ * holandesa, alguien que pulso "Lo quiero".
+ */
+export type RoundCloseReason = 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM';
+
+/**
+ * Como se juega una ronda (subastas dinamicas). `CLASSIC` es la subasta ascendente de
+ * siempre y el modo de toda ronda que no paso por la ruleta.
+ */
+export type RoundMode = 'CLASSIC' | 'DUTCH' | 'SEALED' | 'MYSTERY';
+
+/** Lo que puede marcar la ruleta. El comodin no es un modo: obliga a girar otra vez. */
+export type SpinSegment = 'DUTCH' | 'SEALED' | 'MYSTERY' | 'WILDCARD';
+
+/** Precios de una ronda holandesa. Importes como texto, igual que el resto. */
+export interface DutchScheduleDetail {
+  startPrice: string;
+  floorPrice: string;
+  step: string;
+  intervalSeconds: number;
+}
+
+/** Sobre cerrado: cuantos sobres hay y el de quien consulta. Nunca los de los demas. */
+export interface SealedDetail {
+  count: number;
+  mine: { amount: string; sealedAt: string } | null;
+}
+
+/** `POST /rooms/:id/rounds/:roundId/spin`. */
+export interface SpinResult {
+  roomId: string;
+  roundId: string;
+  position: number;
+  segment: SpinSegment;
+  /** `null` si salio comodin. */
+  mode: RoundMode | null;
+  wildcardSpins: number;
+  canSpinAgain: boolean;
+}
+
+/** `GET /rounds/:id/sealed-results`: la apertura de sobres, cuando la ronda ya cerro. */
+export interface SealedResultsDetail {
+  roundId: string;
+  sealedCount: number;
+  ranking: Array<{ rank: number; amount: string; mine: boolean; winner: boolean }>;
+  myRank: number | null;
+}
 
 export interface RoundDetail {
   id: string;
@@ -67,6 +117,14 @@ export interface RoundDetail {
   endsAt: string | null;
   maximumEndsAt: string | null;
   entries: RoundEntry[];
+  /** Subastas dinamicas. Los servicios anteriores no lo traen: se trata como `CLASSIC`. */
+  mode?: RoundMode;
+  /** La ruleta ya fijo el modo y no se puede volver a girar. */
+  modeLocked?: boolean;
+  /** Comodines seguidos en esta ronda. */
+  wildcardSpins?: number;
+  dutch?: DutchScheduleDetail | null;
+  sealed?: SealedDetail | null;
 }
 
 /** `GET /rooms/:id`: la sala con sus rondas en orden. */
@@ -99,6 +157,8 @@ export interface ScheduleRoomRequest {
   maximumCapacity: number;
   /** ISO 8601. La sala se abre sola a esta hora y cierra el registro (HU-17). */
   startsAt: string;
+  /** Subastas dinamicas: activa la ruleta de modalidades desde que se programa. */
+  dynamicModes?: boolean;
   rounds: Array<{
     /**
      * El servicio admite varias entradas por ronda, pero la pantalla pone una sola: la sala

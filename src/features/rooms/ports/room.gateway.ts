@@ -2,6 +2,7 @@ import type {
   RoomDetail,
   RoomSummary,
   ScheduleRoomRequest,
+  SpinResult,
 } from '../model/room';
 
 /**
@@ -24,4 +25,16 @@ export interface RoomGateway {
    * no esta disponible responde 409 y no crea nada. Si catalog no contesta, 503.
    */
   schedule(request: ScheduleRoomRequest): Promise<RoomDetail>;
+
+  /**
+   * Subastas dinamicas: `PATCH /rooms/:id/dynamic-modes`. Solo el dueño de la sala (quien la
+   * programo); a otro funcionario el servicio le responde 403.
+   */
+  setDynamicModes(roomId: string, enabled: boolean): Promise<void>;
+
+  /**
+   * Subastas dinamicas: `POST /rooms/:id/rounds/:roundId/spin`. El resultado lo decide el
+   * servidor; la pantalla solo lo anima.
+   */
+  spin(roomId: string, roundId: string): Promise<SpinResult>;
 }

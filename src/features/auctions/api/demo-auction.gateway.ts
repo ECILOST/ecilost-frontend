@@ -866,6 +866,13 @@ export function createDemoAuctionGateway(
       myHighestBid: mine.length ? Math.max(...mine) : null,
       wonByMe: target.status === 'CLOSED' && target.currentBidderId === ME,
       closeReason: target.status === 'CLOSED' ? (target.closeReason ?? 'EXPIRED') : null,
+      // El demo solo simula la subasta clasica: sus rondas no pasan por la ruleta.
+      mode: 'CLASSIC',
+      modeLocked: false,
+      wildcardSpins: 0,
+      dutch: null,
+      sealed: null,
+      mystery: null,
     };
   }
 
@@ -879,6 +886,7 @@ export function createDemoAuctionGateway(
       capacity: room.capacity,
       admitted: room.admitted,
       isParticipant: room.isParticipant,
+      dynamicModesEnabled: false,
       rounds: room.rounds.map(roundView),
     };
   }
@@ -1021,6 +1029,22 @@ export function createDemoAuctionGateway(
         active.endsAt = now();
         advance();
         return live(room);
+      }),
+
+    // Las subastas dinamicas no se simulan: ninguna ronda del demo es holandesa ni de sobre.
+    dutchClaim: () =>
+      run(() => {
+        throw conflict('La demostración no incluye subastas holandesas.');
+      }),
+
+    sealBid: () =>
+      run(() => {
+        throw conflict('La demostración no incluye sobres cerrados.');
+      }),
+
+    sealedResults: () =>
+      run(() => {
+        throw conflict('La demostración no incluye sobres cerrados.');
       }),
 
     setAutoBid: (roomId, roundId, config) =>

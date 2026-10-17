@@ -3,6 +3,7 @@ import type {
   RoomDetail,
   RoomSummary,
   ScheduleRoomRequest,
+  SpinResult,
 } from '../model/room';
 import type { RoomGateway } from '../ports/room.gateway';
 
@@ -15,5 +16,12 @@ export function createHttpRoomGateway(http: HttpClient): RoomGateway {
 
     schedule: (request: ScheduleRoomRequest) =>
       http.post<RoomDetail>('/rooms', request),
+
+    setDynamicModes: async (roomId: string, enabled: boolean) => {
+      await http.patch(`/rooms/${roomId}/dynamic-modes`, { enabled });
+    },
+
+    spin: (roomId: string, roundId: string) =>
+      http.post<SpinResult>(`/rooms/${roomId}/rounds/${roundId}/spin`),
   };
 }

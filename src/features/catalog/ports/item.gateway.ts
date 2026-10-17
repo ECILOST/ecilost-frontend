@@ -4,6 +4,7 @@ import type {
   ItemSummary,
   ItemView,
   ListItemsQuery,
+  MysteryEntry,
   UpdateItemRequest,
 } from '../model/item';
 
@@ -31,4 +32,10 @@ export interface ItemGateway {
 
   /** `DELETE /items/:id`. La version viaja como parametro de consulta. */
   remove(id: string, version: number): Promise<void>;
+
+  /**
+   * `GET /mystery/rounds/:roundId`: las pistas de una ronda que salio como lote misterioso.
+   * Sin nombre, fotos ni id: es lo unico que el estudiante puede saber de ella.
+   */
+  mysteryClues(roundId: string): Promise<{ roundId: string; entries: MysteryEntry[] }>;
 }

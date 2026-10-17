@@ -67,8 +67,49 @@ export interface Round {
   myHighestBid: number | null;
   /** Solo cerrada: si la gano quien mira. */
   wonByMe: boolean;
-  /** Solo cerrada: `BUY_NOW` si alguien la compro de inmediato (HU-25). */
-  closeReason: 'EXPIRED' | 'BUY_NOW' | null;
+  /**
+   * Solo cerrada: `BUY_NOW` si alguien la compro de inmediato (HU-25), `DUTCH_CLAIM` si en una
+   * holandesa alguien pulso "Lo quiero".
+   */
+  closeReason: 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM' | null;
+  /** Subastas dinamicas: como se juega. Sin ruleta, siempre `CLASSIC`. */
+  mode: RoundMode;
+  /** La ruleta ya decidio el modo de esta ronda. */
+  modeLocked: boolean;
+  /** Comodines seguidos que lleva la ruleta de esta ronda. */
+  wildcardSpins: number;
+  /** Solo holandesa: como baja el precio. */
+  dutch: DutchSchedule | null;
+  /** Solo sobre cerrado: cuantos sobres hay y el de quien mira. */
+  sealed: { count: number; mine: number | null } | null;
+  /**
+   * Solo lote misterioso que quien mira no gano: las pistas. El nombre y la foto de la ronda
+   * no se conocen (catalog los oculta), asi que la pantalla pinta esto en su lugar.
+   */
+  mystery: { entries: MysteryEntry[] } | null;
+}
+
+export type RoundMode = 'CLASSIC' | 'DUTCH' | 'SEALED' | 'MYSTERY';
+export type SpinSegment = 'DUTCH' | 'SEALED' | 'MYSTERY' | 'WILDCARD';
+
+/** Holandesa: arranca en `startPrice` y baja `step` cada `intervalSeconds` hasta `floorPrice`. */
+export interface DutchSchedule {
+  startPrice: number;
+  floorPrice: number;
+  step: number;
+  intervalSeconds: number;
+}
+
+export type MysteryEntry =
+  | { kind: 'ITEM'; category: string; condition: string; clues: string[] }
+  | { kind: 'LOT'; itemCount: number; categories: string[]; clues: string[] };
+
+/** Apertura de sobres de una ronda de sobre cerrado ya cerrada. */
+export interface SealedResults {
+  roundId: string;
+  sealedCount: number;
+  ranking: Array<{ rank: number; amount: number; mine: boolean; winner: boolean }>;
+  myRank: number | null;
 }
 
 export interface Room {
@@ -81,10 +122,15 @@ export interface Room {
   admitted: number;
   /** Cierto si quien mira fue admitido antes del inicio y por tanto puede pujar. */
   isParticipant: boolean;
+  /** Subastas dinamicas: la ruleta de modalidades esta activa. */
+  dynamicModesEnabled: boolean;
   rounds: Round[];
   /** Hora del servidor al leer la sala, para contar hacia su inicio sin el reloj local. */
   serverTime?: string;
 }
+
+/** Modalidades de la ruleta en el orden de sus segmentos. */
+export const SPIN_SEGMENTS: readonly SpinSegment[] = ['DUTCH', 'SEALED', 'MYSTERY', 'WILDCARD'];
 
 export interface Bid {
   id: string;
