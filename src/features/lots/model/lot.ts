@@ -28,6 +28,30 @@ export interface Lot {
   /** userId del funcionario que lo armo. No hay nombre: el catalogo no conoce identidades. */
   createdBy: string;
   createdAt: string;
+  /**
+   * Portada del primer objeto del lote que tenga fotografia, firmada y de vida corta
+   * (quince minutos), o `null` si ninguno tiene. Llega en el listado y en la ficha.
+   */
+  coverUrl: string | null;
+  /** Las fotografias de todos sus objetos, en el orden de los objetos. Solo en `GET /lots/:id`. */
+  photos?: LotPhoto[];
+}
+
+/**
+ * Una fotografia de un objeto del lote. El lote no tiene galeria propia: muestra las que ya
+ * se adjuntaron a cada objeto, con el objeto al que pertenecen.
+ */
+export interface LotPhoto {
+  id: string;
+  itemId: string;
+  itemName: string;
+  contentType: string;
+  sizeBytes: number;
+  /** Lugar en la galeria de su objeto. */
+  position: number;
+  /** Enlace firmado de vida corta: no sirve guardarlo, hay que releer el lote. */
+  url: string;
+  uploadedAt: string;
 }
 
 /** Cuantos objetos exige el servicio como minimo. Un lote de uno no agrupa nada. */

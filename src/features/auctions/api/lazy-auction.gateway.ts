@@ -28,6 +28,11 @@ export function createLazyAuctionGateway(
       gateway().then((g) => g.buyNow(roomId, roundId)),
     setAutoBid: (roomId, roundId, config) =>
       gateway().then((g) => g.setAutoBid(roomId, roundId, config)),
+    dutchClaim: (roomId, roundId) =>
+      gateway().then((g) => g.dutchClaim(roomId, roundId)),
+    sealBid: (roomId, roundId, amount) =>
+      gateway().then((g) => g.sealBid(roomId, roundId, amount)),
+    sealedResults: (roundId) => gateway().then((g) => g.sealedResults(roundId)),
     subscribe(roomId, listener) {
       let cancelled = false;
       let stop: (() => void) | undefined;

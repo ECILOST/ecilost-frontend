@@ -5,6 +5,7 @@ import type {
   ItemSummary,
   ItemView,
   ListItemsQuery,
+  MysteryEntry,
   UpdateItemRequest,
 } from '../model/item';
 import type { ItemGateway } from '../ports/item.gateway';
@@ -29,5 +30,10 @@ export function createHttpItemGateway(http: HttpClient): ItemGateway {
 
     remove: (id: string, version: number) =>
       http.delete<void>(`/items/${id}`, { query: { version } }),
+
+    mysteryClues: (roundId: string) =>
+      http.get<{ roundId: string; entries: MysteryEntry[] }>(
+        `/mystery/rounds/${roundId}`,
+      ),
   };
 }

@@ -32,6 +32,15 @@ export const EMPTY_ITEM: ItemFormValues = {
   category: '',
 };
 
+/** Una pista por linea, recortadas, sin vacias y a lo sumo las que admite el servicio. */
+function parseClues(text: string): string[] {
+  return text
+    .split('\n')
+    .map((clue) => clue.trim().slice(0, ITEM_LIMITS.clue))
+    .filter(Boolean)
+    .slice(0, ITEM_LIMITS.clues);
+}
+
 /**
  * Lo que se comprueba antes de salir a la red. Solo la ausencia: la longitud ya la corta el
  * propio control con `maxLength`, y el resto de reglas las arbitra el servicio, que es quien
@@ -81,6 +90,8 @@ export function ItemForm({
   onCancel,
 }: ItemFormProps) {
   const [values, setValues] = useState<ItemFormValues>(initial);
+  // Las pistas se escriben como texto libre, una por linea; se separan al enviar.
+  const [cluesText, setCluesText] = useState((initial.clues ?? []).join('\n'));
   const [clientErrors, setClientErrors] = useState<
     Partial<Record<ItemField, string>>
   >({});
@@ -117,6 +128,10 @@ export function ItemForm({
       condition: values.condition,
       category: values.category.trim(),
     };
+    // Solo viajan si se usan, o si el objeto ya tenia (para poder borrarlas): sin pistas, el
+    // cuerpo es el mismo de siempre.
+    const clues = parseClues(cluesText);
+    if (clues.length > 0 || initial.clues !== undefined) trimmed.clues = clues;
 
     const missing: Partial<Record<ItemField, string>> = {};
     if (!trimmed.name) missing.name = REQUIRED.name;
@@ -231,6 +246,18 @@ export function ItemForm({
             />
           </Field>
         </div>
+
+        <Field
+          label="Pistas para lote misterioso"
+          hint={`Opcional. Una por línea, hasta ${ITEM_LIMITS.clues}. Si la ruleta oculta el objeto, es lo único que verán los estudiantes: no lo delates.`}
+        >
+          <Textarea
+            value={cluesText}
+            rows={3}
+            placeholder={'Encontrado en bloque G\nFunciona con batería'}
+            onChange={(event) => setCluesText(event.target.value)}
+          />
+        </Field>
 
         {note ? <div className={styles.note}>{note}</div> : null}
 

@@ -32,6 +32,18 @@ import {
   RoomItemsStrip,
 } from '../../components/room-panels';
 import { CustomBidForm } from '../../components/custom-bid-form';
+import { DutchPanel } from '../../components/dynamic/dutch-panel';
+import { ModeAnnouncement } from '../../components/dynamic/mode-announcement';
+import { MysteryClues } from '../../components/dynamic/mystery-clues';
+import { RouletteReveal } from '../../components/dynamic/roulette-reveal';
+import { SealedPanel } from '../../components/dynamic/sealed-panel';
+import { SealedResultsDialog } from '../../components/dynamic/sealed-results-dialog';
+import {
+  acceptsAscendingBids,
+  isDynamic,
+  MODE_META,
+} from '../../domain/dynamic-modes';
+import { useDynamicRoom } from '../../hooks/use-dynamic-room';
 import {
   ANTI_SNIPING_WINDOW_MS,
   coinsToCommit,
@@ -45,8 +57,10 @@ import { useLiveOutcomes } from '../../hooks/use-live-outcomes';
 import {
   useAutoBid,
   useBuyNow,
+  useDutchClaim,
   useLiveRoom,
   usePlaceBid,
+  useSealBid,
 } from '../../hooks/use-live-room';
 import type { LiveRoom, Round } from '../../model/auction';
 import styles from './room.module.css';
@@ -75,6 +89,8 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
   const placeBid = usePlaceBid(roomId);
   const buyNow = useBuyNow(roomId);
   const autoBid = useAutoBid(roomId);
+  const dutchClaim = useDutchClaim(roomId);
+  const sealBid = useSealBid(roomId);
   const { data: wallet } = useWallet();
 
   const [intent, setIntent] = useState<BidIntent | null>(null);
@@ -84,6 +100,8 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
   const round = live?.round ?? null;
   const remaining = useCountdown(round?.endsAt ?? null);
   const { outcome, setOutcome, extended } = useLiveOutcomes(live, remaining);
+  // Subastas dinamicas: la ruleta que gira el dueño y el anuncio de la modalidad.
+  const dynamic = useDynamicRoom(live);
 
   // HU-25: un dialogo abierto es para el objeto que se veia al abrirlo. Si la sala paso a
   // otro (alguien lo compro o vencio), se cierra: confirmarlo ya no tiene a que ir.
@@ -131,9 +149,16 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
       title="Sala de subasta en vivo"
       back={{ to: routes.home, label: 'Volver al inicio' }}
       badges={
-        <Pill tone="pink" live>
-          En vivo
-        </Pill>
+        <>
+          {round && isDynamic(round.mode) ? (
+            <Pill tone={MODE_META[round.mode].tone}>
+              {MODE_META[round.mode].glyph} {MODE_META[round.mode].label}
+            </Pill>
+          ) : null}
+          <Pill tone="pink" live>
+            En vivo
+          </Pill>
+        </>
       }
       aside={
         live && round ? (
@@ -173,7 +198,10 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
   }
 
   const nextBid = round ? round.minimumBid : 0;
-  const mutationError = placeBid.error ?? buyNow.error ?? autoBid.error;
+  const mutationError =
+    placeBid.error ?? buyNow.error ?? autoBid.error ?? dutchClaim.error ?? sealBid.error;
+  const mode = round?.mode ?? 'CLASSIC';
+  const hiddenMystery = round?.mode === 'MYSTERY' && round.mystery !== null;
   /*
    * "Vas ganando" y "ultimos segundos" siguen el precio y el reloj en vivo. Los demas
    * cuentan lo que paso en un momento concreto, asi que muestran la ronda congelada de
@@ -198,8 +226,9 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
               <>
                 <ItemArt
                   seed={round.itemId}
-                  label={round.itemName}
-                  src={round.imageUrl}
+                  // Lote misterioso: el objeto esta oculto, el arte solo muestra la incognita.
+                  label={hiddenMystery ? '?' : round.itemName}
+                  src={hiddenMystery ? null : round.imageUrl}
                   variant="hero"
                   className={styles.art}
                 >
@@ -217,8 +246,14 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                 <div className={styles.summary}>
                   <div>
                     <h2 className={styles.itemName}>{round.itemName}</h2>
-                    <span className={styles.label}>Precio actual</span>
-                    <CoinAmount value={round.currentPrice} size="hero" unit />
+                    {mode === 'DUTCH' ? null : (
+                      <>
+                        <span className={styles.label}>
+                          {mode === 'SEALED' ? 'Precio base' : 'Precio actual'}
+                        </span>
+                        <CoinAmount value={mode === 'SEALED' ? round.basePrice : round.currentPrice} size="hero" unit />
+                      </>
+                    )}
                   </div>
                   <div className={styles.mine} aria-live="polite">
                     {round.myHighestBid !== null ? (
@@ -247,33 +282,65 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                   </div>
                 </div>
 
-                <div className={styles.actions}>
-                  <Button
-                    variant="bid"
-                    size="block"
-                    onClick={() => start('bid', nextBid)}
-                  >
-                    ⚡ Pujar {formatCoins(nextBid)} ECICoin
-                  </Button>
-                  {round.buyNowPrice !== null &&
-                  round.buyNowPrice > round.currentPrice ? (
-                    <Button
-                      variant="secondary"
-                      size="block"
-                      onClick={() => start('buy', round.buyNowPrice ?? 0)}
-                    >
-                      🛒 Comprar ahora · {formatCoins(round.buyNowPrice)}
-                    </Button>
-                  ) : null}
-                </div>
+                {hiddenMystery && round.mystery ? (
+                  <MysteryClues entries={round.mystery.entries} />
+                ) : null}
 
-                <div className={styles.customBid}>
-                  <CustomBidForm
-                    minimum={nextBid}
-                    disabled={placeBid.isPending}
-                    onBid={(amount) => start('bid', amount)}
+                {mode === 'DUTCH' ? (
+                  <DutchPanel
+                    round={round}
+                    available={available}
+                    pending={dutchClaim.isPending}
+                    watchers={live.participants}
+                    onClaim={() => {
+                      setOutcome(null);
+                      // Sin confirmacion a proposito: en la holandesa gana quien pulsa primero.
+                      dutchClaim.mutate(round.id);
+                    }}
                   />
-                </div>
+                ) : null}
+
+                {mode === 'SEALED' ? (
+                  <SealedPanel
+                    round={round}
+                    available={available}
+                    pending={sealBid.isPending}
+                    participants={live.participants}
+                    onSeal={(amount) => sealBid.mutate({ roundId: round.id, amount })}
+                  />
+                ) : null}
+
+                {acceptsAscendingBids(mode) ? (
+                  <>
+                    <div className={styles.actions}>
+                      <Button
+                        variant="bid"
+                        size="block"
+                        onClick={() => start('bid', nextBid)}
+                      >
+                        ⚡ Pujar {formatCoins(nextBid)} ECICoin
+                      </Button>
+                      {round.buyNowPrice !== null &&
+                      round.buyNowPrice > round.currentPrice ? (
+                        <Button
+                          variant="secondary"
+                          size="block"
+                          onClick={() => start('buy', round.buyNowPrice ?? 0)}
+                        >
+                          🛒 Comprar ahora · {formatCoins(round.buyNowPrice)}
+                        </Button>
+                      ) : null}
+                    </div>
+
+                    <div className={styles.customBid}>
+                      <CustomBidForm
+                        minimum={nextBid}
+                        disabled={placeBid.isPending}
+                        onBid={(amount) => start('bid', amount)}
+                      />
+                    </div>
+                  </>
+                ) : null}
               </>
             ) : (
               <div className={styles.between}>
@@ -288,7 +355,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
           </div>
 
           <aside className={styles.side}>
-            {round ? (
+            {round && acceptsAscendingBids(round.mode) ? (
               <AutoBidPanel
                 autoBid={live.autoBid}
                 round={round}
@@ -351,6 +418,23 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
               config: { enabled, limit: live.autoBid.limit || nextBid * 2 },
             })
           }
+        />
+      ) : null}
+
+      {dynamic.spin && !dynamic.announcing ? (
+        <RouletteReveal
+          segment={dynamic.spin.segment}
+          position={dynamic.spin.position}
+          onClose={dynamic.closeSpin}
+        />
+      ) : null}
+
+      {dynamic.announcing && isDynamic(dynamic.announcing.mode) ? (
+        <ModeAnnouncement
+          mode={dynamic.announcing.mode}
+          position={dynamic.announcing.position}
+          total={live.room.rounds.length}
+          onDone={dynamic.closeAnnouncement}
         />
       ) : null}
     </>
@@ -542,14 +626,52 @@ function OutcomeScreens({
     );
   }
 
+  // Subastas dinamicas: la apertura de sobres es el resultado del sobre cerrado.
+  if (kind === 'sealed') return <SealedResultsDialog round={round} onClose={onClose} />;
+
+  if (kind === 'lost') {
+    return (
+      <OutcomeDialog
+        {...common}
+        itemName="Lote misterioso"
+        imageUrl={null}
+        tone="pink"
+        heading="Esta vez no"
+        subtitle="Otro participante se llevó el lote misterioso. El objeto solo se revela a quien ganó."
+        actions={
+          <>
+            <Button size="lg" onClick={onClose}>
+              Ver siguiente objeto →
+            </Button>
+            {myBids}
+          </>
+        }
+      >
+        <OutcomeRow>
+          <OutcomeFigure label="Tu última puja">
+            {formatCoins(round.myHighestBid ?? 0)}
+          </OutcomeFigure>
+          <OutcomeFigure label="Tus ECICoin reservados">Se liberan</OutcomeFigure>
+        </OutcomeRow>
+        {price('Precio ganador')}
+      </OutcomeDialog>
+    );
+  }
+
   if (kind === 'won') {
+    const dynamicWin =
+      round.mode === 'MYSTERY'
+        ? { heading: '¡Ganaste el misterio!', subtitle: `Era… ${round.itemName}. Ya puedes verlo en tus pujas.` }
+        : round.mode === 'DUTCH'
+          ? { heading: '¡Es tuyo!', subtitle: 'Pulsaste «Lo quiero» antes que los demás.' }
+          : null;
     return (
       <OutcomeDialog
         {...common}
         tone="cyan"
         confetti
-        heading="¡Ganaste!"
-        subtitle="Ganaste este objeto. La sala continúa con el siguiente."
+        heading={dynamicWin?.heading ?? '¡Ganaste!'}
+        subtitle={dynamicWin?.subtitle ?? 'Ganaste este objeto. La sala continúa con el siguiente.'}
         actions={
           <>
             <Button size="lg" onClick={onClose}>

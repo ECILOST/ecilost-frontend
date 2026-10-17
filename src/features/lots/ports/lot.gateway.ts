@@ -3,9 +3,9 @@ import type { CreateLotRequest, Lot } from '../model/lot';
 /**
  * Lo que la aplicacion necesita de los lotes, sin decir por donde llega.
  *
- * Son tres operaciones y no cinco porque el servicio publica tres: no hay `PATCH` ni
- * `DELETE` de lotes. Declarar aqui un `update` que nadie puede implementar seria prometer
- * algo que la pantalla acabaria ofreciendo.
+ * No hay `PATCH` ni `DELETE` de lotes porque el servicio no los publica: declarar aqui un
+ * `update` que nadie puede implementar seria prometer algo que la pantalla acabaria
+ * ofreciendo. Las fotografias tampoco: el lote muestra las de sus objetos.
  */
 export interface LotGateway {
   /** `GET /lots`. Cualquier sesion valida puede consultarlos. */

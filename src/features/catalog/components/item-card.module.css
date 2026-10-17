@@ -40,7 +40,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  padding: var(--s-4);
+  /* Arriba hay una franja para la etiqueta de estado: en tarjetas angostas tapaba la foto. */
+  padding: var(--s-7) var(--s-4) var(--s-4);
   border-radius: var(--r-md);
   background: var(--eci-night);
   overflow: hidden;

@@ -3,7 +3,16 @@ import { roundSoldToSomeoneElse } from './auction-rules';
 
 /** Los avisos que la sala en vivo le muestra a quien puja. */
 export type OutcomeKind =
-  'winning' | 'outbid' | 'last' | 'won' | 'limit' | 'sold';
+  | 'winning'
+  | 'outbid'
+  | 'last'
+  | 'won'
+  | 'limit'
+  | 'sold'
+  /** Subastas dinamicas: se abrieron los sobres de una ronda en la que sello. */
+  | 'sealed'
+  /** Subastas dinamicas: un lote misterioso en el que pujo se lo llevo otro. */
+  | 'lost';
 
 export interface Outcome {
   kind: OutcomeKind;
@@ -39,6 +48,20 @@ export function detectLiveRoomChange(
     before.round.id === live.round.id &&
     new Date(live.round.endsAt) > new Date(before.round.endsAt),
   );
+
+  // Subastas dinamicas. El sobre cerrado se abre para todos los que sellaron, ganaran o no:
+  // el ranking es el resultado. Va antes que "ganaste", que en esa modalidad ya lo dice el ranking.
+  const closedNow = live.room.rounds.find(
+    (candidate) =>
+      candidate.status === 'CLOSED' &&
+      before.room.rounds.find((old) => old.id === candidate.id)?.status === 'ACTIVE',
+  );
+  if (closedNow?.mode === 'SEALED' && closedNow.sealed?.mine != null) {
+    return { extended, outcome: { kind: 'sealed', round: closedNow } };
+  }
+  if (closedNow?.mode === 'MYSTERY' && !closedNow.wonByMe && closedNow.myHighestBid !== null) {
+    return { extended, outcome: { kind: 'lost', round: closedNow } };
+  }
 
   const won = live.room.rounds.find(
     (candidate) =>

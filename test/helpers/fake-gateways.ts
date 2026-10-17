@@ -17,6 +17,7 @@ import type {
   ItemSummary,
   ItemView,
   ListItemsQuery,
+  MysteryEntry,
   UpdateItemRequest,
 } from '@/features/catalog/model/item';
 import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
@@ -33,6 +34,7 @@ import {
 import type {
   RoomDetail,
   ScheduleRoomRequest,
+  SpinSegment,
 } from '@/features/rooms/model/room';
 import type { RoomGateway } from '@/features/rooms/ports/room.gateway';
 import type {
@@ -234,6 +236,8 @@ export interface FakeCatalog {
   updated?: { id: string; request: UpdateItemRequest }[];
   /** Lo que se mando borrar, con la version que se envio en la consulta. */
   deleted?: { id: string; version: number }[];
+  /** Pistas de las rondas misteriosas, por id de ronda (subastas dinamicas). */
+  mysteryClues?: Record<string, MysteryEntry[]>;
   /**
    * Con que error responde cada escritura, cuando la prueba quiere uno.
    *
@@ -314,6 +318,9 @@ export function createFakeItemGateway(catalog: FakeCatalog = {}): ItemGateway {
       delete views[id];
       return Promise.resolve();
     },
+    // Ninguna ronda de las pruebas es misteriosa salvo que la prueba lo diga.
+    mysteryClues: (roundId: string) =>
+      Promise.resolve({ roundId, entries: catalog.mysteryClues?.[roundId] ?? [] }),
   };
 }
 
@@ -328,6 +335,7 @@ export function lotFixture(overrides: Partial<Lot> = {}): Lot {
     ],
     createdBy: STAFF.userId,
     createdAt: '2026-09-18T10:00:00.000Z',
+    coverUrl: null,
     ...overrides,
   };
 }
@@ -511,6 +519,10 @@ export interface FakeRooms {
   /** Lo que se mando programar, en orden. */
   scheduled?: ScheduleRoomRequest[];
   rejects?: { schedule?: ApiError };
+  /** Subastas dinamicas: lo que marcara la ruleta en cada giro, en orden. */
+  spins?: SpinSegment[];
+  /** Subastas dinamicas: las activaciones y desactivaciones pedidas. */
+  dynamicModes?: Array<{ roomId: string; enabled: boolean }>;
 }
 
 export function createFakeRoomGateway(fake: FakeRooms = {}): RoomGateway {
@@ -559,6 +571,24 @@ export function createFakeRoomGateway(fake: FakeRooms = {}): RoomGateway {
       rooms.push(room);
 
       return Promise.resolve(room);
+    },
+    setDynamicModes: (roomId: string, enabled: boolean) => {
+      const room = rooms.find((candidate) => candidate.id === roomId);
+      if (room) room.dynamicModesEnabled = enabled;
+      fake.dynamicModes?.push({ roomId, enabled });
+      return Promise.resolve();
+    },
+    spin: (roomId: string, roundId: string) => {
+      // Las pruebas fijan lo que marca la ruleta; sin guion, cae en lote misterioso.
+      const segment = fake.spins?.shift() ?? 'MYSTERY';
+      const room = rooms.find((candidate) => candidate.id === roomId);
+      const round = room?.rounds.find((candidate) => candidate.id === roundId);
+      const wildcardSpins = (round?.wildcardSpins ?? 0) + (segment === 'WILDCARD' ? 1 : 0);
+      const mode = segment === 'WILDCARD' ? null : segment;
+      if (round) Object.assign(round, { wildcardSpins, ...(mode ? { mode, modeLocked: true } : {}) });
+      return Promise.resolve({
+        roomId, roundId, position: round?.position ?? 1, segment, mode, wildcardSpins, canSpinAgain: mode === null,
+      });
     },
   };
 }

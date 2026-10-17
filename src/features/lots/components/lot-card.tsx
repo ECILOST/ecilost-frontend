@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { routes } from '@/app/routes';
+import { ItemArt } from '@/shared/components/ui/item-art';
 import { formatDate } from '@/shared/format/date';
 import type { Lot } from '../model/lot';
 import { LotStatusBadge } from './lot-status-badge';
@@ -16,18 +17,28 @@ export function LotCard({ lot }: { lot: Lot }) {
   return (
     <li className={styles.card}>
       <Link className={styles.link} to={routes.lot(lot.id)}>
-        <div className={styles.head}>
-          <h2 className={styles.name}>{lot.name}</h2>
-          <LotStatusBadge status={lot.status} />
+        {/* Decorativa: el nombre del lote va justo al lado, en texto. */}
+        <ItemArt
+          seed={lot.id}
+          label=""
+          src={lot.coverUrl}
+          variant="thumb"
+          className={styles.thumb}
+        />
+        <div className={styles.body}>
+          <div className={styles.head}>
+            <h2 className={styles.name}>{lot.name}</h2>
+            <LotStatusBadge status={lot.status} />
+          </div>
+
+          <p className={styles.items}>
+            {lot.items.map((item) => item.name).join(' · ')}
+          </p>
+
+          <p className={styles.meta}>
+            {lot.items.length} objetos · armado el {formatDate(lot.createdAt)}
+          </p>
         </div>
-
-        <p className={styles.items}>
-          {lot.items.map((item) => item.name).join(' · ')}
-        </p>
-
-        <p className={styles.meta}>
-          {lot.items.length} objetos · armado el {formatDate(lot.createdAt)}
-        </p>
       </Link>
     </li>
   );

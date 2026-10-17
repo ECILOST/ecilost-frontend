@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { EXTENSION_NOTICE_MS, LAST_SECONDS_MS } from '../domain/auction-rules';
+import { acceptsAscendingBids } from '../domain/dynamic-modes';
 import {
   detectLiveRoomChange,
   type Outcome,
@@ -43,6 +44,8 @@ export function useLiveOutcomes(live: LiveRoom | undefined, remaining: number) {
 
   useEffect(() => {
     if (!round || remaining <= 0 || remaining > LAST_SECONDS_MS) return;
+    // "Ultimos segundos" invita a pujar y extender el cierre: en holandesa y sobre cerrado no aplica.
+    if (!acceptsAscendingBids(round.mode)) return;
     if (lastSecondsShown.current === round.id) return;
     lastSecondsShown.current = round.id;
     setOutcome({ kind: 'last', round });

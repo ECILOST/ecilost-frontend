@@ -1,6 +1,7 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { Icon } from './icon';
 import styles from './item-art.module.css';
+import { PhotoPlate } from './photo-plate';
 
 /**
  * Pares de colores de las manchas, tal como aparecen en el diseño. Cada objeto recibe uno
@@ -108,11 +109,15 @@ export function ItemArt({
       ) : null}
 
       {image ? (
-        <img
-          className={styles.image}
+        /*
+         * La misma placa que el catalogo: la foto entera, con la forma de la foto, y las
+         * manchas detras. Antes la foto llenaba el recuadro y se recortaba por los lados.
+         */
+        <PhotoPlate
+          className={styles.plate}
+          size={variant === 'thumb' ? 'thumb' : 'box'}
           src={image}
           alt={label}
-          loading="lazy"
           onError={() => setFailedSrc(image)}
         />
       ) : variant === 'thumb' ? null : (

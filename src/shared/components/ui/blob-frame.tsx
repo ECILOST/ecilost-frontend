@@ -1,5 +1,8 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import styles from './blob-frame.module.css';
+import { PhotoPlate } from './photo-plate';
+
+export { plateRatio } from './photo-plate';
 
 /** Cada paleta son tres colores que conviven, como los collages de la referencia. */
 export type BlobPalette = 1 | 2 | 3 | 4;
@@ -36,7 +39,10 @@ export interface BlobFrameProps {
   palette?: BlobPalette;
   shape?: BlobShape;
   size?: 'sm' | 'md' | 'lg';
-  /** `contain` para objetos recortados, `cover` para fotografias reales. */
+  /**
+   * `contain` para objetos recortados (respiran dentro de la placa), `cover` para fotografias
+   * reales (llenan la placa). En los dos casos la foto se ve entera: nunca se recorta.
+   */
   fit?: 'contain' | 'cover';
   /** Que mostrar cuando no hay imagen: una inicial, un glifo. */
   fallback?: ReactNode;
@@ -53,12 +59,18 @@ export function BlobFrame({
   fallback,
   className,
 }: BlobFrameProps) {
+  // Un enlace firmado vencido responde 403: en vez de una imagen rota vuelve el collage con
+  // la inicial. Se recuerda que URL fallo, asi que un enlace nuevo se vuelve a intentar.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
+  const photo = src && src !== failedSrc ? src : null;
+
   return (
     <div
       className={[
         styles.frame,
         styles[size],
         styles[`palette-${palette}`],
+        photo ? styles.withPhoto : '',
         className,
       ]
         .filter(Boolean)
@@ -69,12 +81,19 @@ export function BlobFrame({
       <span className={styles.blobA} aria-hidden="true" />
       <span className={styles.blobB} aria-hidden="true" />
       <span className={styles.chip} aria-hidden="true" />
-      {src ? (
-        <img
-          className={`${styles.image} ${styles[fit]}`}
-          src={src}
+      {photo ? (
+        /*
+         * La fotografia va en una placa de esquinas suaves y no recortada con la forma de la
+         * mancha: las fotos de producto traen su propio fondo (casi siempre blanco), y al
+         * recortarlas en mancha tapaban el color y dejaban bordes sueltos que no coincidian.
+         * Las manchas pasan detras y asoman por dos esquinas.
+         */
+        <PhotoPlate
+          size="frame"
+          src={photo}
           alt={alt}
-          loading="lazy"
+          fit={fit}
+          onError={() => setFailedSrc(photo)}
         />
       ) : (
         <span className={styles.fallback} aria-hidden="true">

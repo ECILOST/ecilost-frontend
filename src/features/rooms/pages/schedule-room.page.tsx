@@ -12,6 +12,7 @@ import { Field, FormActions, Input, Select } from '@/shared/components/ui/field'
 import { Icon } from '@/shared/components/ui/icon';
 import { Notice } from '@/shared/components/ui/notice';
 import { Page, PageHeader } from '@/shared/components/ui/page';
+import { Toggle } from '@/shared/components/ui/toggle';
 import {
   hasErrors,
   toScheduleRequest,
@@ -191,6 +192,22 @@ export function ScheduleRoomPage() {
           </Field>
         </div>
 
+        <div className={styles.dynamicModes}>
+          <Toggle
+            checked={draft.dynamicModes ?? false}
+            label="Subastas dinámicas"
+            onChange={(dynamicModes) => update({ dynamicModes })}
+          />
+          <span>
+            <strong>🎡 Subastas dinámicas</strong>
+            <br />
+            <small>
+              Antes de cada ronda girarás una ruleta: holandesa, sobre cerrado o lote
+              misterioso. Puedes activarlas después desde la sala.
+            </small>
+          </span>
+        </div>
+
         <fieldset className={styles.rounds}>
           <legend className={styles.legend}>
             Rondas
@@ -254,6 +271,25 @@ export function ScheduleRoomPage() {
                       onChange={(event) =>
                         updateRound(round.id, {
                           startingPrice: event.target.value,
+                        })
+                      }
+                    />
+                  </Field>
+
+                  <Field
+                    label="Compra inmediata"
+                    hint="Opcional. Mayor que el precio mínimo: quien lo pague se lleva la ronda al instante."
+                    error={errors.rounds[round.id]?.buyNowPrice}
+                  >
+                    <Input
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="Sin compra inmediata"
+                      value={round.buyNowPrice ?? ''}
+                      disabled={schedule.isPending}
+                      onChange={(event) =>
+                        updateRound(round.id, {
+                          buyNowPrice: event.target.value,
                         })
                       }
                     />
@@ -330,7 +366,7 @@ export function ScheduleRoomPage() {
           {draft.rounds
             .map(
               (round, index) =>
-                `${index + 1}. ${byKey.get(round.entry)?.name ?? '—'} (desde ${formatEcicoin(round.startingPrice.trim())})`,
+                `${index + 1}. ${byKey.get(round.entry)?.name ?? '—'} (desde ${formatEcicoin(round.startingPrice.trim())}${round.buyNowPrice?.trim() ? `, compra inmediata ${formatEcicoin(round.buyNowPrice.trim())}` : ''})`,
             )
             .join(' · ')}
         </strong>
