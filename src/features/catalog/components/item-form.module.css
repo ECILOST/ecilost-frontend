@@ -1,33 +1,52 @@
 /*
- * Formulario de alta y de edicion. Una sola columna y ancho de lectura: un formulario que
- * ocupa los 1080 px de la pagina obliga a barrer la pantalla de lado a lado entre la
- * etiqueta y su casilla.
+ * Formulario de alta y de edicion. En pantalla ancha usa dos columnas parejas: los datos
+ * cortos (nombre, estado, categoria) a la izquierda y los textos largos (descripcion,
+ * pistas) a la derecha, de modo que el ancho de la pagina se reparte y no queda un lado
+ * vacio. En el movil las dos columnas se apilan y el formulario vuelve a ser de una sola.
  */
 .form {
   display: grid;
-  gap: var(--s-5);
+  gap: var(--s-4);
   width: 100%;
-  max-width: 620px;
+}
+
+.columns {
+  display: grid;
+  gap: var(--s-4);
+}
+
+.column {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  min-width: 0;
+}
+
+@media (width >= 900px) {
+  .columns {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--s-6);
+  }
 }
 
 /*
- * Estado fisico y categoria comparten fila en cuanto hay sitio: son los dos campos cortos y
- * juntos se leen como lo que son, la clasificacion del objeto.
+ * Las dos columnas terminan a la par: la descripcion lleva un alto moderado y los campos cortos
+ * de la izquierda se reparten toda la altura de la fila, en vez de quedar apilados arriba con
+ * un hueco debajo.
  */
-.row {
-  display: grid;
-  gap: var(--s-5);
-}
+@media (width >= 900px) {
+  .column:first-child {
+    align-content: space-between;
+  }
 
-@media (width >= 560px) {
-  .row {
-    grid-template-columns: 1fr 1fr;
+  .column:last-child > :first-child textarea {
+    min-height: 104px;
   }
 }
 
 /* El resumen no dibuja nada: solo es el sitio al que vuelve el foco tras un envio fallido. */
 .summary {
-  max-width: 620px;
+  max-width: 760px;
 }
 
 .summary:focus {

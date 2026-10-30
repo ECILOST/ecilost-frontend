@@ -21,7 +21,7 @@ body,
  * puesto, pero no se ve donde.
  */
 html {
-  scroll-padding-block: 80px 104px;
+  scroll-padding-block: 64px 84px;
 }
 
 body {

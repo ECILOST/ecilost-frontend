@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './dialog.module.css';
 
 /**
@@ -7,6 +8,10 @@ import styles from './dialog.module.css';
  *
  * No usa `<dialog>` nativo porque jsdom no implementa `showModal()` y las pruebas de
  * pantalla lo necesitan; a cambio cumple lo mismo a mano: rol, titulo, Escape y foco.
+ *
+ * Se pinta en un portal sobre `document.body` y no donde se declara: dentro de una pantalla,
+ * que tiene su propia animacion de entrada y por tanto su propio contexto de apilamiento, el
+ * velo quedaba por debajo de la cabecera y de la barra inferior y las tapaba a medias.
  */
 export function Dialog({
   open,
@@ -44,7 +49,7 @@ export function Dialog({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose}>
       <div
         ref={panel}
@@ -60,6 +65,7 @@ export function Dialog({
         </span>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

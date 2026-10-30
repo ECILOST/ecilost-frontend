@@ -112,8 +112,14 @@
   --s-6: 32px;
   --s-7: 48px;
   --s-8: 64px;
-  --page-max: 1120px;
-  --page-gutter: clamp(16px, 3vw, 34px);
+  /* Mas ancho que antes (1120): en pantallas grandes la columna central se veia perdida. */
+  --page-max: 1280px;
+  --page-gutter: clamp(12px, 2.4vw, 28px);
+  /* Ritmo vertical de pagina: mas apretado en el movil, donde cada pixel cuenta. */
+  --page-gap: clamp(12px, 2vw, 20px);
+  --page-pad-top: clamp(12px, 2.4vw, 24px);
+  /* Alto de los controles: el minimo tactil, sin pasarse. */
+  --control-h: 44px;
 
   /* --- Profundidad ---------------------------------------------------------- */
   --shadow-card: 0 20px 44px -30px rgb(0 0 0 / 95%);

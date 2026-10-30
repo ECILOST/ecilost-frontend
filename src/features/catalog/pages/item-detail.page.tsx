@@ -61,70 +61,78 @@ export function ItemDetailPage() {
 
       <Flash />
 
-      <MediaViewer
-        photos={item.photos}
-        video={item.video}
-        palette={palette}
-        shape={shape}
-        fallback={item.name.charAt(0).toUpperCase()}
-        badge={<ItemStatusBadge status={item.status} solid />}
-      />
-
-      <div className={styles.titleBlock}>
-        <h1 className={styles.name}>{item.name}</h1>
-        <div className={styles.chips}>
-          <Pill tone="blue">{item.category}</Pill>
-          <Pill tone="neutral">
-            Estado físico: {ITEM_CONDITION_LABELS[item.condition]}
-          </Pill>
-        </div>
-      </div>
-
-      <div className={styles.section}>
-        <h2 className={styles.sectionTitle}>Descripción</h2>
-        <p className={styles.description}>{item.description}</p>
-      </div>
-
-      <dl className={styles.detail}>
-        <div>
-          <dt>Registrado</dt>
-          <dd>{formatDate(item.registeredAt)}</dd>
+      <div className={styles.layout}>
+        <div className={styles.media}>
+          <MediaViewer
+            photos={item.photos}
+            video={item.video}
+            palette={palette}
+            shape={shape}
+            fallback={item.name.charAt(0).toUpperCase()}
+            badge={<ItemStatusBadge status={item.status} solid />}
+          />
         </div>
 
-        {/*
-          Solo cuando pertenece a uno. Es lo que explica por que este objeto no se puede
-          editar el dia que cambie de estado, y da a donde ir a verlo.
-        */}
-        {item.lotId ? (
-          <div>
-            <dt>Lote</dt>
-            <dd>
-              <LotLink lotId={item.lotId} />
-            </dd>
+        <div className={styles.info}>
+          <div className={styles.titleBlock}>
+            <h1 className={styles.name}>{item.name}</h1>
+            <div className={styles.chips}>
+              <Pill tone="blue">{item.category}</Pill>
+              <Pill tone="neutral">
+                Estado físico: {ITEM_CONDITION_LABELS[item.condition]}
+              </Pill>
+            </div>
           </div>
-        ) : null}
-      </dl>
 
-      {/*
-        Todo lo que sigue son herramientas de funcionario, agrupadas al final y detras de la
-        capacidad. La `version` que el servicio le manda no se pinta: es el numero del
-        bloqueo optimista, no un dato del objeto, y suelto en la ficha no le dice nada a
-        nadie. Se usa donde sirve, que es al editar y al borrar.
-      */}
-      {principal?.canManageCatalog ? (
-        <>
+          <div className={styles.section}>
+            <h2 className={styles.sectionTitle}>Descripción</h2>
+            <p className={styles.description}>{item.description}</p>
+          </div>
+
+          <dl className={styles.detail}>
+            <div>
+              <dt>Registrado</dt>
+              <dd>{formatDate(item.registeredAt)}</dd>
+            </div>
+
+            {/*
+              Solo cuando pertenece a uno. Es lo que explica por que este objeto no se puede
+              editar el dia que cambie de estado, y da a donde ir a verlo.
+            */}
+            {item.lotId ? (
+              <div>
+                <dt>Lote</dt>
+                <dd>
+                  <LotLink lotId={item.lotId} />
+                </dd>
+              </div>
+            ) : null}
+          </dl>
+
           {/*
+            Herramientas de funcionario, detras de la capacidad. La `version` que el servicio
+            le manda no se pinta: es el numero del bloqueo optimista, no un dato del objeto.
+            Se usa donde sirve, que es al editar y al borrar.
+
             `isItemDetail` no es una comprobacion de permiso, es un estrechamiento de tipo:
             las acciones necesitan la `version`, y la ficha recortada no la trae.
           */}
-          {isItemDetail(item) ? <ItemActions item={item} /> : null}
-          <MediaManager
-            itemId={item.id}
-            photos={item.photos}
-            video={item.video}
-          />
-        </>
-      ) : null}
+          {principal?.canManageCatalog && isItemDetail(item) ? (
+            <ItemActions item={item} />
+          ) : null}
+        </div>
+
+        {/* Subir fotografias queda bajo las fotografias en escritorio, y tras el texto en el movil. */}
+        {principal?.canManageCatalog ? (
+          <div className={styles.tools}>
+            <MediaManager
+              itemId={item.id}
+              photos={item.photos}
+              video={item.video}
+            />
+          </div>
+        ) : null}
+      </div>
     </Page>
   );
 }

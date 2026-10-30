@@ -79,3 +79,27 @@ export function deletionBlockedReason(status: ItemStatus): string | null {
   }
   return null;
 }
+
+/** Los estados que dejan a un objeto fuera de las rondas: todos menos `AVAILABLE`. */
+export const UNAVAILABLE_STATUSES: readonly ItemStatus[] = [
+  ItemStatus.IN_LOT,
+  ItemStatus.IN_ROUND,
+  ItemStatus.SOLD,
+  ItemStatus.WITHDRAWN,
+];
+
+/** Por que un objeto no se puede poner en una ronda, o `null` si si se puede. */
+export function unavailableReason(status: ItemStatus): string | null {
+  switch (status) {
+    case ItemStatus.IN_LOT:
+      return 'Pertenece a un lote: se subasta junto con él.';
+    case ItemStatus.IN_ROUND:
+      return 'Ya está reservado en una ronda de otra sala.';
+    case ItemStatus.SOLD:
+      return 'Ya se vendió.';
+    case ItemStatus.WITHDRAWN:
+      return 'Está retirado del catálogo. Repónlo para poder subastarlo.';
+    default:
+      return null;
+  }
+}

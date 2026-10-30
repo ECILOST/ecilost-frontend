@@ -23,6 +23,7 @@ import {
 } from '../domain/schedule-draft';
 import { AuctionableKind } from '../domain/room-status';
 import { ROOM_NAME_MAX } from '../model/room';
+import { UnavailableItemsDialog } from '../components/unavailable-items-dialog';
 import { useAuctionables, type Auctionable } from '../hooks/use-auctionables';
 import { useScheduleRoom } from '../hooks/use-schedule-room';
 import styles from './schedule-room.page.module.css';
@@ -53,6 +54,7 @@ export function ScheduleRoomPage() {
   });
   const [errors, setErrors] = useState<ScheduleErrors>(NO_ERRORS);
   const [confirming, setConfirming] = useState(false);
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
   const byKey = new Map(auctionables.options.map((option) => [option.key, option]));
 
@@ -318,6 +320,13 @@ export function ScheduleRoomPage() {
               <Icon name="plus" size={18} />
               Añadir ronda
             </Button>
+            <Button
+              variant="quiet"
+              icon={<Icon name="eye" size={18} />}
+              onClick={() => setShowUnavailable(true)}
+            >
+              Ver objetos no disponibles
+            </Button>
             {auctionables.hasMoreItems ? (
               <Button
                 variant="quiet"
@@ -351,6 +360,11 @@ export function ScheduleRoomPage() {
           </Button>
         </FormActions>
       </form>
+
+      <UnavailableItemsDialog
+        open={showUnavailable}
+        onClose={() => setShowUnavailable(false)}
+      />
 
       <ConfirmDialog
         open={confirming}

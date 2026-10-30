@@ -10,8 +10,8 @@
   z-index: 10;
   display: flex;
   align-items: center;
-  gap: 30px;
-  padding: 18px max(var(--page-gutter), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
+  gap: var(--s-5);
+  padding: 10px max(var(--page-gutter), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
   border-bottom: 1px solid var(--eci-line);
   background: rgb(6 21 40 / 88%);
   backdrop-filter: blur(16px);
@@ -21,7 +21,7 @@
 .tools {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--s-2);
   margin-left: auto;
 }
 
@@ -31,12 +31,13 @@
 
 @media (width < 768px) {
   .header {
-    gap: 16px;
+    gap: var(--s-3);
+    padding-block: 8px;
   }
 
   /* Hueco para la barra inferior flotante: sin el, tapa el ultimo elemento de la lista. */
   .main {
-    padding-bottom: 88px;
+    padding-bottom: 72px;
   }
 }
 

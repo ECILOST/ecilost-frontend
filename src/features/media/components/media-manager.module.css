@@ -4,11 +4,27 @@
  */
 .manager {
   display: grid;
-  gap: var(--s-4);
-  padding: var(--s-5);
+  gap: var(--s-3);
+  padding: var(--s-4);
   border: 1px dashed var(--eci-line-strong);
   border-radius: var(--r-lg);
   background: rgb(255 255 255 / 2%);
+}
+
+/*
+ * En pantalla ancha, fotografias y video van lado a lado y todo lo demas (titulo, avisos,
+ * progreso) ocupa la fila de arriba: el panel se reparte parejo en vez de crecer hacia abajo.
+ */
+@media (width >= 860px) {
+  .manager {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    column-gap: var(--s-6);
+  }
+
+  .manager > :not(.group) {
+    grid-column: 1 / -1;
+  }
 }
 
 .title {

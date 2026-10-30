@@ -46,8 +46,9 @@
 .control {
   width: 100%;
   min-width: 0;
-  /* 48 px de alto: el minimo tactil, el mismo que el boton de al lado. */
-  padding: 13px var(--s-4);
+  /* 44 px de alto: el minimo tactil, el mismo que el boton de al lado. */
+  min-height: var(--control-h);
+  padding: 9px var(--s-3);
   border: 1px solid var(--eci-line-strong);
   border-radius: var(--r-sm);
   background: var(--eci-surface);
@@ -86,7 +87,7 @@
 
 .textarea {
   resize: vertical;
-  min-height: 120px;
+  min-height: 96px;
   line-height: 1.55;
 }
 

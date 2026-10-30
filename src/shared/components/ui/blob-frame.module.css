@@ -26,6 +26,13 @@
   max-width: 340px;
 }
 
+/* En el movil la foto grande no necesita media pantalla: deja ver el texto sin hacer scroll. */
+@media (width < 560px) {
+  .lg {
+    max-width: 240px;
+  }
+}
+
 /* La luz de color del fondo. */
 .halo {
   position: absolute;

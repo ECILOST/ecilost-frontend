@@ -35,21 +35,23 @@
   box-shadow: none;
 }
 
-/* 12 + 12 de relleno, la linea y el borde dan 44 px como minimo tactil. */
+/* Alto minimo de 44 px: el minimo tactil, sin hinchar el relleno. */
 .md {
-  padding: 12px 20px;
+  min-height: var(--control-h);
+  padding: 8px 18px;
   font-size: var(--text-sm);
 }
 
 .lg {
-  padding: 16px 32px;
+  min-height: 52px;
+  padding: 12px 28px;
   font-size: var(--text-md);
 }
 
 /* Bloque: las acciones de la sala ocupan todo el ancho de su columna. */
 .block {
   width: 100%;
-  padding-block: 18px;
+  padding-block: 14px;
   font-size: var(--text-lg);
 }
 
