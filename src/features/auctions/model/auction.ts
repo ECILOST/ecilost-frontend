@@ -72,6 +72,8 @@ export interface Round {
    * holandesa alguien pulso "Lo quiero".
    */
   closeReason: 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM' | null;
+  /** Solo cerrada: si se adjudico o quedo desierta. Es publico: no dice a quien. */
+  result: 'AWARDED' | 'DESERTED' | null;
   /** Subastas dinamicas: como se juega. Sin ruleta, siempre `CLASSIC`. */
   mode: RoundMode;
   /** La ruleta ya decidio el modo de esta ronda. */
@@ -170,7 +172,13 @@ export interface Bid {
   mine: boolean;
 }
 
-export type RoomActivityKind = 'BID' | 'OUTBID' | 'AWARDED' | 'STARTED';
+export type RoomActivityKind =
+  | 'BID'
+  | 'OUTBID'
+  | 'AWARDED'
+  | 'STARTED'
+  /** Una ronda cerro sin pujas. */
+  | 'DESERTED';
 
 export interface RoomActivity {
   id: string;
@@ -246,6 +254,13 @@ export interface RoomSummary {
     outcome: RoomOutcome;
     amount: number | null;
     detail: string;
+    /** Lo publico de la ronda, igual para todos: si se vendio y por cuanto. */
+    result: 'AWARDED' | 'DESERTED' | null;
+    finalPrice: number;
   }>;
   totalSpent: number;
+  /** Lo publico de la sala: objetos vendidos, desiertos y lo recaudado. */
+  sold: number;
+  deserted: number;
+  totalRaised: number;
 }

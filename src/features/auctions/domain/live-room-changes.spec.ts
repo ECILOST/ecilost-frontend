@@ -21,6 +21,7 @@ const round = (overrides: Partial<Round> = {}): Round => ({
   myHighestBid: null,
   wonByMe: false,
   closeReason: null,
+  result: null,
   mode: 'CLASSIC',
   modeLocked: false,
   wildcardSpins: 0,

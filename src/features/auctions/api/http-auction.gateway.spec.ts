@@ -611,6 +611,36 @@ describe('createHttpAuctionGateway', () => {
     expect(summary.rows[2].detail).toMatch(/desierta/);
     expect(summary.totalSpent).toBe(200);
     expect(summary.closedAt).toBe('2030-10-01T21:09:00.000Z');
+    // Lo publico, igual para quien no participo: vendidos, desiertos y lo recaudado.
+    expect(summary).toMatchObject({ sold: 2, deserted: 1, totalRaised: 1100 });
+    expect(summary.rows.map((row) => [row.result, row.finalPrice])).toEqual([
+      ['AWARDED', 200],
+      ['AWARDED', 900],
+      ['DESERTED', expect.any(Number)],
+    ]);
+  });
+
+  it('la sala en vivo trae la actividad publica de engagement, y sin ella se pinta igual', async () => {
+    const detail = room({ status: 'ACTIVE', rounds: [round({ status: 'ACTIVE', hasBids: true, currentPrice: '120.00' })] });
+    const base = setup(detail);
+    const engagement = {
+      get: vi.fn().mockResolvedValue({
+        items: [
+          { id: 'b1', kind: 'BID', roundId: 'round-1', position: 1, amount: '120.00', automatic: false, extended: true, endsAt: '2030-10-01T21:03:10.000Z', at: '2030-10-01T21:02:00.000Z' },
+        ],
+      }),
+    } as unknown as HttpClient & { get: ReturnType<typeof vi.fn> };
+    const gateway = createHttpAuctionGateway({ http: base.http, items: base.items, lots: base.lots, engagement });
+
+    const live = await gateway.liveRoom('room-1');
+    expect(engagement.get).toHaveBeenCalledWith('/rooms/room-1/activity');
+    expect(live.bids).toEqual([expect.objectContaining({ id: 'b1', amount: 120, alias: 'Postor anónimo' })]);
+    expect(live.activity[0].text).toMatch(/el cierre se extendió/);
+
+    engagement.get.mockRejectedValue(new Error('engagement caido'));
+    const without = await gateway.liveRoom('room-1');
+    expect(without.bids).toEqual([]);
+    expect(without.round?.id).toBe('round-1');
   });
 
   it('lo que el servicio aun no ofrece responde vacio en vez de inventar datos', async () => {

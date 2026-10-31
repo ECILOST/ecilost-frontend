@@ -5,6 +5,7 @@ import {
   chatLength,
   MAX_CHAT_MESSAGE_LENGTH,
 } from '../domain/room-chat';
+import { publicTotals } from '../domain/room-results';
 import type {
   AppNotification,
   AuctionItem,
@@ -872,6 +873,12 @@ export function createDemoAuctionGateway(
       myHighestBid: mine.length ? Math.max(...mine) : null,
       wonByMe: target.status === 'CLOSED' && target.currentBidderId === ME,
       closeReason: target.status === 'CLOSED' ? (target.closeReason ?? 'EXPIRED') : null,
+      result:
+        target.status !== 'CLOSED'
+          ? null
+          : target.currentBidderId
+            ? 'AWARDED'
+            : 'DESERTED',
       // El demo solo simula la subasta clasica: sus rondas no pasan por la ruleta.
       mode: 'CLASSIC',
       modeLocked: false,
@@ -1196,6 +1203,13 @@ export function createDemoAuctionGateway(
             outcome,
             amount: won ? target.currentPrice : null,
             detail: `Objeto ${target.position} · ${detail}`,
+            result:
+              target.status !== 'CLOSED'
+                ? null
+                : target.currentBidderId
+                  ? 'AWARDED'
+                  : 'DESERTED',
+            finalPrice: target.currentPrice,
           } as RoomSummary['rows'][number];
         });
         return {
@@ -1206,6 +1220,7 @@ export function createDemoAuctionGateway(
           closedAt: iso(room.closedAt ?? now()),
           rows,
           totalSpent: rows.reduce((sum, row) => sum + (row.amount ?? 0), 0),
+          ...publicTotals(rows),
         };
       }),
 

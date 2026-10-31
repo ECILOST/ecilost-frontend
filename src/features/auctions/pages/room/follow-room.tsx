@@ -19,6 +19,7 @@ import {
 import { RoomChat } from '../../components/room-chat';
 import { formatCountdown, roundProgress } from '../../domain/auction-rules';
 import { useCountdown } from '../../hooks/use-countdown';
+import { useLiveOutcomes } from '../../hooks/use-live-outcomes';
 import { useLiveRoom } from '../../hooks/use-live-room';
 import type { Room } from '../../model/auction';
 import styles from './room.module.css';
@@ -67,6 +68,8 @@ export function FollowRoomView({
   } = useLiveRoom(room.id);
   const round = live?.round ?? null;
   const remaining = useCountdown(round?.endsAt ?? null);
+  // Solo el aviso de extension: los demas avisos son de quien puja.
+  const { extended } = useLiveOutcomes(live, remaining);
   const pending = room.rounds.filter((r) => r.status === 'SCHEDULED').length;
   const copy = VIEWER[viewer];
   const back = copy.back ?? {
@@ -141,6 +144,12 @@ export function FollowRoomView({
                       <h2 className={styles.itemName}>{round.itemName}</h2>
                       <span className={styles.label}>Precio actual</span>
                       <CoinAmount value={round.currentPrice} size="hero" unit />
+                      {/* Una puja de ultimo minuto movio el cierre (HU-23): tambien se ve desde afuera. */}
+                      {extended ? (
+                        <Pill tone="yellow" live>
+                          Cierre extendido: {formatCountdown(remaining)}
+                        </Pill>
+                      ) : null}
                     </div>
                     <div className={styles.stats}>
                       <StatBox
