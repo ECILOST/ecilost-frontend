@@ -1,5 +1,10 @@
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
 import { BID_INCREMENT, minimumBid, nextBidFor } from '../domain/auction-rules';
+import {
+  ChatSendError,
+  chatLength,
+  MAX_CHAT_MESSAGE_LENGTH,
+} from '../domain/room-chat';
 import type {
   AppNotification,
   AuctionItem,
@@ -10,6 +15,7 @@ import type {
   NotificationKind,
   Room,
   RoomActivity,
+  RoomChat,
   RoomStatus,
   RoomSummary,
   Round,
@@ -971,6 +977,77 @@ export function createDemoAuctionGateway(
     return result;
   }
 
+  // --- Chat ----------------------------------------------------------------------
+
+  /** Mensajes de cada sala. Los rivales saludan la primera vez que alguien abre el chat. */
+  const chats = new Map<
+    string,
+    Array<{ id: string; authorId: string; body: string; at: number }>
+  >();
+  const chatListeners = new Map<string, Set<(chat: RoomChat) => void>>();
+
+  function chatOf(room: DemoRoom) {
+    let messages = chats.get(room.id);
+    if (!messages) {
+      const t = now();
+      messages = [
+        {
+          id: id('chat'),
+          authorId: RIVALS[0].id,
+          body: '¡Suerte a todos!',
+          at: t - 90_000,
+        },
+        {
+          id: id('chat'),
+          authorId: RIVALS[1].id,
+          body: 'Ese objeto está buenísimo 👀',
+          at: t - 45_000,
+        },
+      ];
+      chats.set(room.id, messages);
+    }
+    return messages;
+  }
+
+  /** Lo mismo que decide engagement: escriben los participantes, solo con la sala en curso. */
+  function chatView(room: DemoRoom): RoomChat {
+    if (!room.isParticipant)
+      return {
+        status: 'unavailable',
+        canWrite: false,
+        alias: null,
+        messages: [],
+        reason: 'not-participant',
+      };
+    if (room.status === 'SCHEDULED')
+      return {
+        status: 'unavailable',
+        canWrite: false,
+        alias: null,
+        messages: [],
+        reason: 'not-open',
+      };
+    return {
+      status: 'ready',
+      canWrite: room.status === 'ACTIVE',
+      alias: aliasOf(ME),
+      messages: chatOf(room).map((message) => ({
+        id: message.id,
+        alias: aliasOf(message.authorId),
+        body: message.body,
+        at: iso(message.at),
+        mine: message.authorId === ME,
+      })),
+    };
+  }
+
+  function emitChat(roomId: string) {
+    const set = chatListeners.get(roomId);
+    if (!set || set.size === 0) return;
+    const chat = chatView(find(roomId));
+    for (const listener of set) listener(chat);
+  }
+
   // --- Puerto --------------------------------------------------------------------
 
   return {
@@ -1073,6 +1150,29 @@ export function createDemoAuctionGateway(
         }
       };
     },
+
+    subscribeChat(roomId, listener) {
+      const set = chatListeners.get(roomId) ?? new Set();
+      set.add(listener);
+      chatListeners.set(roomId, set);
+      listener(chatView(find(roomId)));
+      return () => {
+        set.delete(listener);
+      };
+    },
+
+    sendChatMessage: (roomId, text) =>
+      run(() => {
+        const room = find(roomId);
+        if (!room.isParticipant) throw new ChatSendError('read-only');
+        if (room.status !== 'ACTIVE') throw new ChatSendError('closed');
+        const body = text.replace(/\s+/g, ' ').trim();
+        if (!body) throw new ChatSendError('empty');
+        if (chatLength(body) > MAX_CHAT_MESSAGE_LENGTH)
+          throw new ChatSendError('too-long');
+        chatOf(room).push({ id: id('chat'), authorId: ME, body, at: now() });
+        emitChat(roomId);
+      }),
 
     roomSummary: (roomId) =>
       run(() => {

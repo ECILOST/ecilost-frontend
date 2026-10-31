@@ -7,6 +7,7 @@ import { CoinAmount } from '@/shared/components/ui/coin';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import { Pill } from '@/shared/components/ui/pill';
 import { APP_TIME_ZONE } from '@/shared/format/date';
+import { RoomChat } from '../../components/room-chat';
 import { useRoomSummary } from '../../hooks/use-room';
 import type { Room, RoomOutcome } from '../../model/auction';
 import styles from './room.module.css';
@@ -124,6 +125,13 @@ export function RoomFinishedView({ room }: { room: Room }) {
           <CoinAmount value={summary.totalSpent} size="lg" />
         </li>
       </ul>
+
+      {/* Lo que se dijo en la sala queda para quien participo, en solo lectura. */}
+      {room.isParticipant ? (
+        <div className={styles.finishedChat}>
+          <RoomChat roomId={room.id} />
+        </div>
+      ) : null}
 
       <div className={styles.finishedActions}>
         <Link className={buttonClass('primary', 'lg')} to={routes.myBids}>

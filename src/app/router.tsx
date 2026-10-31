@@ -44,6 +44,11 @@ const RoomPage = lazy(() =>
     default: m.RoomPage,
   })),
 );
+const OwnerRoomPage = lazy(() =>
+  import('@/features/auctions/pages/room/owner-room.page').then((m) => ({
+    default: m.OwnerRoomPage,
+  })),
+);
 const ItemDetailPage = lazy(() =>
   import('@/features/catalog/pages/item-detail.page').then((m) => ({
     default: m.ItemDetailPage,
@@ -197,6 +202,13 @@ export function AppRouter() {
               element={<AuctionDetailPage />}
             />
             <Route path={routePatterns.room} element={<RoomPage />} />
+          </Route>
+          {/* El dueño sigue su sala con la misma pantalla de seguimiento, sin pujar. */}
+          <Route element={<RequireCapability capability="canScheduleRooms" />}>
+            <Route
+              path={routePatterns.managedRoomLive}
+              element={<OwnerRoomPage />}
+            />
           </Route>
         </Route>
       </Route>

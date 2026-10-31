@@ -1,0 +1,98 @@
+.chat {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--eci-line);
+  border-radius: var(--r-lg);
+  background: var(--eci-surface);
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+
+.heading {
+  font-size: var(--text-lg);
+}
+
+.me {
+  font-size: var(--text-xs);
+  color: var(--eci-text-dim);
+}
+
+.notice,
+.readOnly {
+  font-size: var(--text-sm);
+  color: var(--eci-text-dim);
+}
+
+.readOnly {
+  padding-top: 10px;
+  border-top: 1px solid var(--eci-line);
+}
+
+/* La lista crece hasta un alto fijo y despues desplaza: la sala no se estira con el chat. */
+.list {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  max-height: 320px;
+  margin: 0;
+  padding: 0 4px 0 0;
+  overflow-y: auto;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.message {
+  display: grid;
+  gap: 3px;
+  justify-self: start;
+  max-width: 88%;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  background: var(--eci-surface-high);
+}
+
+.mine {
+  justify-self: end;
+  border-color: rgb(25 229 213 / 30%);
+  background: var(--eci-surface-glow);
+}
+
+.meta {
+  display: flex;
+  gap: 8px;
+  font-size: var(--text-2xs);
+  color: var(--eci-text-faint);
+}
+
+.alias {
+  font-weight: 700;
+  color: var(--eci-text-label);
+}
+
+.body {
+  font-size: var(--text-sm);
+  color: var(--eci-text-body);
+  overflow-wrap: anywhere;
+}
+
+/* El campo y su boton van en fila; el boton se alinea con el control, no con la etiqueta. */
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .form {
+    grid-template-columns: 1fr;
+  }
+}

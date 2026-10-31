@@ -4,6 +4,7 @@ import type {
   LiveRoom,
   MyBid,
   Room,
+  RoomChat,
   RoomSummary,
   SealedResults,
 } from '../model/auction';
@@ -56,6 +57,15 @@ export interface AuctionGateway {
    * para dejar de escuchar. Es el equivalente del canal de Socket.IO de engagement.
    */
   subscribe(roomId: string, listener: (state: LiveRoom) => void): () => void;
+
+  /**
+   * Chat de la sala en curso (engagement, `chat.*`). Escriben solo los participantes
+   * admitidos antes del inicio; el funcionario dueño lo lee. Entrega el chat entero en cada
+   * cambio y devuelve la funcion para dejar de escuchar.
+   */
+  subscribeChat(roomId: string, listener: (chat: RoomChat) => void): () => void;
+  /** Envia un mensaje al chat. Si engagement lo rechaza, falla con `ChatSendError`. */
+  sendChatMessage(roomId: string, text: string): Promise<void>;
 
   roomSummary(id: string): Promise<RoomSummary>;
   myBids(): Promise<MyBid[]>;

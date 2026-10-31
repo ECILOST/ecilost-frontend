@@ -1,9 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { formatEcicoin } from '@/features/wallet/domain/ecicoin';
 import { ErrorState } from '@/shared/components/error-state';
 import { Flash } from '@/shared/components/flash';
 import { Loading } from '@/shared/components/loading';
+import { buttonClass } from '@/shared/components/ui/button';
 import { Pill } from '@/shared/components/ui/pill';
 import { BackLink, Page, PageHeader } from '@/shared/components/ui/page';
 import { formatDateTime } from '@/shared/format/date';
@@ -66,6 +67,21 @@ export function ManagedRoomDetailPage() {
           </span>
         </div>
       </div>
+
+      {/* El dueño sigue su sala en vivo, y despues relee el chat. */}
+      {room.isOwner &&
+      (room.status === 'ACTIVE' || room.status === 'CLOSED') ? (
+        <Link
+          className={buttonClass(
+            room.status === 'ACTIVE' ? 'primary' : 'secondary',
+          )}
+          to={routes.managedRoomLive(room.id)}
+        >
+          {room.status === 'ACTIVE'
+            ? 'Ver sala en vivo'
+            : 'Ver chat de la sala'}
+        </Link>
+      ) : null}
 
       {room.isOwner ? <DynamicModesPanel room={room} /> : null}
 

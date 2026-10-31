@@ -16,6 +16,7 @@ import {
   RoomActivityList,
   RoomItemsStrip,
 } from '../../components/room-panels';
+import { RoomChat } from '../../components/room-chat';
 import { formatCountdown, roundProgress } from '../../domain/auction-rules';
 import { useCountdown } from '../../hooks/use-countdown';
 import { useLiveRoom } from '../../hooks/use-live-room';
@@ -23,10 +24,40 @@ import type { Room } from '../../model/auction';
 import styles from './room.module.css';
 
 /**
- * Sala en curso para quien no entro antes del inicio (HU-27: cierre de acceso). Ve lo mismo
- * en tiempo real, pero sin pujar, y se le dice por que antes que nada.
+ * Quien sigue la sala sin pujar: `late` llego despues del inicio (HU-27: cierre de acceso);
+ * `owner` es el funcionario que la programo, que ademas lee el chat sin escribir.
  */
-export function FollowRoomView({ room }: { room: Room }) {
+export type FollowViewer = 'late' | 'owner';
+
+const VIEWER = {
+  late: {
+    back: { to: routes.home, label: 'Volver al inicio' },
+    badge: 'Subasta en curso · Solo seguimiento',
+    title: 'El ingreso a esta sala cerró al iniciar la subasta',
+    sub: 'Puedes seguir la actividad en tiempo real, pero no participar en las pujas.',
+    unavailable: '⚡ Pujar no disponible · esta sala ya inició',
+  },
+  owner: {
+    back: null,
+    badge: 'Subasta en curso · Vista del organizador',
+    title: 'Estás siguiendo tu sala en vivo',
+    sub: 'Ves el precio, las rondas y el chat en tiempo real. Como organizador no pujas ni escribes en el chat.',
+    unavailable: '⚡ El organizador sigue la sala, no puja',
+  },
+} as const;
+
+/**
+ * Sala en curso para quien no puja en ella. Ve lo mismo en tiempo real y se le dice por que
+ * no puede pujar antes que nada. El chat es de los participantes: el dueño lo lee, y quien
+ * llego tarde no lo ve.
+ */
+export function FollowRoomView({
+  room,
+  viewer = 'late',
+}: {
+  room: Room;
+  viewer?: FollowViewer;
+}) {
   const {
     data: live,
     isPending,
@@ -37,13 +68,18 @@ export function FollowRoomView({ room }: { room: Room }) {
   const round = live?.round ?? null;
   const remaining = useCountdown(round?.endsAt ?? null);
   const pending = room.rounds.filter((r) => r.status === 'SCHEDULED').length;
+  const copy = VIEWER[viewer];
+  const back = copy.back ?? {
+    to: routes.managedRoom(room.id),
+    label: 'Volver a la sala programada',
+  };
 
   return (
     <>
       <ScreenHeader
         title={room.name}
-        back={{ to: routes.home, label: 'Volver al inicio' }}
-        badges={<Pill tone="yellow">Subasta en curso · Solo seguimiento</Pill>}
+        back={back}
+        badges={<Pill tone="yellow">{copy.badge}</Pill>}
         aside={
           round ? (
             <span className={styles.chip}>
@@ -59,17 +95,14 @@ export function FollowRoomView({ room }: { room: Room }) {
             <Icon name="eye" size={17} />
           </span>
           <div className={styles.bannerText}>
-            <p className={styles.bannerTitle}>
-              El ingreso a esta sala cerró al iniciar la subasta
-            </p>
-            <p className={styles.bannerSub}>
-              Puedes seguir la actividad en tiempo real, pero no participar en
-              las pujas.
-            </p>
+            <p className={styles.bannerTitle}>{copy.title}</p>
+            <p className={styles.bannerSub}>{copy.sub}</p>
           </div>
-          <Link className={buttonClass('primary')} to={routes.auctions}>
-            Explorar próximas salas
-          </Link>
+          {viewer === 'late' ? (
+            <Link className={buttonClass('primary')} to={routes.auctions}>
+              Explorar próximas salas
+            </Link>
+          ) : null}
         </div>
       </div>
 
@@ -124,9 +157,7 @@ export function FollowRoomView({ room }: { room: Room }) {
                   </div>
                 </>
               ) : null}
-              <p className={styles.unavailable}>
-                ⚡ Pujar no disponible · esta sala ya inició
-              </p>
+              <p className={styles.unavailable}>{copy.unavailable}</p>
               <div className={styles.strip}>
                 <RoomItemsStrip room={live.room} compact />
               </div>
@@ -134,17 +165,22 @@ export function FollowRoomView({ room }: { room: Room }) {
 
             <aside className={styles.side}>
               <RecentBids bids={live.bids} />
+              {viewer === 'owner' ? (
+                <RoomChat roomId={room.id} readOnly />
+              ) : null}
               <RoomActivityList
                 activity={live.activity}
                 title="Actividad reciente"
               />
               <NextItem room={live.room} active={round} />
-              <Link
-                className={buttonClass('secondary', 'lg')}
-                to={routes.myBids}
-              >
-                Ver mis subastas
-              </Link>
+              {viewer === 'late' ? (
+                <Link
+                  className={buttonClass('secondary', 'lg')}
+                  to={routes.myBids}
+                >
+                  Ver mis subastas
+                </Link>
+              ) : null}
             </aside>
           </div>
         ) : null}

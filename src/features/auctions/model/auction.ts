@@ -122,11 +122,41 @@ export interface Room {
   admitted: number;
   /** Cierto si quien mira fue admitido antes del inicio y por tanto puede pujar. */
   isParticipant: boolean;
+  /** Cierto si quien mira es el funcionario que programo la sala: la sigue, no puja. */
+  isOwner?: boolean;
   /** Subastas dinamicas: la ruleta de modalidades esta activa. */
   dynamicModesEnabled: boolean;
   rounds: Round[];
   /** Hora del servidor al leer la sala, para contar hacia su inicio sin el reloj local. */
   serverTime?: string;
+}
+
+/** Un mensaje del chat de la sala. El autor va como alias: nunca se publica su userId. */
+export interface ChatMessage {
+  id: string;
+  alias: string;
+  body: string;
+  at: string;
+  /** Lo escribio quien mira. */
+  mine: boolean;
+}
+
+/**
+ * Por que no se puede usar el chat: `not-participant` (no entro antes del inicio),
+ * `not-open` (la sala no esta en curso) o cualquier fallo del canal.
+ */
+export type ChatUnavailableReason =
+  'not-participant' | 'not-open' | 'unavailable';
+
+/** Lo que pinta el chat de la sala en curso. */
+export interface RoomChat {
+  status: 'connecting' | 'ready' | 'unavailable';
+  /** Escriben solo los participantes y solo con la sala en curso; el dueño solo lee. */
+  canWrite: boolean;
+  /** El alias de quien mira, si participa. */
+  alias: string | null;
+  messages: ChatMessage[];
+  reason?: ChatUnavailableReason;
 }
 
 /** Modalidades de la ruleta en el orden de sus segmentos. */

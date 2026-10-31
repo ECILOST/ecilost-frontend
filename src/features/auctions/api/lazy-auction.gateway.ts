@@ -44,6 +44,19 @@ export function createLazyAuctionGateway(
         stop?.();
       };
     },
+    subscribeChat(roomId, listener) {
+      let cancelled = false;
+      let stop: (() => void) | undefined;
+      void gateway().then((g) => {
+        if (!cancelled) stop = g.subscribeChat(roomId, listener);
+      });
+      return () => {
+        cancelled = true;
+        stop?.();
+      };
+    },
+    sendChatMessage: (roomId, text) =>
+      gateway().then((g) => g.sendChatMessage(roomId, text)),
     roomSummary: (id) => gateway().then((g) => g.roomSummary(id)),
     myBids: () => gateway().then((g) => g.myBids()),
     notifications: () => gateway().then((g) => g.notifications()),

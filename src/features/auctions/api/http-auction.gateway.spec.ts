@@ -4,8 +4,9 @@ import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import type { AutoBidDetail, RoomDetail, RoundDetail } from '@/features/rooms/model/room';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
+import type { RoomChat } from '../model/auction';
 import { createHttpAuctionGateway } from './http-auction.gateway';
-import type { RealtimeChannel, RoomEvent } from './realtime-channel';
+import type { ChatEvent, ChatMessageWire, ChatSendResult, RealtimeChannel, RoomEvent } from './realtime-channel';
 
 const round = (overrides: Partial<RoundDetail> = {}): RoundDetail => ({
   id: 'round-1',
@@ -390,6 +391,8 @@ describe('createHttpAuctionGateway', () => {
           emit = listener;
           return leave;
         }),
+        joinChat: vi.fn(() => vi.fn()),
+        sendChat: vi.fn(async () => ({ ok: true as const })),
       };
       const base = setup(room({ status: 'ACTIVE', isParticipant: true, rounds: [round({ status: 'ACTIVE' })] }));
       const gateway = createHttpAuctionGateway({ http: base.http, items: base.items, lots: base.lots, realtime });
@@ -455,6 +458,84 @@ describe('createHttpAuctionGateway', () => {
       const { gateway, leave } = withChannel();
       gateway.subscribe('room-1', vi.fn())();
       expect(leave).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('chat de la sala', () => {
+    const wire = (id: string, alias: string, second: number): ChatMessageWire => ({
+      id,
+      roomId: 'room-1',
+      alias,
+      body: `mensaje ${id}`,
+      createdAt: new Date(Date.UTC(2026, 9, 30, 15, 0, second)).toISOString(),
+    });
+
+    function withChat(sendResult: ChatSendResult = { ok: true }) {
+      let emit: (event: ChatEvent) => void = () => undefined;
+      const leave = vi.fn();
+      const realtime: RealtimeChannel = {
+        joinRoom: vi.fn(() => vi.fn()),
+        joinChat: vi.fn((_roomId, listener) => {
+          emit = listener;
+          return leave;
+        }),
+        sendChat: vi.fn(async () => sendResult),
+      };
+      const base = setup(room({ status: 'ACTIVE', isParticipant: true }));
+      const gateway = createHttpAuctionGateway({ http: base.http, items: base.items, lots: base.lots, realtime });
+      const chats: RoomChat[] = [];
+      const stop = gateway.subscribeChat('room-1', (chat) => chats.push(chat));
+      return { gateway, realtime, emit: (event: ChatEvent) => emit(event), leave, chats, stop };
+    }
+
+    it('entra al chat, marca los mensajes propios por el alias y agrega los que llegan en vivo', () => {
+      const { emit, chats } = withChat();
+      expect(chats.at(-1)).toMatchObject({ status: 'connecting', canWrite: false });
+
+      emit({ name: 'chat.joined', ok: true, alias: 'Participante AAAA', canWrite: true, messages: [wire('m1', 'Participante BBBB', 1), wire('m2', 'Participante AAAA', 2)] });
+      expect(chats.at(-1)).toMatchObject({ status: 'ready', canWrite: true, alias: 'Participante AAAA' });
+      expect(chats.at(-1)?.messages.map((m) => [m.id, m.mine])).toEqual([['m1', false], ['m2', true]]);
+
+      emit({ name: 'chat.message', message: wire('m3', 'Participante BBBB', 3) });
+      expect(chats.at(-1)?.messages.map((m) => m.id)).toEqual(['m1', 'm2', 'm3']);
+    });
+
+    it('al reconectar el historial no repite los mensajes que ya tenia', () => {
+      const { emit, chats } = withChat();
+      const joined: ChatEvent = { name: 'chat.joined', ok: true, alias: 'Participante AAAA', canWrite: true, messages: [wire('m1', 'Participante BBBB', 1)] };
+      emit(joined);
+      emit({ name: 'chat.message', message: wire('m2', 'Participante BBBB', 2) });
+      emit({ ...joined, messages: [wire('m1', 'Participante BBBB', 1), wire('m2', 'Participante BBBB', 2)] });
+      expect(chats.at(-1)?.messages.map((m) => m.id)).toEqual(['m1', 'm2']);
+    });
+
+    it('quien no participa ve el chat como no disponible', () => {
+      const { emit, chats } = withChat();
+      emit({ name: 'chat.joined', ok: false, reason: 'not-participant' });
+      expect(chats.at(-1)).toMatchObject({ status: 'unavailable', canWrite: false, reason: 'not-participant' });
+    });
+
+    it('enviar pasa el texto al canal y un rechazo llega como ChatSendError con su motivo', async () => {
+      const ok = withChat();
+      await ok.gateway.sendChatMessage('room-1', 'hola');
+      expect(ok.realtime.sendChat).toHaveBeenCalledWith('room-1', 'hola');
+
+      const rejected = withChat({ ok: false, reason: 'too-fast' });
+      await expect(rejected.gateway.sendChatMessage('room-1', 'hola')).rejects.toMatchObject({ name: 'ChatSendError', reason: 'too-fast' });
+    });
+
+    it('dejar de escuchar suelta el chat', () => {
+      const { stop, leave } = withChat();
+      stop();
+      expect(leave).toHaveBeenCalledOnce();
+    });
+
+    it('sin canal en vivo no hay chat', () => {
+      const base = setup(room());
+      const gateway = createHttpAuctionGateway({ http: base.http, items: base.items, lots: base.lots });
+      const listener = vi.fn();
+      gateway.subscribeChat('room-1', listener);
+      expect(listener).toHaveBeenCalledWith(expect.objectContaining({ status: 'unavailable' }));
     });
   });
 

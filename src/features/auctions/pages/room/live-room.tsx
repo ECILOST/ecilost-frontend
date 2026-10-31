@@ -32,6 +32,7 @@ import {
   RoomItemsStrip,
 } from '../../components/room-panels';
 import { CustomBidForm } from '../../components/custom-bid-form';
+import { RoomChat } from '../../components/room-chat';
 import { DutchPanel } from '../../components/dynamic/dutch-panel';
 import { ModeAnnouncement } from '../../components/dynamic/mode-announcement';
 import { MysteryClues } from '../../components/dynamic/mystery-clues';
@@ -369,6 +370,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
               />
             ) : null}
             <RecentBids bids={live.bids} />
+            <RoomChat roomId={roomId} />
             <RoomActivityList activity={live.activity} />
             <NextItem room={live.room} active={round} />
           </aside>

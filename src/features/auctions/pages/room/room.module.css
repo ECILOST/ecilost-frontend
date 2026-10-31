@@ -528,6 +528,10 @@
   margin-top: 24px;
 }
 
+.finishedChat {
+  margin-top: 24px;
+}
+
 @media (width < 960px) {
   .grid,
   .waitGrid,

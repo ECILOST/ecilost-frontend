@@ -21,15 +21,45 @@ export type RoomEvent =
   /** El canal se reconecto: lo que se tenia puede estar vencido. */
   | { name: 'resync' };
 
+/** Un mensaje del chat tal como lo emite engagement (`chat.message` y el historial). */
+export interface ChatMessageWire {
+  id: string;
+  roomId: string;
+  alias: string;
+  body: string;
+  createdAt: string;
+}
+
+/** Lo que pasa en el chat de una sala. */
+export type ChatEvent =
+  /** Respuesta a `chat.join`, al entrar y en cada reconexion: trae el historial. */
+  | {
+      name: 'chat.joined';
+      ok: true;
+      alias: string | null;
+      canWrite: boolean;
+      messages: ChatMessageWire[];
+    }
+  | { name: 'chat.joined'; ok: false; reason: string }
+  | { name: 'chat.message'; message: ChatMessageWire };
+
+export type ChatSendResult = { ok: true } | { ok: false; reason: string };
+
 /**
- * Canal en vivo de las salas (HU-26, HU-27).
+ * Canal en vivo de las salas (HU-26, HU-27) y su chat.
  *
- * `joinRoom` devuelve la funcion para dejar de escuchar. Varias pantallas pueden escuchar la
- * misma sala: la suscripcion al servidor se hace una vez y se suelta con la ultima.
+ * `joinRoom` y `joinChat` devuelven la funcion para dejar de escuchar. Varias pantallas
+ * pueden escuchar la misma sala: la suscripcion al servidor se hace una vez y se suelta con
+ * la ultima.
  */
 export interface RealtimeChannel {
   joinRoom(roomId: string, listener: (event: RoomEvent) => void): () => void;
+  joinChat(roomId: string, listener: (event: ChatEvent) => void): () => void;
+  sendChat(roomId: string, text: string): Promise<ChatSendResult>;
 }
+
+/** Cuanto se espera la confirmacion de engagement al entrar al chat o al enviar. */
+const CHAT_ACK_TIMEOUT_MS = 5_000;
 
 const ROOM_EVENTS = [
   'round.price',
@@ -74,10 +104,45 @@ export function createSocketRealtimeChannel({
 }): RealtimeChannel {
   let socket: Socket | null = null;
   const listeners = new Map<string, Set<(event: RoomEvent) => void>>();
+  const chatListeners = new Map<string, Set<(event: ChatEvent) => void>>();
+  /** La ultima respuesta a `chat.join` de cada sala, para quien empieza a escuchar despues. */
+  const chatJoined = new Map<string, ChatEvent>();
   const seen = new Set<string>();
 
   const dispatch = (roomId: string, event: RoomEvent) =>
     listeners.get(roomId)?.forEach((listener) => listener(event));
+
+  const dispatchChat = (roomId: string, event: ChatEvent) =>
+    chatListeners.get(roomId)?.forEach((listener) => listener(event));
+
+  /** Entra al chat y reparte la respuesta (con el historial) a quien escucha esa sala. */
+  async function enterChat(connection: Socket, roomId: string) {
+    let event: ChatEvent;
+    try {
+      const response = await connection
+        .timeout(CHAT_ACK_TIMEOUT_MS)
+        .emitWithAck('chat.join', { roomId, token: getToken() });
+      event = response?.ok
+        ? {
+            name: 'chat.joined',
+            ok: true,
+            alias: response.alias ?? null,
+            canWrite: response.canWrite === true,
+            messages: Array.isArray(response.messages) ? response.messages : [],
+          }
+        : {
+            name: 'chat.joined',
+            ok: false,
+            reason: String(response?.reason ?? 'unavailable'),
+          };
+    } catch {
+      event = { name: 'chat.joined', ok: false, reason: 'unavailable' };
+    }
+    // Pudo dejar de escucharse mientras se esperaba la respuesta.
+    if (!chatListeners.has(roomId)) return;
+    chatJoined.set(roomId, event);
+    dispatchChat(roomId, event);
+  }
 
   const firstTime = (eventId: string | undefined): boolean => {
     if (!eventId) return true;
@@ -104,6 +169,25 @@ export function createSocketRealtimeChannel({
         socket?.emit('room.join', { roomId, token: getToken() });
         dispatch(roomId, { name: 'resync' });
       }
+      // El chat tambien se vuelve a abrir: el historial trae lo que se perdio sin conexion.
+      for (const roomId of chatListeners.keys()) {
+        if (socket) void enterChat(socket, roomId);
+      }
+    });
+
+    socket.on('chat.message', (payload: Partial<ChatMessageWire>) => {
+      if (!payload?.roomId || !payload.id || typeof payload.body !== 'string')
+        return;
+      dispatchChat(payload.roomId, {
+        name: 'chat.message',
+        message: {
+          id: payload.id,
+          roomId: payload.roomId,
+          alias: payload.alias ?? 'Participante',
+          body: payload.body,
+          createdAt: payload.createdAt ?? new Date().toISOString(),
+        },
+      });
     });
 
     for (const name of [...ROOM_EVENTS, ...PERSONAL_EVENTS]) {
@@ -156,6 +240,46 @@ export function createSocketRealtimeChannel({
           socket?.emit('room.leave', { roomId });
         }
       };
+    },
+
+    joinChat(roomId, listener) {
+      const connection = connect();
+      let roomListeners = chatListeners.get(roomId);
+      if (!roomListeners) {
+        roomListeners = new Set();
+        chatListeners.set(roomId, roomListeners);
+        // Sin conexion todavia, el `connect` se encarga de entrar.
+        if (connection.connected) void enterChat(connection, roomId);
+      } else {
+        const joined = chatJoined.get(roomId);
+        if (joined) listener(joined);
+      }
+      roomListeners.add(listener);
+
+      return () => {
+        const current = chatListeners.get(roomId);
+        current?.delete(listener);
+        if (current && current.size === 0) {
+          chatListeners.delete(roomId);
+          chatJoined.delete(roomId);
+          socket?.emit('chat.leave', { roomId });
+        }
+      };
+    },
+
+    async sendChat(roomId, text) {
+      const connection = connect();
+      if (!connection.connected) return { ok: false, reason: 'unavailable' };
+      try {
+        const response = await connection
+          .timeout(CHAT_ACK_TIMEOUT_MS)
+          .emitWithAck('chat.send', { roomId, text, token: getToken() });
+        return response?.ok
+          ? { ok: true }
+          : { ok: false, reason: String(response?.reason ?? 'unavailable') };
+      } catch {
+        return { ok: false, reason: 'unavailable' };
+      }
     },
   };
 }
