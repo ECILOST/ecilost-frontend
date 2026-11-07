@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog } from '@/shared/components/ui/dialog';
 import { segmentMeta } from '../../domain/dynamic-modes';
 import type { SpinSegment } from '../../model/auction';
 import styles from './dynamic.module.css';
-import { RouletteWheel, rotationFor, SPIN_DURATION_MS } from './roulette-wheel';
+import { RouletteWheel, rotationFor, SegmentLegend, SPIN_DURATION_MS } from './roulette-wheel';
 
 /** Cuanto queda a la vista el resultado despues de detenerse la ruleta. */
 const RESULT_HOLD_MS = 3_500;
@@ -42,11 +42,13 @@ export function RouletteReveal({
     <Dialog open onClose={onClose} title={`Ruleta de la ronda ${position}`} tone="cyan">
       <div className={styles.rouletteBody}>
         <p className={styles.label}>Ruleta · ronda {position}</p>
-        <RouletteWheel rotation={rotation} highlight={stopped ? segment : null} />
+        <div className={styles.wheelStage} style={stopped ? ({ '--stage': meta.color } as CSSProperties) : undefined}>
+          <RouletteWheel rotation={rotation} highlight={stopped ? segment : null} spinning={!stopped} />
+        </div>
         <div aria-live="polite">
           {stopped ? (
             <>
-              <span className={styles.rouletteResult} style={{ background: meta.color }}>
+              <span className={styles.rouletteResult} style={{ '--mode': meta.color } as CSSProperties}>
                 {segment === 'WILDCARD' ? '¡Comodín!' : `¡${meta.label}!`}
               </span>
               <p className={styles.rouletteHint} style={{ marginTop: '0.6rem' }}>
@@ -59,6 +61,7 @@ export function RouletteReveal({
             <p className={styles.rouletteHint}>El organizador giró la ruleta…</p>
           )}
         </div>
+        <SegmentLegend active={stopped ? segment : null} />
         {stopped ? (
           <Button variant="secondary" onClick={onClose}>
             Entendido

@@ -115,9 +115,10 @@
 /* --- Siguiente objeto --------------------------------------------------------- */
 .next {
   padding: 16px;
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: 22px;
-  background: var(--eci-surface);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
 }
 
 .nextLabel {

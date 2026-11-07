@@ -1,7 +1,6 @@
 import type { CSSProperties } from 'react';
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
-import { Button } from '@/shared/components/ui/button';
 import { formatCoins } from '@/shared/components/ui/coin';
 import { Icon } from '@/shared/components/ui/icon';
 import { TransactionHistory } from '../components/transaction-history';
@@ -51,16 +50,25 @@ export function WalletPage() {
                 }
                 role="img"
                 aria-label={`${Math.round(share * 100)} % disponible`}
-              />
+              >
+                <span className={styles.barAvailable} />
+                <span className={styles.barHeld} />
+              </div>
 
               <dl className={styles.split}>
                 <div>
-                  <dt>Disponible</dt>
+                  <dt>
+                    <i className={styles.dotCyan} aria-hidden="true" />
+                    Disponible
+                  </dt>
                   <dd className={styles.cyan}>{formatCoins(available)}</dd>
                 </div>
                 <div>
-                  <dt>Comprometido</dt>
-                  <dd className={styles.pink}>{formatCoins(held)}</dd>
+                  <dt>
+                    <i className={styles.dotYellow} aria-hidden="true" />
+                    Comprometido
+                  </dt>
+                  <dd className={styles.held}>{formatCoins(held)}</dd>
                 </div>
                 <div className={styles.right}>
                   <dt>Total</dt>
@@ -68,23 +76,19 @@ export function WalletPage() {
                 </div>
               </dl>
 
-              <div className={styles.actions}>
-                <Button
-                  size="lg"
-                  disabled
-                  title="Las recargas las abona un funcionario"
-                >
-                  Solicitar recarga ECICoin
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  disabled
-                  title="Todavía no disponible"
-                >
-                  <Icon name="swap" size={16} /> Transferir
-                </Button>
-              </div>
+              {/*
+                Antes habia dos botones deshabilitados ("Solicitar recarga" y "Transferir")
+                que no hacian nada: un control muerto promete algo que no existe. En su lugar
+                se dice como se recarga de verdad.
+              */}
+              <p className={styles.howTo}>
+                <Icon name="coin" size={18} />
+                <span>
+                  <strong>¿Necesitas más ECICoin?</strong> Las recargas las
+                  abona un funcionario a tu billetera; aparecen aquí en cuanto
+                  se registran.
+                </span>
+              </p>
             </section>
 
             <section className={styles.info} aria-labelledby="que-es">

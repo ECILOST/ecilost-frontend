@@ -20,6 +20,8 @@ export const routes = {
   wallet: '/billetera',
   myBids: '/mis-pujas',
   notifications: '/notificaciones',
+  /** Guia de las subastas dinamicas: la puede leer cualquier sesion. */
+  dynamicGuide: '/subastas-dinamicas',
 
   // --- Funcionario -------------------------------------------------------------------
   items: '/items',

@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { Loading } from '@/shared/components/loading';
 import { Brand } from '@/shared/components/shell/brand';
 import { Button } from '@/shared/components/ui/button';
+import { Icon } from '@/shared/components/ui/icon';
 import { Notice } from '@/shared/components/ui/notice';
 import { loginErrorMessage } from '../domain/auth-error';
 import { useSession } from '../hooks/use-session';
@@ -61,20 +62,34 @@ export function LoginPage() {
             Descubre, puja y llévatelos. Las subastas de objetos perdidos de tu
             universidad, en vivo y con ECICoin.
           </p>
-          <dl className={styles.stats}>
-            <div>
-              <dt>objetos recuperados</dt>
-              <dd className={styles.yellowText}>1.240</dd>
-            </div>
-            <div>
-              <dt>salas al mes</dt>
-              <dd className={styles.cyanText}>38</dd>
-            </div>
-            <div>
-              <dt>estudiantes activos</dt>
-              <dd className={styles.pinkText}>4.5k</dd>
-            </div>
-          </dl>
+          {/*
+            Antes habia tres cifras fijas ("1.240 objetos recuperados", "38 salas al mes",
+            "4.5k estudiantes") que no venian de ningun servicio. Una cifra inventada en la
+            puerta de entrada resta confianza; aqui va lo que la plataforma si hace.
+          */}
+          <ul className={styles.features}>
+            <li style={{ '--tone': 'var(--eci-pink)' } as CSSProperties}>
+              <Icon name="live" size={20} />
+              <span>
+                <strong>Subastas en vivo</strong>
+                Pujas en tiempo real contra otros estudiantes.
+              </span>
+            </li>
+            <li style={{ '--tone': 'var(--eci-purple)' } as CSSProperties}>
+              <Icon name="spin" size={20} />
+              <span>
+                <strong>Subastas dinámicas</strong>
+                Holandesa, sobre cerrado y lote misterioso.
+              </span>
+            </li>
+            <li style={{ '--tone': 'var(--eci-yellow)' } as CSSProperties}>
+              <Icon name="coin" size={20} />
+              <span>
+                <strong>Con ECICoin</strong>
+                La moneda interna de la universidad.
+              </span>
+            </li>
+          </ul>
         </section>
 
         <section className={styles.panel}>

@@ -48,8 +48,13 @@
   --eci-blue-text: #7faaff;
   --eci-purple: #7b5cff;
   --eci-purple-text: #b3a1ff;
-  /* El diseño no tiene verde: "confirmado" y "ganaste" usan el cian. */
-  --eci-green: var(--eci-cyan);
+  /*
+   * Verde propio para "vas ganando", "ganaste" y confirmaciones. Antes era un alias del cian,
+   * y entonces "pulsa aqui" y "vas ganando" se confundian: el cian es una accion, el verde un
+   * estado.
+   */
+  --eci-green: #2fe39a;
+  --eci-green-text: #6ff0b9;
 
   --eci-pink-deep: #e83a64;
 
@@ -63,7 +68,9 @@
   --eci-yellow-soft: rgb(255 200 74 / 14%);
   --eci-blue-soft: rgb(43 107 255 / 22%);
   --eci-purple-soft: rgb(123 92 255 / 20%);
-  --eci-green-soft: var(--eci-cyan-soft);
+  --eci-green-soft: rgb(47 227 154 / 14%);
+  --eci-green-line: rgb(47 227 154 / 40%);
+  --eci-purple-line: rgb(123 92 255 / 45%);
   --eci-neutral-soft: rgb(255 255 255 / 7%);
 
   --eci-cyan-line: rgb(25 229 213 / 35%);
@@ -72,7 +79,7 @@
   --eci-blue-line: rgb(43 107 255 / 40%);
 
   /* --- Tipografia ----------------------------------------------------------- */
-  --font-display: 'Exo 2', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Sora', 'Segoe UI', system-ui, sans-serif;
   --font-text: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-script: var(--font-display);
 
@@ -126,6 +133,22 @@
   --shadow-float: 0 20px 44px rgb(0 0 0 / 50%);
   --glow-cyan: 0 14px 32px rgb(25 229 213 / 35%);
   --glow-pink: 0 14px 32px rgb(255 79 120 / 38%);
+  --glow-green: 0 14px 32px rgb(47 227 154 / 30%);
+  --glow-blue: 0 14px 32px rgb(43 107 255 / 35%);
+  --glow-purple: 0 14px 32px rgb(123 92 255 / 38%);
+  --glow-yellow: 0 14px 32px rgb(255 200 74 / 30%);
+
+  /*
+   * --- Superficies de cristal ---------------------------------------------------------
+   * Paneles translucidos con un borde que brilla arriba y se apaga abajo: es lo que separa
+   * un panel del fondo sin dibujar una caja. Se usan con `background` + `border-color`.
+   */
+  --glass: linear-gradient(180deg, rgb(20 38 66 / 72%), rgb(10 26 50 / 64%));
+  --glass-high: linear-gradient(180deg, rgb(30 56 96 / 70%), rgb(14 34 64 / 66%));
+  --glass-edge: rgb(140 180 255 / 14%);
+  --glass-edge-strong: rgb(140 180 255 / 24%);
+  --glass-shine: inset 0 1px 0 rgb(255 255 255 / 6%);
+  --glass-blur: blur(14px);
 
   /* --- Movimiento ----------------------------------------------------------- */
   --t-fast: 140ms;

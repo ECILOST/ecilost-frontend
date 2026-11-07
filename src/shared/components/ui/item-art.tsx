@@ -1,5 +1,4 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
-import { Icon } from './icon';
 import styles from './item-art.module.css';
 import { PhotoPlate } from './photo-plate';
 
@@ -39,6 +38,12 @@ export function artColors(seed: string): [string, string, string, string] {
   return [c1, c2, extras[0], extras[1]];
 }
 
+/** Primera letra con significado: salta numeros y signos ("2 audifonos" -> "A"). */
+function initial(label: string): string {
+  const match = label.match(/\p{L}/u);
+  return (match ? match[0] : label.charAt(0) || '?').toUpperCase();
+}
+
 export type ItemArtVariant = 'card' | 'hero' | 'thumb' | 'plain';
 
 /**
@@ -60,6 +65,7 @@ export function ItemArt({
   dimmed = false,
   className,
   children,
+  colors,
 }: {
   seed: string;
   label: string;
@@ -70,8 +76,10 @@ export function ItemArt({
   className?: string;
   /** Piezas encima del arte: capsula de estado, reloj. */
   children?: ReactNode;
+  /** Colores fijos en vez de los del hash: el lote misterioso se pinta siempre en violeta. */
+  colors?: [string, string, string, string];
 }) {
-  const [c1, c2, c3, c4] = artColors(seed);
+  const [c1, c2, c3, c4] = colors ?? artColors(seed);
   // Un enlace firmado vencido responde 403: en vez de una imagen rota se pinta el marcador.
   // Se recuerda que URL fallo, asi que un enlace nuevo vuelve a intentarse solo.
   const [failedSrc, setFailedSrc] = useState<string | null>(null);
@@ -123,8 +131,8 @@ export function ItemArt({
       ) : variant === 'thumb' ? null : (
         // Decorativo: el nombre del objeto siempre esta escrito al lado, en su titulo.
         <span className={styles.placeholder} aria-hidden="true">
-          <Icon name="image" size={variant === 'hero' ? 22 : 18} />
-          <span>{label}</span>
+          <span className={styles.token}>{initial(label)}</span>
+          <span className={styles.placeholderLabel}>{label}</span>
         </span>
       )}
 

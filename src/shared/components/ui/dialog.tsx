@@ -26,7 +26,7 @@ export function Dialog({
   /** Nombre accesible. Puede ir oculto si el titulo visible es un rotulo grafico. */
   title: string;
   /** Color del borde: el estado se reconoce antes de leerlo. */
-  tone?: 'neutral' | 'cyan' | 'pink' | 'yellow';
+  tone?: 'neutral' | 'cyan' | 'pink' | 'yellow' | 'green';
   size?: 'md' | 'lg';
   children: ReactNode;
 }) {

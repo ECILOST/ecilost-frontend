@@ -152,12 +152,13 @@ export function ConfirmBidDialog({
               size="lg"
               onClick={onConfirm}
               disabled={pending}
+              icon={pending ? null : <Icon name="bolt" size={18} />}
             >
               {pending
                 ? 'Enviando...'
                 : buying
-                  ? '⚡ Confirmar compra'
-                  : '⚡ Confirmar puja'}
+                  ? 'Confirmar compra'
+                  : 'Confirmar puja'}
             </Button>
           </div>
         </Frame>

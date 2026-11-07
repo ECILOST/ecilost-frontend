@@ -42,27 +42,60 @@ export function AuctionMeta({ item }: { item: AuctionItem }) {
 export function AuctionCard({
   item,
   order = 'price-first',
+  variant = 'default',
 }: {
   item: AuctionItem;
   /** La portada pone la fecha antes que el precio; el catalogo, al reves. */
   order?: 'price-first' | 'meta-first';
+  /**
+   * `feature`: tarjeta ancha para las subastas en vivo, lo primero que se ve del catalogo.
+   * `default`: la de la grilla. Las finalizadas se atenuan solas.
+   */
+  variant?: 'default' | 'feature';
 }) {
   const live = item.status === 'LIVE';
+  const closed = item.status === 'CLOSED';
   const price = (
-    <CoinAmount value={item.currentPrice} size="md" className={styles.price} />
+    <CoinAmount
+      value={item.currentPrice}
+      size={variant === 'feature' ? 'xl' : 'md'}
+      className={styles.price}
+    />
   );
 
   return (
     <Link
-      className={[styles.card, live ? styles.cardLive : '']
+      className={[
+        styles.card,
+        live ? styles.cardLive : '',
+        closed ? styles.cardClosed : '',
+        variant === 'feature' ? styles.feature : '',
+      ]
         .filter(Boolean)
         .join(' ')}
       to={routes.auction(item.id)}
     >
-      <ItemArt seed={item.id} label={item.name} src={item.imageUrl}>
-        {live ? <span className={styles.badge}>En vivo</span> : null}
+      <ItemArt
+        seed={item.id}
+        label={item.name}
+        src={item.imageUrl}
+        className={styles.art}
+      >
+        {live ? (
+          <span className={styles.badge}>
+            <span className={styles.badgeDot} aria-hidden="true" />
+            En vivo
+          </span>
+        ) : closed ? (
+          <span className={`${styles.badge} ${styles.badgeClosed}`}>
+            {item.awarded ? 'Adjudicada' : 'Sin ofertas'}
+          </span>
+        ) : null}
       </ItemArt>
       <div className={styles.body}>
+        {item.category ? (
+          <span className={styles.category}>{item.category}</span>
+        ) : null}
         <h3 className={styles.name}>{item.name}</h3>
         {order === 'price-first' ? (
           <>
@@ -75,6 +108,11 @@ export function AuctionCard({
             {price}
           </>
         )}
+        {variant === 'feature' && live ? (
+          <span className={styles.cta}>
+            <Icon name="bolt" size={16} /> Entrar a pujar
+          </span>
+        ) : null}
       </div>
     </Link>
   );

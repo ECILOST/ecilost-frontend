@@ -8,15 +8,36 @@
 /* Que paso a la izquierda, cuanto a la derecha: el importe es lo que se busca con la vista. */
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    'label amount'
-    'when amount';
+    'kind label amount'
+    'kind when amount';
   align-items: center;
   column-gap: var(--s-4);
   padding: var(--s-3) var(--s-4);
-  border-radius: var(--r-sm);
-  background: var(--eci-surface);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-md);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
+}
+
+.kind {
+  grid-area: kind;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+}
+
+.kindIn {
+  background: var(--eci-green-soft);
+  color: var(--eci-green-text);
+}
+
+.kindOut {
+  background: var(--eci-pink-soft);
+  color: var(--eci-pink-text);
 }
 
 .label {
@@ -35,20 +56,46 @@
 .row strong {
   grid-area: amount;
   font-family: var(--font-display);
+  font-size: var(--text-lg);
 }
 
 .in {
-  color: var(--eci-cyan);
+  color: var(--eci-green-text);
 }
 
 .out {
-  color: var(--eci-text-soft);
+  color: var(--eci-pink-text);
 }
 
 .empty {
-  padding: 18px;
-  border: 1px dashed var(--eci-line-strong);
-  border-radius: 20px;
-  font-size: var(--text-xs);
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 32px 20px;
+  border: 1px solid var(--glass-edge);
+  border-radius: 22px;
+  background: var(--glass);
+  text-align: center;
+}
+
+.empty p {
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+.empty small {
+  max-width: 44ch;
+  font-size: var(--text-sm);
   color: var(--eci-text-dim);
+}
+
+.emptyIcon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  margin-bottom: 6px;
+  border-radius: 18px;
+  background: var(--eci-yellow-soft);
+  color: var(--eci-yellow);
 }
