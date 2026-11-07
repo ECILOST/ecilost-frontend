@@ -1,0 +1,819 @@
+diff --git a/src/app/styles/tokens.css b/src/app/styles/tokens.css
+index dc0b12f..ae8d678 100644
+--- a/src/app/styles/tokens.css
++++ b/src/app/styles/tokens.css
+@@ -120,7 +120,8 @@
+   --s-7: 48px;
+   --s-8: 64px;
+   /* Mas ancho que antes (1120): en pantallas grandes la columna central se veia perdida. */
+-  --page-max: 1280px;
++  /* Crece con la ventana hasta 1360 px: a 1920 de ancho, 1280 fijos dejaban bandas vacias. */
++  --page-max: clamp(1120px, 78vw, 1360px);
+   --page-gutter: clamp(12px, 2.4vw, 28px);
+   /* Ritmo vertical de pagina: mas apretado en el movil, donde cada pixel cuenta. */
+   --page-gap: clamp(12px, 2vw, 20px);
+diff --git a/src/features/auctions/pages/my-bids.page.module.css b/src/features/auctions/pages/my-bids.page.module.css
+index 3a276f2..125b131 100644
+--- a/src/features/auctions/pages/my-bids.page.module.css
++++ b/src/features/auctions/pages/my-bids.page.module.css
+@@ -30,15 +30,29 @@
+   gap: 9px;
+ }
+ 
++/*
++ * Tarjetas en rejilla y no filas a todo el ancho: en una pantalla ancha la fila dejaba el
++ * nombre a un extremo y el precio al otro, con un hueco enorme en medio.
++ */
+ .list {
+   display: grid;
++  grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
+   gap: 14px;
+ }
+ 
++.list > li {
++  display: grid;
++}
++
+ .row {
+-  display: flex;
++  display: grid;
++  grid-template-columns: auto minmax(0, 1fr) auto;
++  grid-template-areas:
++    'thumb text status'
++    'thumb text amount';
+   align-items: center;
+-  gap: 18px;
++  column-gap: 16px;
++  row-gap: 6px;
+   padding: 14px 18px 14px 14px;
+   border: 1px solid var(--glass-edge);
+   border-radius: 24px;
+@@ -123,21 +137,51 @@
+   color: var(--eci-text-soft);
+ }
+ 
++/* En el movil las tres cifras van en una fila compacta, sin icono: son un resumen. */
+ @media (width < 640px) {
+   .summary {
++    gap: 8px;
++  }
++
++  .summaryCard {
+     grid-template-columns: 1fr;
++    grid-template-areas:
++      'value'
++      'label';
++    padding: 12px;
++  }
++
++  .summaryCard svg {
++    display: none;
++  }
++
++  .summaryCard strong {
++    font-size: 1.375rem;
++  }
++
++  .row {
++    grid-template-columns: auto minmax(0, 1fr) auto;
++    grid-template-areas:
++      'thumb text text'
++      'thumb status amount';
++  }
++
++  .row > span:last-child {
++    justify-self: start;
++    align-self: center;
+   }
+ }
+ 
+ .thumb.thumb {
++  grid-area: thumb;
+   width: 84px;
+   height: 84px;
+   border-radius: 18px;
+ }
+ 
+ .text {
++  grid-area: text;
+   display: flex;
+-  flex: 1;
+   flex-direction: column;
+   align-items: flex-start;
+   gap: 6px;
+@@ -156,6 +200,8 @@
+ }
+ 
+ .amount {
++  grid-area: amount;
++  align-self: end;
+   display: grid;
+   justify-items: end;
+   gap: 4px;
+@@ -167,6 +213,9 @@
+ }
+ 
+ .row > span:last-child {
++  grid-area: status;
++  align-self: start;
++  justify-self: end;
+   min-width: 92px;
+   justify-content: center;
+   padding-block: 9px;
+diff --git a/src/features/auctions/pages/room/follow-room.tsx b/src/features/auctions/pages/room/follow-room.tsx
+index 17b646e..a78ab17 100644
+--- a/src/features/auctions/pages/room/follow-room.tsx
++++ b/src/features/auctions/pages/room/follow-room.tsx
+@@ -170,6 +170,13 @@ export function FollowRoomView({
+               <div className={styles.strip}>
+                 <RoomItemsStrip room={live.room} compact />
+               </div>
++              <div className={styles.lower}>
++                <RoomActivityList
++                  activity={live.activity}
++                  title="Actividad reciente"
++                />
++                <NextItem room={live.room} active={round} />
++              </div>
+             </div>
+ 
+             <aside className={styles.side}>
+@@ -177,11 +184,6 @@ export function FollowRoomView({
+               {viewer === 'owner' ? (
+                 <RoomChat roomId={room.id} readOnly />
+               ) : null}
+-              <RoomActivityList
+-                activity={live.activity}
+-                title="Actividad reciente"
+-              />
+-              <NextItem room={live.room} active={round} />
+               {viewer === 'late' ? (
+                 <Link
+                   className={buttonClass('secondary', 'lg')}
+diff --git a/src/features/auctions/pages/room/live-room.tsx b/src/features/auctions/pages/room/live-room.tsx
+index 1c6c5c8..32e8670 100644
+--- a/src/features/auctions/pages/room/live-room.tsx
++++ b/src/features/auctions/pages/room/live-room.tsx
+@@ -360,6 +360,16 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
+             <div className={styles.strip}>
+               <RoomItemsStrip room={live.room} />
+             </div>
++
++            {/*
++              Actividad y siguiente objeto van debajo de la columna principal y no al final de
++              la lateral: la lateral ya tiene puja automatica, pujas y chat, y la principal se
++              quedaba vacia a media pantalla.
++            */}
++            <div className={styles.lower}>
++              <RoomActivityList activity={live.activity} />
++              <NextItem room={live.room} active={round} />
++            </div>
+           </div>
+ 
+           <aside className={styles.side}>
+@@ -378,8 +388,6 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
+             ) : null}
+             <RecentBids bids={live.bids} />
+             <RoomChat roomId={roomId} />
+-            <RoomActivityList activity={live.activity} />
+-            <NextItem room={live.room} active={round} />
+           </aside>
+         </div>
+       </div>
+diff --git a/src/features/auctions/pages/room/room.module.css b/src/features/auctions/pages/room/room.module.css
+index 2aa23ca..8d05abb 100644
+--- a/src/features/auctions/pages/room/room.module.css
++++ b/src/features/auctions/pages/room/room.module.css
+@@ -157,6 +157,21 @@
+   margin-top: 28px;
+ }
+ 
++/* Actividad y siguiente objeto, lado a lado bajo la columna principal. */
++.lower {
++  display: grid;
++  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
++  align-items: start;
++  gap: 22px;
++  margin-top: 28px;
++}
++
++@media (width < 720px) {
++  .lower {
++    grid-template-columns: 1fr;
++  }
++}
++
+ .between {
+   display: grid;
+   place-items: center;
+diff --git a/src/features/lots/pages/lot-form.page.module.css b/src/features/lots/pages/lot-form.page.module.css
+index a5de914..a5e9b19 100644
+--- a/src/features/lots/pages/lot-form.page.module.css
++++ b/src/features/lots/pages/lot-form.page.module.css
+@@ -2,11 +2,6 @@
+   display: grid;
+   gap: var(--s-5);
+   width: 100%;
+-  max-width: 620px;
+-}
+-
+-.summary {
+-  max-width: 620px;
+ }
+ 
+ .requirement {
+diff --git a/src/features/lots/pages/lot-form.page.tsx b/src/features/lots/pages/lot-form.page.tsx
+index aa11df7..6103f08 100644
+--- a/src/features/lots/pages/lot-form.page.tsx
++++ b/src/features/lots/pages/lot-form.page.tsx
+@@ -7,7 +7,13 @@ import { Button } from '@/shared/components/ui/button';
+ import { ConfirmDialog } from '@/shared/components/ui/confirm-dialog';
+ import { Field, FormActions, Input } from '@/shared/components/ui/field';
+ import { Notice } from '@/shared/components/ui/notice';
+-import { Page, PageHeader } from '@/shared/components/ui/page';
++import { Icon } from '@/shared/components/ui/icon';
++import {
++  AsideCard,
++  AsideSteps,
++  Page,
++  PageHeader,
++} from '@/shared/components/ui/page';
+ import { ItemPicker } from '../components/item-picker';
+ import { useCreateLot } from '../hooks/use-create-lot';
+ import { LOT_NAME_MAX, MIN_LOT_ITEMS, type LotItem } from '../model/lot';
+@@ -76,7 +82,43 @@ export function LotFormPage() {
+   }
+ 
+   return (
+-    <Page>
++    <Page
++      aside={
++        <>
++          <AsideCard
++            title="Qué es un lote"
++            icon={<Icon name="layers" size={18} />}
++          >
++            <p>
++              Varios objetos que salen a subasta juntos, como una sola ronda.
++              Los objetos que elijas quedan reservados en el lote.
++            </p>
++          </AsideCard>
++          <AsideCard
++            title="Para crearlo"
++            icon={<Icon name="check" size={18} />}
++            tone="var(--eci-green)"
++          >
++            <AsideSteps
++              steps={[
++                <>
++                  <strong>Ponle un nombre</strong> con el que lo reconozcan en
++                  la sala.
++                </>,
++                <>
++                  <strong>Marca los objetos</strong> que van juntos (mínimo{' '}
++                  {MIN_LOT_ITEMS}).
++                </>,
++                <>
++                  <strong>Crea el lote.</strong> Después podrás usarlo como
++                  ronda al programar una sala.
++                </>,
++              ]}
++            />
++          </AsideCard>
++        </>
++      }
++    >
+       <PageHeader
+         eyebrow="Lotes"
+         title="Crear lote"
+diff --git a/src/features/rooms/pages/schedule-room.page.module.css b/src/features/rooms/pages/schedule-room.page.module.css
+index f1544ff..cf9c818 100644
+--- a/src/features/rooms/pages/schedule-room.page.module.css
++++ b/src/features/rooms/pages/schedule-room.page.module.css
+@@ -2,11 +2,6 @@
+   display: grid;
+   gap: var(--s-4);
+   width: 100%;
+-  max-width: 880px;
+-}
+-
+-.summary {
+-  max-width: 880px;
+ }
+ 
+ /* Inicio y aforo van juntos en pantalla ancha y se apilan en el movil. */
+diff --git a/src/features/rooms/pages/schedule-room.page.tsx b/src/features/rooms/pages/schedule-room.page.tsx
+index d4ffbbc..95104f0 100644
+--- a/src/features/rooms/pages/schedule-room.page.tsx
++++ b/src/features/rooms/pages/schedule-room.page.tsx
+@@ -11,7 +11,7 @@ import { ConfirmDialog } from '@/shared/components/ui/confirm-dialog';
+ import { Field, FormActions, Input, Select } from '@/shared/components/ui/field';
+ import { Icon } from '@/shared/components/ui/icon';
+ import { Notice } from '@/shared/components/ui/notice';
+-import { Page, PageHeader } from '@/shared/components/ui/page';
++import { AsideCard, AsideSteps, Page, PageHeader } from '@/shared/components/ui/page';
+ import { Toggle } from '@/shared/components/ui/toggle';
+ import {
+   hasErrors,
+@@ -130,7 +130,36 @@ export function ScheduleRoomPage() {
+   const noOptions = auctionables.options.length === 0;
+ 
+   return (
+-    <Page>
++    <Page
++      aside={
++        <>
++          <AsideCard title="Cómo se programa" icon={<Icon name="timer" size={18} />}>
++            <AsideSteps
++              steps={[
++                <>
++                  <strong>Nombre, inicio y aforo.</strong> A la hora de inicio la sala se abre sola
++                  y se cierra el registro.
++                </>,
++                <>
++                  <strong>Las rondas, en orden.</strong> Cada una lleva un objeto o un lote y su
++                  precio mínimo.
++                </>,
++                <>
++                  <strong>Ruleta opcional.</strong> Con subastas dinámicas, girarás la ruleta antes
++                  de cada ronda.
++                </>,
++              ]}
++            />
++          </AsideCard>
++          <AsideCard title="Reglas de la sala" icon={<Icon name="alert" size={18} />} tone="var(--eci-yellow)">
++            <p>
++              Solo pujan quienes se unieron <strong>antes del inicio</strong>. Cada puja suma al menos
++              100 ECICoin y una puja en el último minuto extiende el cierre.
++            </p>
++          </AsideCard>
++        </>
++      }
++    >
+       <PageHeader
+         eyebrow="Salas"
+         title="Programar sala"
+diff --git a/src/features/wallet/pages/recharge.page.module.css b/src/features/wallet/pages/recharge.page.module.css
+index 25e239e..7a640e5 100644
+--- a/src/features/wallet/pages/recharge.page.module.css
++++ b/src/features/wallet/pages/recharge.page.module.css
+@@ -2,7 +2,7 @@
+   display: grid;
+   gap: var(--s-5);
+   width: 100%;
+-  max-width: 620px;
++  max-width: 640px;
+ }
+ 
+ .note {
+@@ -19,7 +19,7 @@
+   flex-wrap: wrap;
+   align-items: center;
+   gap: var(--s-3);
+-  max-width: 620px;
++  max-width: 640px;
+   padding: var(--s-4) var(--s-5);
+   border: 1px solid var(--glass-edge-strong);
+   border-radius: var(--r-lg);
+diff --git a/src/features/wallet/pages/recharge.page.tsx b/src/features/wallet/pages/recharge.page.tsx
+index c6862de..920888b 100644
+--- a/src/features/wallet/pages/recharge.page.tsx
++++ b/src/features/wallet/pages/recharge.page.tsx
+@@ -8,7 +8,8 @@ import { Button } from '@/shared/components/ui/button';
+ import { ConfirmDialog } from '@/shared/components/ui/confirm-dialog';
+ import { Field, FormActions, Input } from '@/shared/components/ui/field';
+ import { Notice } from '@/shared/components/ui/notice';
+-import { Page, PageHeader } from '@/shared/components/ui/page';
++import { Icon } from '@/shared/components/ui/icon';
++import { AsideCard, AsideSteps, Page, PageHeader } from '@/shared/components/ui/page';
+ import { Pill } from '@/shared/components/ui/pill';
+ import { formatEcicoin, isValidAmount } from '../domain/ecicoin';
+ import { useRecharge } from '../hooks/use-recharge';
+@@ -95,7 +96,35 @@ export function RechargePage() {
+   }
+ 
+   return (
+-    <Page>
++    <Page
++      aside={
++        <>
++          <AsideCard title="Cómo se abona" icon={<Icon name="coin" size={18} />} tone="var(--eci-yellow)">
++            <AsideSteps
++              steps={[
++                <>
++                  <strong>Busca a la persona</strong> por el correo con el que entra a ECILOST.
++                </>,
++                <>
++                  <strong>Escribe la cantidad</strong> o elige un monto sugerido. Un ECICoin vale un
++                  peso.
++                </>,
++                <>
++                  <strong>Confirma.</strong> El saldo aparece en su billetera al instante.
++                </>,
++              ]}
++            />
++          </AsideCard>
++          <AsideCard title="Antes de confirmar" icon={<Icon name="alert" size={18} />} tone="var(--eci-pink)">
++            <p>
++              Una recarga <strong>no se puede deshacer</strong> desde aquí. Usa una referencia
++              (por ejemplo, el número de consignación): si se envía dos veces, no se abona dos
++              veces.
++            </p>
++          </AsideCard>
++        </>
++      }
++    >
+       <PageHeader
+         eyebrow="Billetera"
+         title="Recargar ECICoin"
+diff --git a/src/features/wallet/pages/wallet.page.module.css b/src/features/wallet/pages/wallet.page.module.css
+index 6aa2455..85bdbe5 100644
+--- a/src/features/wallet/pages/wallet.page.module.css
++++ b/src/features/wallet/pages/wallet.page.module.css
+@@ -13,10 +13,22 @@
+ 
+ .top {
+   display: grid;
+-  grid-template-columns: 1.2fr 1fr;
++  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
++  align-items: start;
+   gap: 24px;
+ }
+ 
++.left {
++  display: grid;
++  gap: 22px;
++  min-width: 0;
++}
++
++.info {
++  position: sticky;
++  top: 84px;
++}
++
+ /* --- Tarjeta de saldo ------------------------------------------------------------ */
+ .balance {
+   position: relative;
+diff --git a/src/features/wallet/pages/wallet.page.tsx b/src/features/wallet/pages/wallet.page.tsx
+index a17c49b..18d1170 100644
+--- a/src/features/wallet/pages/wallet.page.tsx
++++ b/src/features/wallet/pages/wallet.page.tsx
+@@ -31,66 +31,81 @@ export function WalletPage() {
+ 
+       {wallet ? (
+         <>
++          {/*
++            Dos columnas: saldo e historial a la izquierda, la explicacion fija a la derecha.
++            Antes el historial ocupaba todo el ancho debajo, y la mitad derecha de la pantalla
++            quedaba vacia mientras se leian los movimientos.
++          */}
+           <div className={styles.top}>
+-            <section className={styles.balance} aria-label="Saldo ECICoin">
+-              <div className={styles.balanceHead}>
+-                <span className={styles.badge} aria-hidden="true">
+-                  EC
+-                </span>
+-                <div>
+-                  <span className={styles.caption}>Saldo ECICoin</span>
+-                  <span className={styles.total}>{formatCoins(total)}</span>
++            <div className={styles.left}>
++              <section className={styles.balance} aria-label="Saldo ECICoin">
++                <div className={styles.balanceHead}>
++                  <span className={styles.badge} aria-hidden="true">
++                    EC
++                  </span>
++                  <div>
++                    <span className={styles.caption}>Saldo ECICoin</span>
++                    <span className={styles.total}>{formatCoins(total)}</span>
++                  </div>
+                 </div>
+-              </div>
+ 
+-              <div
+-                className={styles.bar}
+-                style={
+-                  { '--share': `${Math.round(share * 100)}%` } as CSSProperties
+-                }
+-                role="img"
+-                aria-label={`${Math.round(share * 100)} % disponible`}
+-              >
+-                <span className={styles.barAvailable} />
+-                <span className={styles.barHeld} />
+-              </div>
+-
+-              <dl className={styles.split}>
+-                <div>
+-                  <dt>
+-                    <i className={styles.dotCyan} aria-hidden="true" />
+-                    Disponible
+-                  </dt>
+-                  <dd className={styles.cyan}>{formatCoins(available)}</dd>
+-                </div>
+-                <div>
+-                  <dt>
+-                    <i className={styles.dotYellow} aria-hidden="true" />
+-                    Comprometido
+-                  </dt>
+-                  <dd className={styles.held}>{formatCoins(held)}</dd>
++                <div
++                  className={styles.bar}
++                  style={
++                    {
++                      '--share': `${Math.round(share * 100)}%`,
++                    } as CSSProperties
++                  }
++                  role="img"
++                  aria-label={`${Math.round(share * 100)} % disponible`}
++                >
++                  <span className={styles.barAvailable} />
++                  <span className={styles.barHeld} />
+                 </div>
+-                <div className={styles.right}>
+-                  <dt>Total</dt>
+-                  <dd>{formatCoins(total)}</dd>
+-                </div>
+-              </dl>
+ 
+-              {/*
++                <dl className={styles.split}>
++                  <div>
++                    <dt>
++                      <i className={styles.dotCyan} aria-hidden="true" />
++                      Disponible
++                    </dt>
++                    <dd className={styles.cyan}>{formatCoins(available)}</dd>
++                  </div>
++                  <div>
++                    <dt>
++                      <i className={styles.dotYellow} aria-hidden="true" />
++                      Comprometido
++                    </dt>
++                    <dd className={styles.held}>{formatCoins(held)}</dd>
++                  </div>
++                  <div className={styles.right}>
++                    <dt>Total</dt>
++                    <dd>{formatCoins(total)}</dd>
++                  </div>
++                </dl>
++
++                {/*
+                 Antes habia dos botones deshabilitados ("Solicitar recarga" y "Transferir")
+                 que no hacian nada: un control muerto promete algo que no existe. En su lugar
+                 se dice como se recarga de verdad.
+               */}
+-              <p className={styles.howTo}>
+-                <Icon name="coin" size={18} />
+-                <span>
+-                  <strong>¿Necesitas más ECICoin?</strong> Las recargas las
+-                  abona un funcionario a tu billetera; aparecen aquí en cuanto
+-                  se registran.
+-                </span>
+-              </p>
+-            </section>
++                <p className={styles.howTo}>
++                  <Icon name="coin" size={18} />
++                  <span>
++                    <strong>¿Necesitas más ECICoin?</strong> Las recargas las
++                    abona un funcionario a tu billetera; aparecen aquí en cuanto
++                    se registran.
++                  </span>
++                </p>
++              </section>
+ 
++              <section className={styles.history} aria-labelledby="historial">
++                <h2 id="historial" className={styles.historyTitle}>
++                  Historial de movimientos
++                </h2>
++                <TransactionHistory />
++              </section>
++            </div>
+             <section className={styles.info} aria-labelledby="que-es">
+               <h2 id="que-es" className={styles.infoTitle}>
+                 ¿Qué es el ECICoin?
+@@ -118,13 +133,6 @@ export function WalletPage() {
+               </ul>
+             </section>
+           </div>
+-
+-          <section className={styles.history} aria-labelledby="historial">
+-            <h2 id="historial" className={styles.historyTitle}>
+-              Historial de movimientos
+-            </h2>
+-            <TransactionHistory />
+-          </section>
+         </>
+       ) : null}
+     </div>
+diff --git a/src/shared/components/ui/notice.module.css b/src/shared/components/ui/notice.module.css
+index 423a1fb..b22db0a 100644
+--- a/src/shared/components/ui/notice.module.css
++++ b/src/shared/components/ui/notice.module.css
+@@ -8,7 +8,7 @@
+   display: grid;
+   gap: var(--s-3);
+   justify-items: start;
+-  max-width: 560px;
++  max-width: 100%;
+   padding: var(--s-5);
+   border: 1px solid var(--glass-edge);
+   border-radius: var(--r-lg);
+diff --git a/src/shared/components/ui/page.module.css b/src/shared/components/ui/page.module.css
+index efef6b8..a458eba 100644
+--- a/src/shared/components/ui/page.module.css
++++ b/src/shared/components/ui/page.module.css
+@@ -22,6 +22,104 @@
+   min-width: 0;
+ }
+ 
++/* --- Con columna lateral ------------------------------------------------------------ */
++.withAside {
++  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
++  align-items: start;
++  column-gap: var(--s-6);
++}
++
++.main {
++  display: grid;
++  align-content: start;
++  gap: var(--page-gap);
++  min-width: 0;
++}
++
++.aside {
++  position: sticky;
++  top: 84px;
++  display: grid;
++  gap: var(--s-4);
++  padding-top: var(--s-6);
++}
++
++.asideCard {
++  display: grid;
++  gap: var(--s-3);
++  padding: var(--s-5);
++  border: 1px solid color-mix(in srgb, var(--tone) 28%, transparent);
++  border-radius: var(--r-lg);
++  background:
++    radial-gradient(80% 60% at 0% 0%, color-mix(in srgb, var(--tone) 12%, transparent), transparent 70%),
++    var(--glass);
++  box-shadow: var(--glass-shine);
++}
++
++.asideTitle {
++  display: flex;
++  align-items: center;
++  gap: var(--s-2);
++  font-size: var(--text-lg);
++}
++
++.asideIcon {
++  display: grid;
++  place-items: center;
++  width: 32px;
++  height: 32px;
++  border-radius: 10px;
++  background: color-mix(in srgb, var(--tone) 18%, transparent);
++  color: var(--tone);
++}
++
++.asideBody {
++  display: grid;
++  gap: var(--s-2);
++  font-size: var(--text-sm);
++  line-height: 1.6;
++  color: var(--eci-text-soft);
++}
++
++.asideBody strong {
++  color: var(--eci-text);
++}
++
++.steps {
++  display: grid;
++  gap: var(--s-3);
++}
++
++.steps li {
++  display: flex;
++  gap: var(--s-3);
++}
++
++.steps li > span {
++  display: grid;
++  flex: none;
++  place-items: center;
++  width: 26px;
++  height: 26px;
++  border-radius: 50%;
++  background: color-mix(in srgb, var(--tone, var(--eci-cyan)) 18%, transparent);
++  font-family: var(--font-display);
++  font-size: var(--text-xs);
++  font-weight: 700;
++  color: var(--tone, var(--eci-cyan));
++}
++
++@media (width < 960px) {
++  .withAside {
++    grid-template-columns: minmax(0, 1fr);
++  }
++
++  .aside {
++    position: static;
++    padding-top: 0;
++  }
++}
++
+ @keyframes enter {
+   from {
+     opacity: 0;
+diff --git a/src/shared/components/ui/page.tsx b/src/shared/components/ui/page.tsx
+index ae6b5bf..ef2c37c 100644
+--- a/src/shared/components/ui/page.tsx
++++ b/src/shared/components/ui/page.tsx
+@@ -1,22 +1,82 @@
+-import type { ReactNode } from 'react';
++import type { CSSProperties, ReactNode } from 'react';
+ import { Link } from 'react-router-dom';
+ import styles from './page.module.css';
+ 
+-/** Contenedor de pantalla: ancho, margenes y ritmo vertical comunes. */
++/**
++ * Contenedor de pantalla: ancho, margenes y ritmo vertical comunes.
++ *
++ * Con `aside`, la pantalla se parte en dos: el contenido a la izquierda y una columna fija a
++ * la derecha (ayuda, resumen, pasos). Sin ella, los formularios de una sola columna dejaban
++ * media pantalla vacia en escritorio. En el movil la columna baja al final.
++ */
+ export function Page({
+   children,
+   className,
++  aside,
+ }: {
+   children: ReactNode;
+   className?: string;
++  aside?: ReactNode;
+ }) {
++  if (!aside) {
++    return (
++      <section className={[styles.page, className].filter(Boolean).join(' ')}>
++        {children}
++      </section>
++    );
++  }
+   return (
+-    <section className={[styles.page, className].filter(Boolean).join(' ')}>
+-      {children}
++    <section
++      className={[styles.page, styles.withAside, className]
++        .filter(Boolean)
++        .join(' ')}
++    >
++      <div className={styles.main}>{children}</div>
++      <aside className={styles.aside}>{aside}</aside>
+     </section>
+   );
+ }
+ 
++/** Bloque de la columna lateral: titulo con icono y contenido corto. */
++export function AsideCard({
++  title,
++  icon,
++  tone = 'var(--eci-cyan)',
++  children,
++}: {
++  title: string;
++  icon?: ReactNode;
++  tone?: string;
++  children: ReactNode;
++}) {
++  return (
++    <div
++      className={styles.asideCard}
++      style={{ '--tone': tone } as CSSProperties}
++    >
++      <h2 className={styles.asideTitle}>
++        {icon ? <span className={styles.asideIcon}>{icon}</span> : null}
++        {title}
++      </h2>
++      <div className={styles.asideBody}>{children}</div>
++    </div>
++  );
++}
++
++/** Pasos numerados para la columna lateral. */
++export function AsideSteps({ steps }: { steps: ReactNode[] }) {
++  return (
++    <ol className={styles.steps}>
++      {steps.map((step, index) => (
++        <li key={index}>
++          <span aria-hidden="true">{index + 1}</span>
++          <div>{step}</div>
++        </li>
++      ))}
++    </ol>
++  );
++}
++
+ /**
+  * Enlace de vuelta. Es un enlace y no un `history.back()`: la vuelta debe llevar siempre al
+  * mismo sitio, tanto si se llego navegando como si se abrio el enlace directo.
