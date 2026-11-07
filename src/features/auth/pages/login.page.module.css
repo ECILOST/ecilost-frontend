@@ -10,6 +10,8 @@
 .blob {
   position: absolute;
   z-index: -2;
+  filter: blur(80px);
+  opacity: 0.6;
 }
 
 .blue {
@@ -49,11 +51,12 @@
 }
 
 /* Veladura: la mitad izquierda se lee sobre fondo liso, las manchas asoman a la derecha. */
+/* Oscurece la mitad del texto sin cortar la luz: un degradado, no un bloque con borde. */
 .fade {
   position: absolute;
-  inset: 0 44% 0 0;
+  inset: 0;
   z-index: -1;
-  background: linear-gradient(90deg, var(--eci-night) 72%, rgb(6 21 40 / 82%));
+  background: linear-gradient(90deg, var(--eci-night) 30%, rgb(6 21 40 / 55%) 60%, transparent 85%);
 }
 
 .layout {
@@ -73,7 +76,7 @@
 }
 
 .panel {
-  background: rgb(6 21 40 / 78%);
+  align-items: center;
 }
 
 .tagline {
@@ -90,38 +93,34 @@
   color: var(--eci-text-soft);
 }
 
-.stats {
+.features {
+  display: grid;
+  gap: 12px;
+  margin: 30px 0 0;
+}
+
+.features li {
   display: flex;
-  gap: 34px;
-  margin: 34px 0 0;
+  align-items: center;
+  gap: 14px;
+  font-size: var(--text-sm);
+  color: var(--eci-text-soft);
 }
 
-.stats div {
-  display: flex;
-  flex-direction: column-reverse;
-  gap: 4px;
+.features svg {
+  flex: none;
+  box-sizing: content-box;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--tone) 35%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--tone) 16%, transparent);
+  color: var(--tone);
 }
 
-.stats dt {
-  font-size: 0.6875rem;
-  color: var(--eci-text-dim);
-}
-
-.stats dd {
-  margin: 0;
-  font: 800 1.625rem var(--font-display);
-}
-
-.yellowText {
-  color: var(--eci-yellow);
-}
-
-.cyanText {
-  color: var(--eci-cyan);
-}
-
-.pinkText {
-  color: var(--eci-pink-text);
+.features strong {
+  display: block;
+  font-family: var(--font-display);
+  color: var(--eci-text);
 }
 
 .card {
@@ -130,8 +129,12 @@
   padding: 34px;
   border: 1px solid rgb(25 229 213 / 30%);
   border-radius: var(--r-xl);
-  background: var(--eci-surface);
-  box-shadow: 0 0 40px rgb(25 229 213 / 10%);
+  background: rgb(10 28 52 / 72%);
+  box-shadow:
+    var(--glass-shine),
+    0 30px 60px -30px rgb(0 0 0 / 80%),
+    0 0 50px -10px rgb(25 229 213 / 22%);
+  backdrop-filter: blur(20px);
 }
 
 .cardTitle {
@@ -140,9 +143,9 @@
 
 .hint {
   padding: 15px 17px;
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-md);
-  background: var(--eci-night);
+  background: rgb(0 0 0 / 25%);
   font-size: var(--text-sm);
   line-height: 1.6;
   color: var(--eci-text-label);
@@ -158,7 +161,7 @@
   }
 
   .fade {
-    inset: 0;
+    background: rgb(6 21 40 / 70%);
   }
 
   .intro,

@@ -20,6 +20,8 @@ export const routes = {
   wallet: '/billetera',
   myBids: '/mis-pujas',
   notifications: '/notificaciones',
+  /** Guia de las subastas dinamicas: la puede leer cualquier sesion. */
+  dynamicGuide: '/subastas-dinamicas',
 
   // --- Funcionario -------------------------------------------------------------------
   items: '/items',
@@ -42,6 +44,8 @@ export const routes = {
    */
   managedRooms: '/programacion',
   managedRoom: (id: string) => `/programacion/${id}`,
+  /** La sala en vivo vista por quien la programo: la sigue y lee el chat, no puja. */
+  managedRoomLive: (id: string) => `/programacion/${id}/en-vivo`,
   newRoom: '/programacion/nueva',
 } as const;
 
@@ -53,4 +57,5 @@ export const routePatterns = {
   editItem: '/items/:id/editar',
   lot: '/lots/:id',
   managedRoom: '/programacion/:id',
+  managedRoomLive: '/programacion/:id/en-vivo',
 } as const;

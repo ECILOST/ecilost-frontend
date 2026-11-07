@@ -1,15 +1,57 @@
 /*
- * Ficha del objeto, en el orden de la referencia: primero la fotografia a todo lo ancho,
- * despues el nombre y, al final, el detalle en texto. Lo que la persona vino a ver ocupa la
- * primera pantalla completa.
+ * Ficha del objeto. En pantalla ancha, la multimedia ocupa la columna izquierda (con las
+ * herramientas para adjuntarla, si quien mira administra el catalogo) y todo el texto va a la
+ * derecha. En el movil se apila: primero la fotografia, despues el texto.
  */
+.layout {
+  display: grid;
+  gap: var(--page-gap);
+  align-items: start;
+  grid-template-areas:
+    'media'
+    'info'
+    'tools';
+}
+
+.media,
+.info,
+.tools {
+  min-width: 0;
+}
+
+.media {
+  grid-area: media;
+}
+
+.info {
+  grid-area: info;
+  display: grid;
+  gap: var(--page-gap);
+}
+
+/* Las herramientas de subida van despues del texto: primero se lee el objeto. */
+.tools {
+  grid-area: tools;
+}
+
+@media (width >= 860px) {
+  .layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    column-gap: var(--s-5);
+    /* Dos columnas parejas arriba (foto | texto) y la multimedia debajo, a todo el ancho. */
+    grid-template-areas:
+      'media info'
+      'tools tools';
+  }
+}
+
 .titleBlock {
   display: grid;
   gap: var(--s-3);
 }
 
 .name {
-  font-size: var(--text-2xl);
+  font-size: clamp(1.375rem, 5vw, var(--text-2xl));
 }
 
 .chips {
@@ -44,8 +86,8 @@
 .detail {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s-4) var(--s-6);
-  padding: var(--s-4) var(--s-5);
+  gap: var(--s-3) var(--s-5);
+  padding: var(--s-3) var(--s-4);
   border-radius: var(--r-lg);
   background: var(--eci-surface);
 }

@@ -19,6 +19,7 @@ import { useAuctionItem } from '../hooks/use-auction-items';
 import { useCountdown } from '../hooks/use-countdown';
 import type { AuctionItem } from '../model/auction';
 import styles from './auction-detail.page.module.css';
+import { Icon } from '@/shared/components/ui/icon';
 
 function StatusBadge({ item }: { item: AuctionItem }) {
   if (item.status === 'LIVE') {
@@ -40,14 +41,16 @@ function Actions({ item }: { item: AuctionItem }) {
           className={buttonClass('bid', 'block')}
           to={routes.room(item.roomId)}
         >
-          ⚡ Pujar {formatCoins(item.nextBid)} ECICoin
+          <Icon name="bolt" size={18} />
+          Pujar {formatCoins(item.nextBid)} ECICoin
         </Link>
         {item.buyNowPrice !== null ? (
           <Link
             className={buttonClass('secondary', 'block')}
             to={routes.room(item.roomId)}
           >
-            🛒 Comprar ahora · {formatCoins(item.buyNowPrice)}
+            <Icon name="cart" size={18} />
+            Comprar ahora · {formatCoins(item.buyNowPrice)}
           </Link>
         ) : null}
       </>
@@ -156,6 +159,41 @@ export function AuctionDetailPage() {
               </div>
             </div>
           </div>
+        ) : null}
+
+        {item && item.status !== 'CLOSED' ? (
+          <section className={styles.before} aria-labelledby="antes-de-pujar">
+            <h2 id="antes-de-pujar" className={styles.beforeTitle}>
+              Antes de pujar
+            </h2>
+            <ul className={styles.tips}>
+              <li>
+                <Icon name="users" size={20} />
+                <span>
+                  <strong>Entra a tiempo</strong>
+                  Solo pujan quienes se unieron a la sala antes de que empezara.
+                </span>
+              </li>
+              <li>
+                <Icon name="lock" size={20} />
+                <span>
+                  <strong>Tu puja queda retenida</strong>
+                  Si te superan o no ganas, los ECICoin vuelven a tu saldo.
+                </span>
+              </li>
+              <li>
+                <Icon name="timer" size={20} />
+                <span>
+                  <strong>Sin pujas de último segundo</strong>
+                  Una puja en el último minuto extiende el cierre.
+                </span>
+              </li>
+            </ul>
+            <Link className={styles.guide} to={routes.dynamicGuide}>
+              <Icon name="spin" size={16} /> Algunas rondas se juegan distinto:
+              ver las subastas dinámicas
+            </Link>
+          </section>
         ) : null}
       </div>
     </>

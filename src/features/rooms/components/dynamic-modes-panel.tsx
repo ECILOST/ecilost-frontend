@@ -9,6 +9,7 @@ import { Toggle } from '@/shared/components/ui/toggle';
 import { roomKeys, useSetDynamicModes, useSpinRoulette } from '../hooks/use-rooms';
 import type { RoomDetail, RoundDetail } from '../model/room';
 import styles from './dynamic-modes-panel.module.css';
+import { Icon } from '@/shared/components/ui/icon';
 
 /**
  * Subastas dinamicas, para el dueño de la sala (quien la programo): activar la ruleta y
@@ -23,11 +24,14 @@ export function DynamicModesPanel({ room }: { room: RoomDetail }) {
   const finished = room.status === 'CLOSED' || room.status === 'CANCELLED';
 
   return (
-    <section className={styles.panel} aria-labelledby="dynamic-modes-title">
+    <section
+      className={[styles.panel, enabled ? styles.panelOn : ''].filter(Boolean).join(' ')}
+      aria-labelledby="dynamic-modes-title"
+    >
       <div className={styles.head}>
         <div>
           <h2 id="dynamic-modes-title" className={styles.title}>
-            🎡 Subastas dinámicas
+            <Icon name="spin" size={20} /> Subastas dinámicas
           </h2>
           <p className={styles.hint}>
             Gira la ruleta antes de cada ronda: holandesa, sobre cerrado, lote misterioso o
@@ -71,8 +75,8 @@ export function DynamicModesPanel({ room }: { room: RoomDetail }) {
                   ) : null}
                 </span>
                 {canSpin ? (
-                  <Button size="md" onClick={() => setSpinning(round)}>
-                    ↻ Girar ruleta
+                  <Button size="md" onClick={() => setSpinning(round)} icon={<Icon name="spin" size={16} />}>
+                    Girar ruleta
                   </Button>
                 ) : (
                   <span className={styles.hint}>

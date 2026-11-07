@@ -72,6 +72,8 @@ export interface Round {
    * holandesa alguien pulso "Lo quiero".
    */
   closeReason: 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM' | null;
+  /** Solo cerrada: si se adjudico o quedo desierta. Es publico: no dice a quien. */
+  result: 'AWARDED' | 'DESERTED' | null;
   /** Subastas dinamicas: como se juega. Sin ruleta, siempre `CLASSIC`. */
   mode: RoundMode;
   /** La ruleta ya decidio el modo de esta ronda. */
@@ -122,11 +124,41 @@ export interface Room {
   admitted: number;
   /** Cierto si quien mira fue admitido antes del inicio y por tanto puede pujar. */
   isParticipant: boolean;
+  /** Cierto si quien mira es el funcionario que programo la sala: la sigue, no puja. */
+  isOwner?: boolean;
   /** Subastas dinamicas: la ruleta de modalidades esta activa. */
   dynamicModesEnabled: boolean;
   rounds: Round[];
   /** Hora del servidor al leer la sala, para contar hacia su inicio sin el reloj local. */
   serverTime?: string;
+}
+
+/** Un mensaje del chat de la sala. El autor va como alias: nunca se publica su userId. */
+export interface ChatMessage {
+  id: string;
+  alias: string;
+  body: string;
+  at: string;
+  /** Lo escribio quien mira. */
+  mine: boolean;
+}
+
+/**
+ * Por que no se puede usar el chat: `not-participant` (no entro antes del inicio),
+ * `not-open` (la sala no esta en curso) o cualquier fallo del canal.
+ */
+export type ChatUnavailableReason =
+  'not-participant' | 'not-open' | 'unavailable';
+
+/** Lo que pinta el chat de la sala en curso. */
+export interface RoomChat {
+  status: 'connecting' | 'ready' | 'unavailable';
+  /** Escriben solo los participantes y solo con la sala en curso; el dueño solo lee. */
+  canWrite: boolean;
+  /** El alias de quien mira, si participa. */
+  alias: string | null;
+  messages: ChatMessage[];
+  reason?: ChatUnavailableReason;
 }
 
 /** Modalidades de la ruleta en el orden de sus segmentos. */
@@ -140,7 +172,13 @@ export interface Bid {
   mine: boolean;
 }
 
-export type RoomActivityKind = 'BID' | 'OUTBID' | 'AWARDED' | 'STARTED';
+export type RoomActivityKind =
+  | 'BID'
+  | 'OUTBID'
+  | 'AWARDED'
+  | 'STARTED'
+  /** Una ronda cerro sin pujas. */
+  | 'DESERTED';
 
 export interface RoomActivity {
   id: string;
@@ -216,6 +254,13 @@ export interface RoomSummary {
     outcome: RoomOutcome;
     amount: number | null;
     detail: string;
+    /** Lo publico de la ronda, igual para todos: si se vendio y por cuanto. */
+    result: 'AWARDED' | 'DESERTED' | null;
+    finalPrice: number;
   }>;
   totalSpent: number;
+  /** Lo publico de la sala: objetos vendidos, desiertos y lo recaudado. */
+  sold: number;
+  deserted: number;
+  totalRaised: number;
 }

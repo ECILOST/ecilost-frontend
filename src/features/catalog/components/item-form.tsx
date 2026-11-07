@@ -181,83 +181,91 @@ export function ItemForm({
       ) : null}
 
       <form className={styles.form} onSubmit={submit} noValidate>
-        <Field
-          label="Nombre"
-          hint="Con el que se reconoce el objeto en el catálogo."
-          error={fieldErrors.name}
-          required
-        >
-          <Input
-            value={values.name}
-            maxLength={ITEM_LIMITS.name}
-            autoComplete="off"
-            placeholder="Portátil Lenovo ThinkPad"
-            onChange={(event) => edit('name', event.target.value)}
-          />
-        </Field>
-
-        <Field
-          label="Descripción"
-          hint="Señas particulares, contenido y dónde apareció. Es lo que permite reconocerlo."
-          error={fieldErrors.description}
-          required
-        >
-          <Textarea
-            value={values.description}
-            maxLength={ITEM_LIMITS.description}
-            placeholder="Carcasa negra con una calcomanía de la universidad en la tapa."
-            onChange={(event) => edit('description', event.target.value)}
-          />
-        </Field>
-
-        <div className={styles.row}>
-          <Field
-            label="Estado físico"
-            hint="Describe el objeto, no su disponibilidad."
-            error={fieldErrors.condition}
-            required
-          >
-            <Select
-              value={values.condition}
-              onChange={(event) =>
-                edit('condition', event.target.value as ItemCondition)
-              }
+        {/*
+          Dos columnas parejas en pantalla ancha: los datos cortos a la izquierda y los textos
+          largos a la derecha. En el movil se apilan en este mismo orden.
+        */}
+        <div className={styles.columns}>
+          <div className={styles.column}>
+            <Field
+              label="Nombre"
+              hint="Con el que se reconoce el objeto en el catálogo."
+              error={fieldErrors.name}
+              required
             >
-              {Object.values(ItemCondition).map((condition) => (
-                <option key={condition} value={condition}>
-                  {ITEM_CONDITION_LABELS[condition]}
-                </option>
-              ))}
-            </Select>
-          </Field>
+              <Input
+                value={values.name}
+                maxLength={ITEM_LIMITS.name}
+                autoComplete="off"
+                placeholder="Portátil Lenovo ThinkPad"
+                onChange={(event) => edit('name', event.target.value)}
+              />
+            </Field>
 
-          <Field
-            label="Categoría"
-            hint="Sirve para armar rondas por tipo."
-            error={fieldErrors.category}
-            required
-          >
-            <Input
-              value={values.category}
-              maxLength={ITEM_LIMITS.category}
-              autoComplete="off"
-              placeholder="Electrónica"
-              onChange={(event) => edit('category', event.target.value)}
-            />
-          </Field>
+            <Field
+              label="Estado físico"
+              hint="Describe el objeto, no su disponibilidad."
+              error={fieldErrors.condition}
+              required
+            >
+              <Select
+                value={values.condition}
+                onChange={(event) =>
+                  edit('condition', event.target.value as ItemCondition)
+                }
+              >
+                {Object.values(ItemCondition).map((condition) => (
+                  <option key={condition} value={condition}>
+                    {ITEM_CONDITION_LABELS[condition]}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+
+            <Field
+              label="Categoría"
+              hint="Sirve para armar rondas por tipo."
+              error={fieldErrors.category}
+              required
+            >
+              <Input
+                value={values.category}
+                maxLength={ITEM_LIMITS.category}
+                autoComplete="off"
+                placeholder="Electrónica"
+                onChange={(event) => edit('category', event.target.value)}
+              />
+            </Field>
+          </div>
+
+          <div className={styles.column}>
+            <Field
+              label="Descripción"
+              hint="Señas particulares, contenido y dónde apareció. Es lo que permite reconocerlo."
+              error={fieldErrors.description}
+              required
+            >
+              <Textarea
+                value={values.description}
+                maxLength={ITEM_LIMITS.description}
+                placeholder="Carcasa negra con una calcomanía de la universidad en la tapa."
+                onChange={(event) => edit('description', event.target.value)}
+              />
+            </Field>
+
+            <Field
+              label="Pistas para lote misterioso"
+              hint={`Opcional. Una por línea, hasta ${ITEM_LIMITS.clues}. Si la ruleta oculta el objeto, es lo único que verán los estudiantes: no lo delates.`}
+            >
+              <Textarea
+                value={cluesText}
+                rows={3}
+                placeholder={'Encontrado en bloque G\nFunciona con batería'}
+                onChange={(event) => setCluesText(event.target.value)}
+              />
+            </Field>
+          </div>
         </div>
-
-        <Field
-          label="Pistas para lote misterioso"
-          hint={`Opcional. Una por línea, hasta ${ITEM_LIMITS.clues}. Si la ruleta oculta el objeto, es lo único que verán los estudiantes: no lo delates.`}
-        >
-          <Textarea
-            value={cluesText}
-            rows={3}
-            placeholder={'Encontrado en bloque G\nFunciona con batería'}
-            onChange={(event) => setCluesText(event.target.value)}
-          />
-        </Field>
 
         {note ? <div className={styles.note}>{note}</div> : null}
 

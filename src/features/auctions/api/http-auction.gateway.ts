@@ -20,22 +20,32 @@ import { ApiError } from '@/shared/api/problem-details';
 import { recordServerTime } from '@/shared/api/server-clock';
 import { isSignedUrlFresh } from '@/shared/api/signed-url';
 import { minimumBid } from '../domain/auction-rules';
+import {
+  CHAT_CONNECTING,
+  ChatSendError,
+  chatUnavailableReason,
+  mergeChatMessages,
+} from '../domain/room-chat';
+import { publicTotals } from '../domain/room-results';
 import type {
   AppNotification,
   AutoBid,
   AuctionItem,
   AuctionItemStatus,
+  ChatMessage,
   DutchSchedule,
   LiveRoom,
   MyBid,
   Room,
+  RoomChat,
   RoomSummary,
   Round,
   MysteryEntry,
   SealedResults,
 } from '../model/auction';
 import type { AuctionGateway } from '../ports/auction.gateway';
-import type { RealtimeChannel } from './realtime-channel';
+import type { ChatMessageWire, RealtimeChannel } from './realtime-channel';
+import { type RoomActivityWire, toRoomActivity } from './room-activity';
 
 /** Cada cuanto se relee la sala cuando no hay canal en vivo. */
 const POLL_INTERVAL_MS = 2_000;
@@ -183,6 +193,7 @@ export function createHttpAuctionGateway(deps: {
       capacity: detail.maximumCapacity,
       admitted: detail.admittedCount,
       isParticipant: detail.isParticipant,
+      isOwner: detail.isOwner ?? false,
       dynamicModesEnabled: detail.dynamicModesEnabled ?? false,
       rounds: detail.rounds.map((round, index) =>
         toRound(round, infos[index], clues[index]),
@@ -204,22 +215,43 @@ export function createHttpAuctionGateway(deps: {
    * salen de `GET /rooms/:id/state`, que solo responde a quien participa; quien solo sigue
    * la sala toma la hora que trae la sala misma. El reloj local nunca decide nada.
    */
+  /**
+   * Actividad publica de la sala en engagement (pujas sin autor, inicio y cierre de rondas).
+   * Es un adorno de la sala, no su estado: si engagement no responde, la sala se pinta igual
+   * sin ella.
+   */
+  async function activityOf(roomId: string): Promise<RoomActivityWire[]> {
+    if (!deps.engagement) return [];
+    try {
+      const { items } = await deps.engagement.get<{ items: RoomActivityWire[] }>(
+        `/rooms/${roomId}/activity`,
+      );
+      return Array.isArray(items) ? items : [];
+    } catch {
+      return [];
+    }
+  }
+
   async function live(roomId: string): Promise<LiveRoom> {
     const detail = await roomDetail(roomId);
-    const state = detail.isParticipant
-      ? await http.get<RoomStateDetail>(`/rooms/${roomId}/state`)
-      : null;
+    // El dueño tambien lee el estado: sigue su sala en vivo, aunque no puje.
+    const [state, publicActivity] = await Promise.all([
+      detail.isParticipant || detail.isOwner
+        ? http.get<RoomStateDetail>(`/rooms/${roomId}/state`)
+        : Promise.resolve(null),
+      activityOf(roomId),
+    ]);
     recordServerTime(state?.serverTime);
     const serverTime =
       state?.serverTime ?? detail.serverTime ?? new Date().toISOString();
     const room = await toRoom(detail);
+    const { bids, activity } = toRoomActivity(publicActivity, room);
 
     return {
       room,
       round: room.rounds.find((round) => round.status === 'ACTIVE') ?? null,
-      // El servicio no publica todavia el historial de pujas ni la actividad de la sala.
-      bids: [],
-      activity: [],
+      bids,
+      activity,
       autoBid: toAutoBid(state?.autoBid ?? null),
       participants: detail.admittedCount,
       serverTime,
@@ -339,6 +371,8 @@ export function createHttpAuctionGateway(deps: {
           position: round.position,
           outcome,
           amount: won ? price : mine,
+          result: round.result,
+          finalPrice: price,
           detail: `Objeto ${round.position} · ${
             won
               ? 'lo ganaste'
@@ -364,6 +398,7 @@ export function createHttpAuctionGateway(deps: {
         totalSpent: rows
           .filter((row) => row.outcome === 'WON')
           .reduce((total, row) => total + (row.amount ?? 0), 0),
+        ...publicTotals(rows),
       };
     },
 
@@ -407,6 +442,71 @@ export function createHttpAuctionGateway(deps: {
         clearInterval(timer);
         leave?.();
       };
+    },
+
+    /**
+     * Chat de la sala por el canal de engagement. Sin canal no hay chat: no se sondea, porque
+     * un chat que llega cada quince segundos no es un chat.
+     */
+    subscribeChat(roomId, listener) {
+      if (!deps.realtime) {
+        listener({
+          ...CHAT_CONNECTING,
+          status: 'unavailable',
+          reason: 'unavailable',
+        });
+        return () => undefined;
+      }
+
+      let chat: RoomChat = CHAT_CONNECTING;
+      listener(chat);
+      const toMessage = (wire: ChatMessageWire): ChatMessage => ({
+        id: wire.id,
+        alias: wire.alias,
+        body: wire.body,
+        at: wire.createdAt,
+        mine: chat.alias !== null && wire.alias === chat.alias,
+      });
+
+      return deps.realtime.joinChat(roomId, (event) => {
+        if (event.name === 'chat.message') {
+          chat = {
+            ...chat,
+            messages: mergeChatMessages(chat.messages, [
+              toMessage(event.message),
+            ]),
+          };
+        } else if (event.ok) {
+          chat = {
+            ...chat,
+            status: 'ready',
+            canWrite: event.canWrite,
+            alias: event.alias,
+            reason: undefined,
+          };
+          chat = {
+            ...chat,
+            messages: mergeChatMessages(
+              chat.messages,
+              event.messages.map(toMessage),
+            ),
+          };
+        } else {
+          chat = {
+            ...chat,
+            status: 'unavailable',
+            canWrite: false,
+            reason: chatUnavailableReason(event.reason),
+          };
+        }
+        listener(chat);
+      });
+    },
+
+    async sendChatMessage(roomId, text) {
+      if (!deps.realtime) throw new ChatSendError('unavailable');
+      const result = await deps.realtime.sendChat(roomId, text);
+      if (!result.ok) throw new ChatSendError(result.reason);
     },
 
     /**
@@ -696,6 +796,7 @@ function toRound(round: RoundDetail, info: EntryInfo, clues: MysteryEntry[] | nu
       round.myHighestBid === null ? null : Number(round.myHighestBid),
     wonByMe: round.status === 'CLOSED' && round.isLeading,
     closeReason: round.closeReason ?? null,
+    result: round.status === 'CLOSED' ? (round.result ?? null) : null,
   };
 }
 

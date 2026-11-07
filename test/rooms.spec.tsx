@@ -1,6 +1,7 @@
 import { fireEvent, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
+import { ItemStatus } from '@/features/catalog/domain/item-status';
 import type { ScheduleRoomRequest } from '@/features/rooms/model/room';
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
 import {
@@ -100,6 +101,37 @@ describe('Salas del funcionario', () => {
     expect(
       within(second).getByRole('option', { name: /portatil lenovo/i }),
     ).toBeDisabled();
+  });
+
+  it('muestra en un popup los objetos que no se pueden subastar y por que', async () => {
+    renderApp({
+      route: '/programacion/nueva',
+      container: staff({
+        items: createFakeItemGateway({
+          items: [
+            ...AVAILABLE,
+            itemFixture({ id: 'item-3', name: 'Termo azul', status: ItemStatus.SOLD }),
+            itemFixture({ id: 'item-4', name: 'Paraguas', status: ItemStatus.WITHDRAWN }),
+          ],
+        }),
+      }),
+    });
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /ver objetos no disponibles/i }),
+    );
+
+    const popup = await screen.findByRole('dialog', {
+      name: /objetos no disponibles para subastar/i,
+    });
+    expect(await within(popup).findByText('Termo azul')).toBeInTheDocument();
+    expect(within(popup).getByText('Paraguas')).toBeInTheDocument();
+    expect(within(popup).getByText(/ya se vendió/i)).toBeInTheDocument();
+    // Lo disponible no se lista: ya esta en el selector de rondas.
+    expect(within(popup).queryByText('Portatil Lenovo')).not.toBeInTheDocument();
+
+    await userEvent.click(within(popup).getByRole('button', { name: /cerrar/i }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
   it('no envia una sala con precio con centavos', async () => {

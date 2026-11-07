@@ -23,8 +23,8 @@
  */
 .grid {
   display: grid;
-  gap: var(--s-4);
-  grid-template-columns: repeat(auto-fill, minmax(min(240px, 45%), 1fr));
+  gap: var(--s-3);
+  grid-template-columns: repeat(auto-fill, minmax(min(200px, 46%), 1fr));
 }
 
 /*

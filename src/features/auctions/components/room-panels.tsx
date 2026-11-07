@@ -1,4 +1,4 @@
-import { CoinAmount } from '@/shared/components/ui/coin';
+import { CoinAmount, formatCoins } from '@/shared/components/ui/coin';
 import { Icon, type IconName } from '@/shared/components/ui/icon';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import { formatAgo, formatCountdown } from '../domain/auction-rules';
@@ -69,6 +69,7 @@ const ACTIVITY_ICON: Record<
   OUTBID: { icon: 'arrow-down', tone: styles.greyIcon },
   AWARDED: { icon: 'check', tone: styles.cyanIcon },
   STARTED: { icon: 'play', tone: styles.blueIcon },
+  DESERTED: { icon: 'minus', tone: styles.greyIcon },
 };
 
 export function RoomActivityList({
@@ -136,6 +137,14 @@ export function NextItem({
       </div>
     </section>
   );
+}
+
+/** El resultado publico de una ronda cerrada: por cuanto se vendio, o que quedo desierta. */
+function closedLabel(round: Round): string {
+  if (round.result === 'DESERTED') return '— Desierto';
+  if (round.result === 'AWARDED')
+    return `✓ Vendido · ${formatCoins(round.currentPrice)}`;
+  return `✓ Finalizado · ${formatCoins(round.currentPrice)}`;
 }
 
 /**
@@ -212,7 +221,7 @@ export function RoomItemsStrip({
                   .join(' ')}
               >
                 {isClosed
-                  ? `✓ Finalizado${compact ? '' : ` · ${round.currentPrice}`}`
+                  ? closedLabel(round)
                   : isLive
                     ? `● En subasta${compact ? '' : ` · ${round.currentPrice}`}`
                     : compact

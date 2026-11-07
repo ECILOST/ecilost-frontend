@@ -3,7 +3,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--s-4);
-  padding: 18px max(var(--page-gutter), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
+  padding: 10px max(var(--page-gutter), calc((100% - var(--page-max)) / 2 + var(--page-gutter)));
   border-bottom: 1px solid var(--eci-line);
 }
 

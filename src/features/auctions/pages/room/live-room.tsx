@@ -32,6 +32,7 @@ import {
   RoomItemsStrip,
 } from '../../components/room-panels';
 import { CustomBidForm } from '../../components/custom-bid-form';
+import { RoomChat } from '../../components/room-chat';
 import { DutchPanel } from '../../components/dynamic/dutch-panel';
 import { ModeAnnouncement } from '../../components/dynamic/mode-announcement';
 import { MysteryClues } from '../../components/dynamic/mystery-clues';
@@ -231,6 +232,11 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                   src={hiddenMystery ? null : round.imageUrl}
                   variant="hero"
                   className={styles.art}
+                  colors={
+                    hiddenMystery
+                      ? ['var(--eci-purple)', 'var(--eci-blue)', 'var(--eci-purple)', 'var(--eci-pink)']
+                      : undefined
+                  }
                 >
                   <CountdownRing
                     className={styles.ring}
@@ -317,8 +323,9 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                         variant="bid"
                         size="block"
                         onClick={() => start('bid', nextBid)}
+                        icon={<Icon name="bolt" size={20} />}
                       >
-                        ⚡ Pujar {formatCoins(nextBid)} ECICoin
+                        Pujar {formatCoins(nextBid)} ECICoin
                       </Button>
                       {round.buyNowPrice !== null &&
                       round.buyNowPrice > round.currentPrice ? (
@@ -326,8 +333,9 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                           variant="secondary"
                           size="block"
                           onClick={() => start('buy', round.buyNowPrice ?? 0)}
+                          icon={<Icon name="cart" size={18} />}
                         >
-                          🛒 Comprar ahora · {formatCoins(round.buyNowPrice)}
+                          Comprar ahora · {formatCoins(round.buyNowPrice)}
                         </Button>
                       ) : null}
                     </div>
@@ -369,6 +377,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
               />
             ) : null}
             <RecentBids bids={live.bids} />
+            <RoomChat roomId={roomId} />
             <RoomActivityList activity={live.activity} />
             <NextItem room={live.room} active={round} />
           </aside>
@@ -483,9 +492,9 @@ function OutcomeScreens({
     return (
       <OutcomeDialog
         {...common}
-        tone="cyan"
+        tone="green"
         heading="¡Vas ganando!"
-        subtitle={<Pill tone="cyan">Tu oferta es la más alta</Pill>}
+        subtitle={<Pill tone="green">Tu oferta es la más alta</Pill>}
         actions={
           <>
             <Button size="lg" onClick={onClose}>
@@ -501,7 +510,7 @@ function OutcomeScreens({
           </OutcomeFigure>
           <OutcomeFigure label="Siguiente puja">{coins(next)}</OutcomeFigure>
         </OutcomeRow>
-        <OutcomeStrip tone="cyan">
+        <OutcomeStrip tone="green">
           <Icon name="timer" size={16} />
           <span style={{ flex: 1, color: 'var(--eci-text)' }}>
             Tiempo restante
@@ -524,8 +533,8 @@ function OutcomeScreens({
         subtitle={`Alguien pujó ${formatCoins(diff)} ECICoin más que tú.`}
         actions={
           <>
-            <Button variant="bid" size="lg" onClick={() => onBid(next)}>
-              ⚡ Pujar {formatCoins(next)}
+            <Button variant="bid" size="lg" onClick={() => onBid(next)} icon={<Icon name="bolt" size={18} />}>
+              Pujar {formatCoins(next)}
             </Button>
             {myBids}
           </>
@@ -571,8 +580,8 @@ function OutcomeScreens({
         subtitle="La subasta está por finalizar. Una puja ahora extiende el cierre hasta 1 minuto."
         actions={
           <>
-            <Button variant="bid" size="lg" onClick={() => onBid(next)}>
-              ⚡ Pujar {formatCoins(next)}
+            <Button variant="bid" size="lg" onClick={() => onBid(next)} icon={<Icon name="bolt" size={18} />}>
+              Pujar {formatCoins(next)}
             </Button>
             <Button variant="secondary" size="lg" onClick={onClose}>
               Ver seguimiento
@@ -641,7 +650,7 @@ function OutcomeScreens({
         actions={
           <>
             <Button size="lg" onClick={onClose}>
-              Ver siguiente objeto →
+              Ver siguiente objeto
             </Button>
             {myBids}
           </>
@@ -668,14 +677,14 @@ function OutcomeScreens({
     return (
       <OutcomeDialog
         {...common}
-        tone="cyan"
+        tone="green"
         confetti
         heading={dynamicWin?.heading ?? '¡Ganaste!'}
         subtitle={dynamicWin?.subtitle ?? 'Ganaste este objeto. La sala continúa con el siguiente.'}
         actions={
           <>
             <Button size="lg" onClick={onClose}>
-              Ver siguiente objeto →
+              Ver siguiente objeto
             </Button>
             {myBids}
           </>

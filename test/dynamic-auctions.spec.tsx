@@ -92,7 +92,7 @@ const baseRound: Round = {
   id: 'round-1', position: 1, itemId: 'item-1', itemName: 'Reloj inteligente', imageUrl: null, status: 'ACTIVE',
   basePrice: 3000, currentPrice: 3000, minimumBid: 3000, currentBidderId: null,
   startedAt: new Date(Date.now() - 12_000).toISOString(), endsAt: new Date(Date.now() + 60_000).toISOString(),
-  maximumEndsAt: null, buyNowPrice: null, leading: false, myHighestBid: null, wonByMe: false, closeReason: null,
+  maximumEndsAt: null, buyNowPrice: null, leading: false, myHighestBid: null, wonByMe: false, closeReason: null, result: null,
   mode: 'CLASSIC', modeLocked: true, wildcardSpins: 0, dutch: null, sealed: null, mystery: null,
 };
 

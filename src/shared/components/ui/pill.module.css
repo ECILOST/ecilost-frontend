@@ -41,17 +41,20 @@
 
 .blue {
   background: var(--eci-blue-soft);
+  border-color: var(--eci-blue-line);
   color: var(--eci-blue-text);
 }
 
 .purple {
   background: var(--eci-purple-soft);
+  border-color: var(--eci-purple-line);
   color: var(--eci-purple-text);
 }
 
 .green {
   background: var(--eci-green-soft);
-  color: var(--eci-green);
+  border-color: var(--eci-green-line);
+  color: var(--eci-green-text);
 }
 
 /*

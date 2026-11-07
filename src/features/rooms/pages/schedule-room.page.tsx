@@ -1,5 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { formatEcicoin } from '@/features/wallet/domain/ecicoin';
 import { ApiError } from '@/shared/api/problem-details';
@@ -23,9 +23,12 @@ import {
 } from '../domain/schedule-draft';
 import { AuctionableKind } from '../domain/room-status';
 import { ROOM_NAME_MAX } from '../model/room';
+import { UnavailableItemsDialog } from '../components/unavailable-items-dialog';
 import { useAuctionables, type Auctionable } from '../hooks/use-auctionables';
 import { useScheduleRoom } from '../hooks/use-schedule-room';
 import styles from './schedule-room.page.module.css';
+import { Pill } from '@/shared/components/ui/pill';
+import { MODE_META } from '@/features/auctions/domain/dynamic-modes';
 
 const NO_ERRORS: ScheduleErrors = { rounds: {} };
 
@@ -53,6 +56,7 @@ export function ScheduleRoomPage() {
   });
   const [errors, setErrors] = useState<ScheduleErrors>(NO_ERRORS);
   const [confirming, setConfirming] = useState(false);
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
   const byKey = new Map(auctionables.options.map((option) => [option.key, option]));
 
@@ -199,12 +203,20 @@ export function ScheduleRoomPage() {
             onChange={(dynamicModes) => update({ dynamicModes })}
           />
           <span>
-            <strong>🎡 Subastas dinámicas</strong>
+            <strong>Subastas dinámicas</strong>
             <br />
             <small>
               Antes de cada ronda girarás una ruleta: holandesa, sobre cerrado o lote
               misterioso. Puedes activarlas después desde la sala.
             </small>
+            <span className={styles.modeChips} aria-hidden="true">
+              <Pill tone="pink">{MODE_META.DUTCH.glyph} {MODE_META.DUTCH.label}</Pill>
+              <Pill tone="blue">{MODE_META.SEALED.glyph} {MODE_META.SEALED.label}</Pill>
+              <Pill tone="purple">{MODE_META.MYSTERY.glyph} {MODE_META.MYSTERY.label}</Pill>
+              <Link to={routes.dynamicGuide} className={styles.guideLink}>
+                Ver cómo se juega
+              </Link>
+            </span>
           </span>
         </div>
 
@@ -318,6 +330,13 @@ export function ScheduleRoomPage() {
               <Icon name="plus" size={18} />
               Añadir ronda
             </Button>
+            <Button
+              variant="quiet"
+              icon={<Icon name="eye" size={18} />}
+              onClick={() => setShowUnavailable(true)}
+            >
+              Ver objetos no disponibles
+            </Button>
             {auctionables.hasMoreItems ? (
               <Button
                 variant="quiet"
@@ -351,6 +370,11 @@ export function ScheduleRoomPage() {
           </Button>
         </FormActions>
       </form>
+
+      <UnavailableItemsDialog
+        open={showUnavailable}
+        onClose={() => setShowUnavailable(false)}
+      />
 
       <ConfirmDialog
         open={confirming}

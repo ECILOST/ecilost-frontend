@@ -4,23 +4,23 @@
  */
 .viewer {
   display: grid;
-  gap: var(--s-4);
+  gap: var(--s-3);
 }
 
 .stage {
   position: relative;
   display: grid;
   place-items: center;
-  padding: var(--s-6);
-  border-radius: var(--r-xl);
+  padding: var(--s-5) var(--s-4);
+  border-radius: var(--r-lg);
   background: var(--eci-night);
   overflow: hidden;
 }
 
 .badge {
   position: absolute;
-  top: var(--s-4);
-  right: var(--s-4);
+  top: var(--s-3);
+  right: var(--s-3);
   z-index: 3;
 }
 
@@ -59,8 +59,8 @@
 
 .thumb {
   flex: 0 0 auto;
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   padding: 0;
   border: 2px solid transparent;
   border-radius: var(--r-sm);

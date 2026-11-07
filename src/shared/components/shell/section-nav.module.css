@@ -38,11 +38,11 @@
 .bottom {
   position: fixed;
   right: var(--page-gutter);
-  bottom: var(--s-4);
+  bottom: var(--s-2);
   left: var(--page-gutter);
   z-index: 20;
   justify-content: space-around;
-  padding: var(--s-2);
+  padding: 4px var(--s-2);
   border: 1px solid var(--eci-line);
   border-radius: var(--r-chip);
   /* Translucida y con desenfoque: la pantalla sigue viendose debajo, como en una emision. */
@@ -55,7 +55,7 @@
   flex-direction: column;
   gap: 2px;
   flex: 1;
-  padding: var(--s-2) 0;
+  padding: 6px 0;
   font-size: var(--text-2xs);
 }
 

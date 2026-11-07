@@ -55,7 +55,8 @@
 }
 
 .itemName {
-  font-size: 1.625rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.02em;
 }
 
 .label {
@@ -73,30 +74,53 @@
 
 .myBid {
   padding: 12px 16px;
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-md);
-  background: var(--eci-surface);
+  background: var(--glass);
   font-size: var(--text-xs);
   font-weight: 500;
   color: var(--eci-text-body);
+  box-shadow: var(--glass-shine);
 }
 
+/*
+ * Estado de quien mira: color + texto + punto. Verde "vas ganando" (no cian: el cian es la
+ * accion principal), rosa "te superaron".
+ */
 .state {
-  padding: 11px 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 16px;
+  border: 1px solid transparent;
   border-radius: var(--r-md);
-  font-size: 0.6875rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
   white-space: nowrap;
 }
 
+.state::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentcolor;
+  box-shadow: 0 0 10px currentcolor;
+}
+
 .winning {
-  background: var(--eci-cyan);
-  color: var(--eci-on-accent);
+  border-color: var(--eci-green-line);
+  background: var(--eci-green-soft);
+  box-shadow: 0 0 30px -10px var(--eci-green);
+  color: var(--eci-green-text);
 }
 
 .outbid {
-  background: var(--eci-pink);
-  color: var(--eci-text);
+  border-color: var(--eci-pink-line);
+  background: var(--eci-pink-soft);
+  box-shadow: 0 0 30px -10px var(--eci-pink);
+  color: var(--eci-pink-text);
   animation: shake 0.4s ease-in-out;
 }
 
@@ -223,7 +247,10 @@
   height: 250px;
   overflow: hidden;
   border-radius: var(--r-xl);
+  border: 1px solid var(--glass-edge);
   background:
+    linear-gradient(rgb(255 255 255 / 3.5%) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, rgb(255 255 255 / 3.5%) 1px, transparent 1px) 0 0 / 28px 28px,
     radial-gradient(55% 75% at 12% 18%, color-mix(in srgb, var(--eci-blue) 55%, transparent) 0, transparent 70%),
     radial-gradient(50% 70% at 90% 85%, color-mix(in srgb, var(--eci-pink) 45%, transparent) 0, transparent 70%),
     radial-gradient(35% 45% at 80% 15%, color-mix(in srgb, var(--eci-cyan) 35%, transparent) 0, transparent 70%),
@@ -267,28 +294,32 @@
   overflow: hidden;
   border: 1px solid rgb(25 229 213 / 30%);
   border-radius: 28px;
-  background: linear-gradient(120deg, var(--eci-surface-high), var(--eci-surface));
+  background:
+    linear-gradient(rgb(255 255 255 / 3%) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgb(255 255 255 / 3%) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(120deg, var(--eci-surface-high), var(--eci-surface));
   text-align: center;
-  box-shadow: 0 0 36px rgb(25 229 213 / 10%);
+  box-shadow:
+    var(--glass-shine),
+    0 0 50px -10px rgb(25 229 213 / 22%);
   isolation: isolate;
 }
 
 .countdown::before {
   content: '';
   position: absolute;
-  left: -50px;
-  bottom: -60px;
+  inset: 20% 25%;
   z-index: -1;
-  width: 200px;
-  height: 170px;
-  background: rgb(25 229 213 / 20%);
-  border-radius: var(--blob-d);
+  border-radius: 50%;
+  background: rgb(25 229 213 / 30%);
+  filter: blur(40px);
 }
 
 .countdownValue {
-  font: 800 3.875rem/1 var(--font-display);
+  font: 800 clamp(2.75rem, 7vw, 4.25rem)/1 var(--font-display);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 3px;
+  letter-spacing: -0.01em;
+  text-shadow: 0 0 30px rgb(25 229 213 / 45%);
 }
 
 .waitStats {
@@ -324,9 +355,15 @@
   align-items: center;
   gap: 12px;
   padding: 11px 14px;
-  border: 1px solid rgb(255 255 255 / 7%);
+  border: 1px solid var(--glass-edge);
   border-radius: 20px;
-  background: var(--eci-surface);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
+  transition: border-color var(--t-fast) linear;
+}
+
+.orderRow:hover {
+  border-color: var(--glass-edge-strong);
 }
 
 .orderNumber {
@@ -347,9 +384,68 @@
 }
 
 .orderName {
+  display: flex;
   flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   font-size: var(--text-sm);
   font-weight: 600;
+}
+
+/* Aviso de subastas dinamicas en la sala de espera, con enlace a la guia. */
+.dynamicBanner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--eci-purple-line);
+  border-radius: 22px;
+  background:
+    radial-gradient(70% 120% at 0% 50%, rgb(123 92 255 / 22%), transparent 70%),
+    var(--glass);
+}
+
+.dynamicBanner strong {
+  font-family: var(--font-display);
+}
+
+.dynamicBanner p {
+  margin-top: 2px;
+  font-size: var(--text-sm);
+  color: var(--eci-text-soft);
+}
+
+.dynamicBanner > a {
+  flex: none;
+}
+
+.dynamicBannerIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: linear-gradient(150deg, var(--eci-pink), var(--eci-purple) 55%, var(--eci-blue));
+  box-shadow: var(--glow-purple);
+  color: #fff;
+}
+
+.guideLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+@media (width < 560px) {
+  .dynamicBanner {
+    flex-wrap: wrap;
+  }
 }
 
 .join {
@@ -359,12 +455,13 @@
 .note {
   margin-top: 14px;
   padding: 14px 16px;
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: 20px;
-  background: var(--eci-surface);
+  background: var(--glass);
   font-size: 0.6875rem;
   line-height: 1.6;
   color: var(--eci-text-label);
+  box-shadow: var(--glass-shine);
 }
 
 /* --- Sala finalizada --------------------------------------------------------------- */
@@ -380,6 +477,7 @@
   position: absolute;
   z-index: -1;
   border-radius: 50%;
+  filter: blur(80px);
 }
 
 .finished::before {
@@ -439,11 +537,12 @@
 }
 
 .counterWon {
-  border-color: var(--eci-cyan-line);
+  border-color: var(--eci-green-line);
+  box-shadow: 0 0 30px -12px var(--eci-green);
 }
 
 .counterWon strong {
-  color: var(--eci-cyan);
+  color: var(--eci-green);
 }
 
 .counterLost {
@@ -482,7 +581,10 @@
 }
 
 .resumeWon {
-  border-color: var(--eci-cyan-line);
+  border-color: var(--eci-green-line);
+  background:
+    radial-gradient(60% 120% at 0% 50%, rgb(47 227 154 / 10%), transparent 70%),
+    var(--glass);
 }
 
 .resumeLost {
@@ -525,6 +627,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  margin-top: 24px;
+}
+
+.finishedChat {
   margin-top: 24px;
 }
 

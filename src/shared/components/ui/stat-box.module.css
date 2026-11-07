@@ -5,9 +5,10 @@
   gap: 4px;
   min-width: 0;
   padding: 13px 15px;
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-md);
-  background: var(--eci-surface);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
 }
 
 .center {

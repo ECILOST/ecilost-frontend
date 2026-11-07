@@ -268,6 +268,27 @@ describe('Subastas', () => {
     expect(
       screen.queryByRole('button', { name: /pujar/i }),
     ).not.toBeInTheDocument();
+    // El chat es de los participantes: quien sigue desde afuera no lo ve.
+    expect(
+      screen.queryByRole('heading', { name: 'Chat de la sala' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('el participante chatea con la sala mientras la subasta esta en curso', async () => {
+    const user = userEvent.setup();
+    renderApp({ route: '/salas/sala-04', container: student() });
+
+    const chat = within(
+      (await screen.findByRole('heading', { name: 'Chat de la sala' }))
+        .closest('section') as HTMLElement,
+    );
+    expect(await chat.findByText('¡Suerte a todos!')).toBeInTheDocument();
+
+    await user.type(chat.getByLabelText('Mensaje'), '  Hola   sala ');
+    await user.click(chat.getByRole('button', { name: 'Enviar' }));
+
+    expect(await chat.findByText('Hola sala')).toBeInTheDocument();
+    expect(chat.getByLabelText('Mensaje')).toHaveValue('');
   });
 
   it('en la sala de espera se puede unir antes del inicio', async () => {

@@ -1,6 +1,7 @@
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
 import { Button } from '@/shared/components/ui/button';
+import { Icon } from '@/shared/components/ui/icon';
 import { formatDateTime } from '@/shared/format/date';
 import { formatEcicoin } from '../domain/ecicoin';
 import { TRANSACTION_TYPE } from '../domain/transaction-type';
@@ -23,7 +24,18 @@ export function TransactionHistory() {
   if (isPending) return <Loading label="Cargando tus movimientos..." />;
   if (error) return <ErrorState error={error} onRetry={() => void refetch()} />;
   if (transactions.length === 0) {
-    return <p className={styles.empty}>Todavía no tienes movimientos.</p>;
+    return (
+      <div className={styles.empty}>
+        <span className={styles.emptyIcon} aria-hidden="true">
+          <Icon name="swap" size={24} />
+        </span>
+        <p>Todavía no tienes movimientos.</p>
+        <small>
+          Aquí verás tus recargas, lo que retienen tus pujas y lo que pagas al
+          ganar.
+        </small>
+      </div>
+    );
   }
 
   return (
@@ -33,6 +45,15 @@ export function TransactionHistory() {
           const type = TRANSACTION_TYPE[transaction.type];
           return (
             <li key={transaction.id} className={styles.row}>
+              <span
+                className={`${styles.kind} ${type.sign === '+' ? styles.kindIn : styles.kindOut}`}
+                aria-hidden="true"
+              >
+                <Icon
+                  name={type.sign === '+' ? 'arrow-down' : 'arrow-up'}
+                  size={18}
+                />
+              </span>
               <span className={styles.label}>{type.label}</span>
               <span className={styles.when}>
                 {formatDateTime(transaction.createdAt)}
