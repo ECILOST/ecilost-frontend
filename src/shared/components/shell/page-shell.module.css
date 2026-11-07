@@ -25,8 +25,15 @@
   margin-left: auto;
 }
 
+/*
+ * Las luces de color de las portadas se salen de su seccion a proposito; `clip` las corta en
+ * el borde de la pantalla sin crear desplazamiento horizontal. No es `hidden`: `hidden` haria
+ * de `main` un contenedor de scroll y romperia los `position: sticky` de dentro.
+ */
 .main {
   flex: 1;
+  min-width: 0;
+  overflow-x: clip;
 }
 
 @media (width < 768px) {

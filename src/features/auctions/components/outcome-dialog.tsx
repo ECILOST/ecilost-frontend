@@ -3,7 +3,7 @@ import { Dialog } from '@/shared/components/ui/dialog';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import styles from './outcome-dialog.module.css';
 
-export type OutcomeTone = 'cyan' | 'pink' | 'yellow';
+export type OutcomeTone = 'cyan' | 'pink' | 'yellow' | 'green';
 
 /**
  * Los estados de la subasta son pantallas, no mensajes: una mancha grande del color del

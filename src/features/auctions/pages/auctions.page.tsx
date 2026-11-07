@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { routes } from '@/app/routes';
 import { EmptyState } from '@/shared/components/empty-state';
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
@@ -16,6 +18,28 @@ const FILTERS: Array<{ value: AuctionItemStatus | 'ALL'; label: string }> = [
   { value: 'CLOSED', label: 'Finalizadas' },
 ];
 
+const SECTIONS: Array<{
+  status: AuctionItemStatus;
+  title: string;
+  hint: string;
+}> = [
+  {
+    status: 'LIVE',
+    title: 'En vivo ahora',
+    hint: 'Entra antes de que cierre el reloj.',
+  },
+  {
+    status: 'UPCOMING',
+    title: 'Próximamente',
+    hint: 'Únete a la sala antes de que empiece para poder pujar.',
+  },
+  {
+    status: 'CLOSED',
+    title: 'Ya terminaron',
+    hint: 'Subastas cerradas recientemente.',
+  },
+];
+
 /** Quita tildes y mayusculas: "audifonos" encuentra "Audífonos". */
 const normalize = (text: string) =>
   text
@@ -30,6 +54,9 @@ export function AuctionsPage() {
   const [search, setSearch] = useState('');
 
   const query = normalize(search.trim());
+  // Sin filtro ni busqueda, el catalogo se ordena por urgencia: lo que esta en vivo arriba y
+  // grande, lo que viene despues, y lo terminado al final y atenuado.
+  const grouped = filter === 'ALL' && !query;
   const visible = (items ?? [])
     .filter((item) => filter === 'ALL' || item.status === filter)
     .filter(
@@ -44,7 +71,10 @@ export function AuctionsPage() {
           <h1 className={styles.title}>Catálogo de subastas</h1>
           <p className={styles.subtitle}>
             Descubre, puja y llévatelos
-            {items ? ` · ${items.length} objetos` : ''}
+            {items ? ` · ${items.length} objetos` : ''} ·{' '}
+            <Link to={routes.dynamicGuide}>
+              ¿Cómo funcionan las subastas dinámicas?
+            </Link>
           </p>
         </div>
         <label className={styles.search}>
@@ -91,7 +121,48 @@ export function AuctionsPage() {
         </EmptyState>
       ) : null}
 
-      {visible.length > 0 ? (
+      {visible.length > 0 && grouped ? (
+        <>
+          {SECTIONS.map(({ status, title, hint }) => {
+            const group = visible.filter((item) => item.status === status);
+            if (!group.length) return null;
+            return (
+              <section
+                key={status}
+                className={styles.section}
+                aria-labelledby={`grupo-${status}`}
+              >
+                <div className={styles.sectionHead}>
+                  <h2 id={`grupo-${status}`} className={styles.sectionTitle}>
+                    {status === 'LIVE' ? (
+                      <span className={styles.liveDot} aria-hidden="true" />
+                    ) : null}
+                    {title}
+                    <span className={styles.sectionCount}>{group.length}</span>
+                  </h2>
+                  <p className={styles.sectionHint}>{hint}</p>
+                </div>
+                <ul
+                  className={
+                    status === 'LIVE' ? styles.featureGrid : styles.grid
+                  }
+                >
+                  {group.map((item) => (
+                    <li key={item.id}>
+                      <AuctionCard
+                        item={item}
+                        variant={status === 'LIVE' ? 'feature' : 'default'}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            );
+          })}
+        </>
+      ) : null}
+
+      {visible.length > 0 && !grouped ? (
         <ul className={styles.grid}>
           {visible.map((item) => (
             <li key={item.id}>

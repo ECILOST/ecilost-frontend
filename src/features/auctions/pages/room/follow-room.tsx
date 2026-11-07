@@ -36,14 +36,14 @@ const VIEWER = {
     badge: 'Subasta en curso · Solo seguimiento',
     title: 'El ingreso a esta sala cerró al iniciar la subasta',
     sub: 'Puedes seguir la actividad en tiempo real, pero no participar en las pujas.',
-    unavailable: '⚡ Pujar no disponible · esta sala ya inició',
+    unavailable: 'Pujar no disponible · esta sala ya inició',
   },
   owner: {
     back: null,
     badge: 'Subasta en curso · Vista del organizador',
     title: 'Estás siguiendo tu sala en vivo',
     sub: 'Ves el precio, las rondas y el chat en tiempo real. Como organizador no pujas ni escribes en el chat.',
-    unavailable: '⚡ El organizador sigue la sala, no puja',
+    unavailable: 'El organizador sigue la sala, no puja',
   },
 } as const;
 

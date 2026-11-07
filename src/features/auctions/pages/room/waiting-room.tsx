@@ -1,13 +1,16 @@
 import { routes } from '@/app/routes';
 import { ErrorState } from '@/shared/components/error-state';
 import { Brand } from '@/shared/components/shell/brand';
-import { Button } from '@/shared/components/ui/button';
+import { Link } from 'react-router-dom';
+import { Button, buttonClass } from '@/shared/components/ui/button';
+import { Icon } from '@/shared/components/ui/icon';
 import { CoinAmount } from '@/shared/components/ui/coin';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import { Pill } from '@/shared/components/ui/pill';
 import { ScreenHeader } from '@/shared/components/ui/screen-header';
 import { StatBox } from '@/shared/components/ui/stat-box';
 import { formatCountdown } from '../../domain/auction-rules';
+import { isDynamic, MODE_META } from '../../domain/dynamic-modes';
 import { useCountdown } from '../../hooks/use-countdown';
 import { useLiveRoom } from '../../hooks/use-live-room';
 import { useJoinRoom } from '../../hooks/use-room';
@@ -71,6 +74,31 @@ export function WaitingRoomView({ room }: { room: Room }) {
                 {formatCountdown(remaining, true)}
               </span>
             </div>
+            {room.dynamicModesEnabled ? (
+              <div className={styles.dynamicBanner}>
+                <span className={styles.dynamicBannerIcon} aria-hidden="true">
+                  <Icon name="spin" size={26} />
+                </span>
+                <div>
+                  <strong>Esta sala tiene subastas dinámicas</strong>
+                  <p>
+                    Antes de cada ronda se gira una ruleta: holandesa, sobre
+                    cerrado o lote misterioso. Cada una se juega distinto.
+                  </p>
+                </div>
+                <Link
+                  className={buttonClass('secondary')}
+                  to={routes.dynamicGuide}
+                >
+                  Cómo se juega
+                </Link>
+              </div>
+            ) : (
+              <Link className={styles.guideLink} to={routes.dynamicGuide}>
+                <Icon name="help" size={16} /> ¿Cómo funcionan las subastas
+                dinámicas?
+              </Link>
+            )}
             <div className={styles.waitStats}>
               <StatBox
                 size="lg"
@@ -115,7 +143,19 @@ export function WaitingRoomView({ room }: { room: Room }) {
                     src={round.imageUrl}
                     variant="thumb"
                   />
-                  <span className={styles.orderName}>{round.itemName}</span>
+                  <span className={styles.orderName}>
+                    {round.itemName}
+                    {room.dynamicModesEnabled ? (
+                      isDynamic(round.mode) && round.modeLocked ? (
+                        <Pill tone={MODE_META[round.mode].tone}>
+                          {MODE_META[round.mode].glyph}{' '}
+                          {MODE_META[round.mode].label}
+                        </Pill>
+                      ) : (
+                        <Pill tone="neutral">Ruleta antes de empezar</Pill>
+                      )
+                    ) : null}
+                  </span>
                   <CoinAmount value={round.basePrice} size="sm" />
                 </li>
               ))}

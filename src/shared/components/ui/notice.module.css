@@ -10,9 +10,9 @@
   justify-items: start;
   max-width: 560px;
   padding: var(--s-5);
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-lg);
-  background: var(--eci-surface);
+  background: var(--glass);
   box-shadow: var(--shadow-card);
 }
 

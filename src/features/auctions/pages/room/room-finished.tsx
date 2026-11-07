@@ -14,9 +14,9 @@ import styles from './room.module.css';
 
 const OUTCOME: Record<
   RoomOutcome,
-  { label: string; tone: 'cyan' | 'pink' | 'neutral'; row: string }
+  { label: string; tone: 'green' | 'pink' | 'neutral'; row: string }
 > = {
-  WON: { label: 'Ganado', tone: 'cyan', row: styles.resumeWon },
+  WON: { label: 'Ganado', tone: 'green', row: styles.resumeWon },
   LOST: { label: 'Perdido', tone: 'pink', row: styles.resumeLost },
   NO_BID: { label: 'Sin ofertar', tone: 'neutral', row: '' },
 };
@@ -77,7 +77,7 @@ export function PublicRoomSummary({ summary }: { summary: RoomSummary }) {
               ) : null}
             </div>
             <Pill
-              tone={row.result === 'AWARDED' ? 'cyan' : 'neutral'}
+              tone={row.result === 'AWARDED' ? 'green' : 'neutral'}
               solid={row.result === 'AWARDED'}
             >
               {row.result === 'AWARDED' ? 'Vendido' : 'Desierto'}

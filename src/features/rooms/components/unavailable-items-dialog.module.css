@@ -42,9 +42,10 @@
   justify-content: space-between;
   gap: var(--s-3);
   padding: var(--s-2) var(--s-3);
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-sm);
-  background: var(--eci-surface);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
 }
 
 .info {

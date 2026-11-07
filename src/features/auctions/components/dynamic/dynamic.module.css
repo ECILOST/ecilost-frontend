@@ -4,6 +4,7 @@
 .wheelBox {
   position: relative;
   margin: 0 auto;
+  filter: drop-shadow(0 24px 40px rgb(0 0 0 / 55%));
 }
 
 .wheel {
@@ -13,23 +14,138 @@
   transition-timing-function: cubic-bezier(0.17, 0.89, 0.24, 1);
 }
 
-.wheelGlyph {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
+.segment,
+.segmentDim {
+  transition: opacity var(--t-med) linear;
+}
+
+.segmentDim {
+  opacity: 0.22;
 }
 
 .wheelLabel {
   font-family: var(--font-display);
-  font-size: 10.5px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
 }
 
 .wheelHub {
   font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
   fill: var(--eci-cyan);
+}
+
+.hub {
+  filter: drop-shadow(0 0 8px rgb(25 229 213 / 55%));
+}
+
+.pointer {
+  filter: drop-shadow(0 0 6px rgb(25 229 213 / 80%)) drop-shadow(0 4px 4px rgb(0 0 0 / 50%));
+}
+
+/* Bombillas del aro: dos grupos que se alternan, como una marquesina. */
+.bulbA,
+.bulbB {
+  fill: #fff6d6;
+}
+
+.bulbB {
+  fill: var(--eci-yellow);
+  opacity: 0.55;
+}
+
+.wheelSpinning .bulbA {
+  animation: bulb 0.5s steps(1) infinite;
+}
+
+.wheelSpinning .bulbB {
+  animation: bulb 0.5s steps(1) 0.25s infinite;
+}
+
+@keyframes bulb {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* Escenario: un foco del color que salio, detras de la ruleta. */
+.wheelStage {
+  --stage: var(--eci-blue);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  padding: 0.5rem;
+}
+
+.wheelStage::before {
+  content: '';
+  position: absolute;
+  inset: 8%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--stage) 55%, transparent), transparent 70%);
+  filter: blur(30px);
+  transition: background var(--t-slow) linear;
+}
+
+.legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--mode) 35%, transparent);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--mode) 10%, transparent);
+  transition:
+    opacity var(--t-med) linear,
+    transform var(--t-med) var(--ease-spring);
+}
+
+.legend strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+}
+
+.legend small {
+  display: block;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--eci-text-soft);
+}
+
+.legendIcon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: var(--mode);
+  color: #fff;
+}
+
+.legendActive {
+  transform: scale(1.03);
+  box-shadow: 0 0 24px -6px var(--mode);
+}
+
+.legendDim {
+  opacity: 0.4;
 }
 
 .rouletteBody {
@@ -49,18 +165,23 @@
 .rouletteHint {
   margin: 0;
   font-size: 0.8125rem;
-  color: var(--eci-text-dim);
+  color: var(--eci-text-soft);
 }
 
 .rouletteResult {
+  --mode: var(--eci-cyan);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1.25rem;
+  padding: 0.55rem 1.4rem;
   border-radius: 999px;
+  background: var(--mode);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    0 0 36px -4px var(--mode);
   font-family: var(--font-display);
-  font-size: 1.375rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: #fff;
   animation: pop var(--t-med) var(--ease-spring);
 }
@@ -72,98 +193,210 @@
   justify-content: center;
 }
 
+@media (width < 480px) {
+  .legend {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* --- Anuncio a pantalla completa ----------------------------------------------------- */
 .announce {
+  --mode: var(--eci-pink);
   position: fixed;
   inset: 0;
   z-index: 60;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 2.5rem;
-  align-items: center;
-  padding: clamp(1.5rem, 6vw, 5rem);
+  place-items: center;
+  padding: clamp(1.25rem, 5vw, 3rem);
+  overflow: hidden auto;
+  background:
+    radial-gradient(60% 55% at 50% 0%, color-mix(in srgb, var(--mode) 55%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 50% 100%, color-mix(in srgb, var(--mode) 25%, transparent), transparent 70%),
+    #030b18;
   color: #fff;
-  overflow: hidden;
+  cursor: pointer;
   animation: fade var(--t-med) var(--ease-out);
 }
 
+/* Suelo de reticula en perspectiva: el "escenario" donde aparece la modalidad. */
+.announceFloor {
+  position: absolute;
+  inset: auto -20% -10% -20%;
+  height: 45%;
+  background:
+    linear-gradient(color-mix(in srgb, var(--mode) 30%, transparent) 1px, transparent 1px) 0 0 / 60px 40px,
+    linear-gradient(90deg, color-mix(in srgb, var(--mode) 30%, transparent) 1px, transparent 1px) 0 0 / 60px 40px;
+  mask-image: linear-gradient(transparent, #000 70%);
+  transform: perspective(400px) rotateX(55deg);
+  transform-origin: bottom;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.announceInner {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 860px);
+  text-align: center;
+}
+
 .announceTag {
-  display: inline-block;
-  padding: 0.3rem 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--mode) 50%, transparent);
   border-radius: 999px;
-  background: rgb(0 0 0 / 28%);
+  background: color-mix(in srgb, var(--mode) 16%, rgb(0 0 0 / 30%));
   font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.announceHead {
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  margin-top: 1.25rem;
+.announceDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--mode);
+  box-shadow: 0 0 10px var(--mode);
+  animation: live-dot 1.2s ease-in-out infinite;
 }
 
-.announceBlob {
+.announceEmblem {
   display: grid;
   place-items: center;
-  flex: none;
-  width: clamp(5rem, 12vw, 7.5rem);
+  width: clamp(76px, 12vw, 104px);
   aspect-ratio: 1;
-  border-radius: var(--blob-a);
-  background: #fff;
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 6vw, 3.75rem);
-  font-weight: 800;
-  animation: wobble 2.4s ease-in-out infinite;
+  margin-top: 1.5rem;
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 30px;
+  background: linear-gradient(150deg, color-mix(in srgb, var(--mode) 90%, #fff), var(--mode));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 40%),
+    0 0 60px -6px var(--mode),
+    0 20px 40px -12px rgb(0 0 0 / 60%);
+  transform: rotate(-6deg);
+  animation: emblem 700ms var(--ease-spring) both;
 }
 
 .announceTitle {
-  margin: 0;
+  margin: 1.25rem 0 0;
   font-family: var(--font-display);
-  font-size: clamp(2.25rem, 6vw, 3.75rem);
-  line-height: 1.02;
+  font-size: clamp(2.5rem, 8vw, 4.75rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  animation: rise 520ms var(--ease-out) both;
+}
+
+.announceTitle span {
+  background: linear-gradient(180deg, #fff 10%, var(--mode) 95%);
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 24px color-mix(in srgb, var(--mode) 55%, transparent));
 }
 
 .announceTagline {
-  margin: 1rem 0 0;
-  font-size: 1rem;
-  opacity: 0.9;
+  margin: 0.9rem 0 0;
+  max-width: 34ch;
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  color: rgb(255 255 255 / 85%);
 }
 
 .announceRules {
-  margin: 0;
-  padding: 0.4rem 1.25rem;
-  border-radius: 28px;
-  background: rgb(0 0 0 / 22%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  width: 100%;
+  margin: 2rem 0 0;
+  padding: 0;
   list-style: none;
+  text-align: left;
 }
 
 .announceRules li {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgb(255 255 255 / 16%);
+  position: relative;
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem 1rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--mode) 30%, rgb(255 255 255 / 10%));
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgb(255 255 255 / 7%), rgb(255 255 255 / 2%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+  backdrop-filter: blur(10px);
   font-size: 0.9375rem;
+  line-height: 1.4;
+  animation: rise 480ms var(--ease-out) both;
 }
 
-.announceRules li:last-child {
-  border-bottom: none;
+.ruleIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mode) 22%, transparent);
+  color: color-mix(in srgb, var(--mode) 60%, #fff);
+}
+
+.ruleNumber {
+  position: absolute;
+  top: 0.85rem;
+  right: 1rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: rgb(255 255 255 / 14%);
 }
 
 .announceCount {
-  display: flex;
-  align-items: baseline;
-  gap: 0.9rem;
-  margin-top: 1.25rem;
-  font-size: 0.875rem;
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+  width: min(100%, 360px);
+  margin-top: 2rem;
+}
+
+.announceCount p {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: rgb(255 255 255 / 85%);
 }
 
 .announceCount strong {
+  display: inline-block;
+  min-width: 1ch;
+  margin-left: 0.25rem;
   font-family: var(--font-display);
-  font-size: 4rem;
-  line-height: 1;
+  font-size: 1.75rem;
+  color: #fff;
   font-variant-numeric: tabular-nums;
-  animation: pop 1s var(--ease-spring) infinite;
+}
+
+.announceCount small {
+  font-size: 0.75rem;
+  color: rgb(255 255 255 / 55%);
+}
+
+.announceBar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  overflow: hidden;
+}
+
+.announceBar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--mode);
+  box-shadow: 0 0 12px var(--mode);
+  transform-origin: left;
+  animation: drain var(--announce-ms) linear forwards;
 }
 
 .confetti {
@@ -171,13 +404,48 @@
   width: 14px;
   height: 6px;
   border-radius: 2px;
+  opacity: 0.85;
+}
+
+@keyframes drain {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes emblem {
+  from {
+    opacity: 0;
+    transform: rotate(-30deg) scale(0.5);
+  }
 }
 
 @media (max-width: 720px) {
-  .announce {
+  .announceRules {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    align-content: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .announceRules li {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .ruleNumber {
+    display: none;
   }
 }
 
@@ -186,9 +454,68 @@
   display: grid;
   gap: 0.9rem;
   padding: 1.1rem 1.2rem;
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: 26px;
-  background: var(--eci-surface);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
+}
+
+/*
+ * Panel de una modalidad: el borde y un foco de luz arriba toman el color de la modalidad
+ * (`--mode`), el mismo de la ruleta y del anuncio. Se reconoce el modo antes de leer.
+ */
+.modePanel {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, var(--mode) 40%, transparent);
+  background:
+    radial-gradient(90% 60% at 50% -10%, color-mix(in srgb, var(--mode) 22%, transparent), transparent 70%),
+    var(--glass);
+  box-shadow:
+    var(--glass-shine),
+    0 0 50px -24px var(--mode);
+}
+
+.panelHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.modeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.75rem 0.3rem 0.55rem;
+  border-radius: 999px;
+  background: var(--mode);
+  box-shadow: 0 0 18px -4px var(--mode);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.liveTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--mode) 55%, #fff);
+}
+
+.liveDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--mode);
+  box-shadow: 0 0 8px var(--mode);
+  animation: live-dot 1.2s ease-in-out infinite;
 }
 
 .label {
@@ -204,8 +531,9 @@
   margin: 0;
   font-family: var(--font-display);
   font-size: clamp(2.5rem, 8vw, 3.5rem);
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.05;
+  letter-spacing: -0.03em;
   color: var(--eci-yellow);
   font-variant-numeric: tabular-nums;
 }
@@ -214,6 +542,19 @@
   margin-left: 0.4rem;
   font-size: 0.9rem;
   font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Cifra de la modalidad: degradado del blanco al color del modo, con su resplandor. */
+.heroMode {
+  background: linear-gradient(180deg, #fff 15%, color-mix(in srgb, var(--mode) 75%, #fff));
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--mode) 50%, transparent));
+}
+
+.heroMode small {
+  color: color-mix(in srgb, var(--mode) 60%, #fff);
 }
 
 .row {
@@ -230,17 +571,101 @@
   color: var(--eci-text-soft);
 }
 
+.hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--eci-text-dim);
+  text-align: center;
+}
+
+.okText {
+  color: var(--eci-green-text);
+}
+
+.footNote {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--eci-text-soft);
+}
+
+.footNote span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* --- Holandesa ------------------------------------------------------------------------ */
+.dutchTop {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* La escalera de precios: cada escalon mas bajo que el anterior, el actual encendido. */
+.stairs {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 72px;
+  padding-bottom: 6px;
+}
+
+.step {
+  width: 14px;
+  border-radius: 5px 5px 2px 2px;
+  background: rgb(255 255 255 / 12%);
+  transition: height var(--t-med) var(--ease-out);
+}
+
+.stepNow {
+  width: 18px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mode) 60%, #fff), var(--mode));
+  box-shadow: 0 0 16px var(--mode);
+}
+
+.stepNext {
+  background: transparent;
+  border: 1.5px dashed color-mix(in srgb, var(--mode) 55%, transparent);
+}
+
+.dropBox {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 16px;
+  background: rgb(0 0 0 / 22%);
+}
+
+.dropText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.floor {
+  font-size: 0.75rem;
+  color: var(--eci-text-dim);
+}
+
 .track {
   height: 8px;
   border-radius: 999px;
-  background: var(--eci-surface-alt);
+  background: rgb(255 255 255 / 8%);
   overflow: hidden;
 }
 
 .trackFill {
   height: 100%;
   border-radius: 999px;
-  background: var(--eci-yellow);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--mode, var(--eci-yellow)) 50%, transparent), var(--mode, var(--eci-yellow)));
+  box-shadow: 0 0 10px var(--mode, var(--eci-yellow));
   transition: width 250ms linear;
 }
 
@@ -253,7 +678,7 @@
 .passed {
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
-  background: var(--eci-surface-alt);
+  background: rgb(255 255 255 / 5%);
   font-size: 0.75rem;
   color: var(--eci-text-faint);
   text-decoration: line-through;
@@ -262,8 +687,38 @@
 
 .bigAction {
   width: 100%;
-  min-height: 3.75rem;
+  min-height: 4rem;
   font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+/* --- Sobre cerrado -------------------------------------------------------------------- */
+.envelopes {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.envelopeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.envelope {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 26px;
+  border: 1px solid var(--eci-blue-line);
+  border-radius: 7px;
+  background: var(--eci-blue-soft);
+  color: var(--eci-blue-text);
+  animation: rise 360ms var(--ease-out) both;
+}
+
+.sealedForm {
+  display: grid;
+  gap: 0.75rem;
 }
 
 .sealedField {
@@ -271,10 +726,21 @@
   align-items: baseline;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border: 1.5px solid var(--eci-blue);
+  padding: 0.9rem 1rem;
+  border: 1.5px solid color-mix(in srgb, var(--eci-blue) 70%, transparent);
   border-radius: 22px;
-  background: var(--eci-surface-alt);
+  background: rgb(0 0 0 / 25%);
+  box-shadow: inset 0 2px 12px rgb(0 0 0 / 35%);
+  transition:
+    border-color var(--t-fast) linear,
+    box-shadow var(--t-fast) linear;
+}
+
+.sealedField:focus-within {
+  border-color: var(--eci-blue-text);
+  box-shadow:
+    inset 0 2px 12px rgb(0 0 0 / 35%),
+    0 0 0 4px var(--eci-blue-soft);
 }
 
 .sealedField input {
@@ -284,36 +750,75 @@
   background: transparent;
   color: var(--eci-text);
   font-family: var(--font-display);
-  font-size: 2.25rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.sealedField input::placeholder {
+  color: rgb(255 255 255 / 22%);
 }
 
 .sealedField input:focus {
   outline: none;
 }
 
-.envelopes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  align-items: center;
+.sealedUnit {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--eci-yellow);
 }
 
-.envelope {
+.sealButton {
+  background: linear-gradient(180deg, #5b82ff, var(--eci-blue));
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 30%),
+    var(--glow-blue);
+}
+
+.sealButton:hover {
+  color: #fff;
+}
+
+/* El sobre ya sellado: una tarjeta con su sello, como un sobre de verdad. */
+.sealedCard {
+  position: relative;
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+  padding: 2rem 1rem 1.25rem;
+  border: 1px solid var(--eci-blue-line);
+  border-radius: 20px;
+  background:
+    linear-gradient(160deg, transparent 49.5%, rgb(255 255 255 / 6%) 50%, transparent 50.5%) top / 100% 50% no-repeat,
+    linear-gradient(20deg, transparent 49.5%, rgb(255 255 255 / 6%) 50%, transparent 50.5%) top / 100% 50% no-repeat,
+    rgb(43 107 255 / 10%);
+  text-align: center;
+}
+
+.sealedStamp {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 22px;
-  border-radius: 6px;
-  background: var(--eci-blue-soft);
-  color: var(--eci-blue-text);
-  font-size: 0.75rem;
+  width: 52px;
+  height: 52px;
+  margin-top: -3.25rem;
+  border: 3px solid #04101f;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #5b82ff, var(--eci-blue));
+  box-shadow: var(--glow-blue);
+  color: #fff;
 }
 
 .warn {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-radius: 14px;
+  background: var(--eci-yellow-soft);
   font-size: 0.8125rem;
   color: var(--eci-yellow);
 }
@@ -324,32 +829,146 @@
   color: var(--eci-pink-text);
 }
 
-.clue {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.8rem;
-  border-radius: 999px;
-  background: var(--eci-purple-soft);
-  color: var(--eci-purple-text);
-  font-size: 0.8125rem;
-  font-weight: 600;
+/* --- Lote misterioso ----------------------------------------------------------------- */
+.clues {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.mysteryArt {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: var(--blob-b);
+.clue {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--eci-purple-line);
+  border-radius: 14px;
+  background: var(--eci-purple-soft);
+  font-size: 0.875rem;
+  font-weight: 600;
+  animation: rise 360ms var(--ease-out) both;
+}
+
+.clueNumber {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
   background: var(--eci-purple);
   font-family: var(--font-display);
-  font-size: clamp(4rem, 14vw, 7rem);
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: #fff;
 }
 
+.mysteryNote {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--eci-purple-text);
+}
+
 /* --- Resultados ------------------------------------------------------------------------ */
+.resultsBody {
+  display: grid;
+  gap: 1.1rem;
+  padding: 1.75rem 1.5rem 1.5rem;
+}
+
+.resultsHead {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+}
+
+/* Podio: tres columnas, la del ganador mas alta y encendida. */
+.podium {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.6rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.podiumSpot {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: center;
+  text-align: center;
+  animation: rise 520ms var(--ease-out) both;
+}
+
+.podiumWho {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--eci-text-soft);
+}
+
+.podiumAmount {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--eci-yellow);
+  font-variant-numeric: tabular-nums;
+}
+
+.podiumBlock {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: center;
+  align-content: start;
+  width: 100%;
+  height: 70px;
+  padding-top: 0.6rem;
+  border: 1px solid var(--glass-edge);
+  border-radius: 16px 16px 6px 6px;
+  background: var(--glass);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--eci-text-dim);
+}
+
+.podiumSpot:nth-child(1) .podiumBlock {
+  height: 54px;
+}
+
+.podiumSpot:nth-child(3) .podiumBlock {
+  height: 40px;
+}
+
+.podiumWinner .podiumBlock {
+  height: 96px;
+  border-color: var(--eci-green-line);
+  background: linear-gradient(180deg, rgb(47 227 154 / 22%), rgb(47 227 154 / 4%));
+  box-shadow: 0 0 40px -12px var(--eci-green);
+  color: var(--eci-green-text);
+}
+
+.podiumWinner .podiumWho {
+  color: var(--eci-green-text);
+}
+
+.podiumMine .podiumBlock {
+  border: 1.5px solid var(--eci-blue-text);
+  box-shadow: 0 0 30px -10px var(--eci-blue);
+}
+
+.podiumMine .podiumWho {
+  color: var(--eci-text);
+}
+
 .ranking {
   display: grid;
   gap: 0.4rem;
@@ -376,8 +995,8 @@
 }
 
 .rankWinner {
-  border-color: var(--eci-cyan-line);
-  background: var(--eci-cyan-soft);
+  border-color: var(--eci-green-line);
+  background: var(--eci-green-soft);
 }
 
 .rankMine {
@@ -419,9 +1038,17 @@
   }
 
   .announce,
-  .announceBlob,
-  .announceCount strong,
-  .rouletteResult {
+  .announceEmblem,
+  .announceTitle,
+  .announceRules li,
+  .announceDot,
+  .rouletteResult,
+  .wheelSpinning .bulbA,
+  .wheelSpinning .bulbB,
+  .liveDot,
+  .envelope,
+  .clue,
+  .podiumSpot {
     animation: none;
   }
 }

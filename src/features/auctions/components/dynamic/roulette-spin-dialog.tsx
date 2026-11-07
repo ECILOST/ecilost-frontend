@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { ErrorState } from '@/shared/components/error-state';
 import { Button } from '@/shared/components/ui/button';
 import { Dialog } from '@/shared/components/ui/dialog';
+import { Icon } from '@/shared/components/ui/icon';
 import { segmentMeta } from '../../domain/dynamic-modes';
 import type { SpinSegment } from '../../model/auction';
 import styles from './dynamic.module.css';
-import { RouletteWheel, rotationFor, SPIN_DURATION_MS } from './roulette-wheel';
+import { RouletteWheel, rotationFor, SegmentLegend, SPIN_DURATION_MS } from './roulette-wheel';
 
 export interface SpinOutcome {
   segment: SpinSegment;
@@ -55,11 +56,13 @@ export function RouletteSpinDialog({
     <Dialog open onClose={spinning ? () => undefined : onClose} title={`Ruleta de la ronda ${position}`} tone="cyan">
       <div className={styles.rouletteBody}>
         <h2 className={styles.rouletteTitle}>Ruleta · ronda {position}</h2>
-        <RouletteWheel rotation={rotation} highlight={result?.segment ?? null} />
+        <div className={styles.wheelStage} style={meta ? { '--stage': meta.color } as CSSProperties : undefined}>
+          <RouletteWheel rotation={rotation} highlight={result?.segment ?? null} spinning={spinning} />
+        </div>
         <div aria-live="polite">
           {result && meta ? (
             <>
-              <span className={styles.rouletteResult} style={{ background: meta.color }}>
+              <span className={styles.rouletteResult} style={{ '--mode': meta.color } as CSSProperties}>
                 {result.segment === 'WILDCARD' ? '¡Comodín!' : `¡${meta.label}!`}
               </span>
               <p className={styles.rouletteHint} style={{ marginTop: '0.6rem' }}>
@@ -74,13 +77,14 @@ export function RouletteSpinDialog({
             </p>
           )}
         </div>
+        <SegmentLegend active={result?.segment ?? null} />
         {error ? <ErrorState error={error} /> : null}
         <div className={styles.rouletteActions}>
           {decided ? (
             <Button onClick={onClose}>Listo</Button>
           ) : (
-            <Button onClick={() => void spin()} disabled={spinning}>
-              ↻ {result?.canSpinAgain ? 'Girar otra vez' : 'Girar ruleta'}
+            <Button onClick={() => void spin()} disabled={spinning} icon={<Icon name="spin" size={18} />}>
+              {result?.canSpinAgain ? 'Girar otra vez' : 'Girar ruleta'}
             </Button>
           )}
           {!decided && !spinning ? (

@@ -77,3 +77,58 @@
     height: 300px;
   }
 }
+
+/* --- Antes de pujar: las reglas que cambian lo que conviene hacer ------------------- */
+.before {
+  display: grid;
+  gap: var(--s-4);
+  margin-top: var(--s-7);
+}
+
+.beforeTitle {
+  font-size: var(--text-xl);
+}
+
+.tips {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-3);
+}
+
+.tips li {
+  display: flex;
+  gap: var(--s-3);
+  padding: var(--s-4);
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-lg);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
+  font-size: var(--text-sm);
+  color: var(--eci-text-soft);
+}
+
+.tips svg {
+  flex: none;
+  color: var(--eci-cyan);
+}
+
+.tips strong {
+  display: block;
+  margin-bottom: 2px;
+  font-family: var(--font-display);
+  color: var(--eci-text);
+}
+
+.guide {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+@media (width < 860px) {
+  .tips {
+    grid-template-columns: 1fr;
+  }
+}

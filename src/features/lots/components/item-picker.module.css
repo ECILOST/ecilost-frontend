@@ -50,13 +50,14 @@
   gap: var(--s-3);
   /* 48 px de alto, el mismo minimo tactil que los botones. */
   padding: 13px var(--s-4);
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-sm);
-  background: var(--eci-surface);
+  background: var(--glass);
   cursor: pointer;
   transition:
     border-color var(--t-fast) linear,
     background-color var(--t-fast) linear;
+  box-shadow: var(--glass-shine);
 }
 
 .row:hover {

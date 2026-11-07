@@ -13,6 +13,7 @@ import { Pill } from '@/shared/components/ui/pill';
 import { formatEcicoin, isValidAmount } from '../domain/ecicoin';
 import { useRecharge } from '../hooks/use-recharge';
 import styles from './recharge.page.module.css';
+import { pillClass } from '@/shared/components/ui/pill';
 
 /**
  * Abonar ECICoin a la billetera de alguien (operacion de funcionario).
@@ -23,6 +24,9 @@ import styles from './recharge.page.module.css';
  * formulario pediria un identificador imposible de escribir. Y ademas obliga a mirar a quien
  * se le esta abonando antes de decidir cuanto.
  */
+/** Montos sugeridos, en ECICoin (un ECICoin vale un peso). */
+const QUICK_AMOUNTS = [5_000, 10_000, 20_000, 50_000];
+
 export function RechargePage() {
   const navigate = useNavigate();
   const recharge = useRecharge();
@@ -218,6 +222,20 @@ export function RechargePage() {
               onChange={(event) => setAmount(event.target.value)}
             />
           </Field>
+          {/* Montos frecuentes: un toque en vez de teclear ceros (y equivocarse en uno). */}
+          <div className={styles.quick} role="group" aria-label="Montos sugeridos">
+            {QUICK_AMOUNTS.map((value) => (
+              <button
+                key={value}
+                type="button"
+                className={pillClass('yellow', { interactive: true, selected: amount === String(value) })}
+                aria-pressed={amount === String(value)}
+                onClick={() => setAmount(String(value))}
+              >
+                {formatEcicoin(String(value))}
+              </button>
+            ))}
+          </div>
 
           <Field
             label="Referencia"

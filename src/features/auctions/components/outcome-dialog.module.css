@@ -24,6 +24,12 @@
   --tone-ink: var(--eci-on-accent);
 }
 
+/* Vas ganando y ganaste: verde propio, distinto del cian de la accion principal. */
+.green {
+  --tone: var(--eci-green);
+  --tone-ink: #02281a;
+}
+
 /* Mancha grande del color del estado, desde la esquina superior izquierda. */
 .stain {
   position: absolute;
@@ -33,7 +39,9 @@
   width: 440px;
   height: 460px;
   background: var(--tone);
-  border-radius: 38% 62% 64% 36% / 40% 34% 66% 60%;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.55;
 }
 
 /* Pieza azul/violeta de la esquina inferior derecha, detras de la caja del precio. */
@@ -46,6 +54,12 @@
   height: 360px;
   border-radius: 50%;
   background: var(--eci-blue);
+  filter: blur(70px);
+  opacity: 0.45;
+}
+
+.green .corner {
+  background: var(--eci-purple);
 }
 
 .pink .corner {
@@ -103,8 +117,11 @@
 .art {
   width: 100%;
   height: 290px;
-  border: 1px dashed rgb(255 255 255 / 30%);
-  background: rgb(6 21 40 / 25%);
+  border: 1px solid var(--glass-edge-strong);
+  background: rgb(6 21 40 / 35%);
+  box-shadow:
+    var(--glass-shine),
+    0 0 50px -16px var(--tone);
 }
 
 .content {
@@ -148,9 +165,11 @@
   flex-direction: column;
   gap: 3px;
   padding: 12px 14px;
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-md);
   background: rgb(6 21 40 / 70%);
+  box-shadow: var(--glass-shine);
+  backdrop-filter: blur(10px);
 }
 
 .figureLabel {
@@ -160,8 +179,9 @@
 
 .figureValue {
   font-family: var(--font-display);
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
 .figureStrong {
@@ -188,6 +208,11 @@
 .strip-cyan {
   border-color: var(--eci-cyan-line);
   color: var(--eci-cyan);
+}
+
+.strip-green {
+  border-color: var(--eci-green-line);
+  color: var(--eci-green-text);
 }
 
 .strip-pink {

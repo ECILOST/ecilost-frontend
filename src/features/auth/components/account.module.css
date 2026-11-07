@@ -40,9 +40,9 @@
   gap: var(--s-2);
   min-width: 240px;
   padding: var(--s-4);
-  border: 1px solid var(--eci-line);
+  border: 1px solid var(--glass-edge);
   border-radius: var(--r-md);
-  background: var(--eci-surface);
+  background: var(--glass);
   box-shadow: var(--shadow-float);
 }
 

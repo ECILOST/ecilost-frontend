@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { EmptyState } from '@/shared/components/empty-state';
@@ -6,6 +6,7 @@ import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
 import { buttonClass } from '@/shared/components/ui/button';
 import { CoinAmount, formatCoins } from '@/shared/components/ui/coin';
+import { Icon } from '@/shared/components/ui/icon';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import { Pill, pillClass } from '@/shared/components/ui/pill';
 import { useMyBids } from '../hooks/use-my-bids';
@@ -14,11 +15,11 @@ import styles from './my-bids.page.module.css';
 
 const STATUS: Record<
   MyBidStatus,
-  { label: string; tone: 'cyan' | 'pink' | 'neutral'; row?: string }
+  { label: string; tone: 'green' | 'pink' | 'neutral'; row?: string }
 > = {
-  WINNING: { label: 'Ganando', tone: 'cyan', row: styles.winning },
+  WINNING: { label: 'Ganando', tone: 'green', row: styles.winning },
   OUTBID: { label: 'Superado', tone: 'pink', row: styles.outbid },
-  WON: { label: 'Ganada', tone: 'cyan' },
+  WON: { label: 'Ganada', tone: 'green' },
   LOST: { label: 'Perdida', tone: 'neutral' },
 };
 
@@ -49,6 +50,11 @@ function Row({ bid }: { bid: MyBid }) {
             <Pill tone="pink">
               Te superaron por {formatCoins(bid.outbidBy)} ECICoin
             </Pill>
+          ) : null}
+          {bid.status === 'OUTBID' ? (
+            <span className={styles.again}>
+              <Icon name="bolt" size={14} /> Volver a pujar
+            </span>
           ) : null}
         </div>
         <div className={styles.amount}>
@@ -91,8 +97,7 @@ export function MyBidsPage() {
         <div>
           <h1 className={styles.title}>Mis pujas</h1>
           <p className={styles.subtitle}>
-            {active.length} activas · {formatCoins(committed)} ECICoin
-            comprometidos
+            Lo que estás pujando ahora y cómo terminaron tus subastas.
           </p>
         </div>
         <div className={styles.tabs} role="tablist" aria-label="Mis pujas">
@@ -118,6 +123,35 @@ export function MyBidsPage() {
           ))}
         </div>
       </div>
+
+      {bids ? (
+        <div className={styles.summary}>
+          <div
+            className={styles.summaryCard}
+            style={{ '--tone': 'var(--eci-cyan)' } as CSSProperties}
+          >
+            <Icon name="bolt" size={20} />
+            <strong>{active.length}</strong>
+            <span>Subastas activas</span>
+          </div>
+          <div
+            className={styles.summaryCard}
+            style={{ '--tone': 'var(--eci-green)' } as CSSProperties}
+          >
+            <Icon name="trophy" size={20} />
+            <strong>{bids.filter((bid) => bid.status === 'WON').length}</strong>
+            <span>Ganadas</span>
+          </div>
+          <div
+            className={styles.summaryCard}
+            style={{ '--tone': 'var(--eci-yellow)' } as CSSProperties}
+          >
+            <Icon name="lock" size={20} />
+            <strong>{formatCoins(committed)}</strong>
+            <span>ECICoin comprometidos</span>
+          </div>
+        </div>
+      ) : null}
 
       {isPending ? <Loading label="Cargando tus pujas..." /> : null}
       {isError ? (

@@ -24,6 +24,11 @@ const AuctionsPage = lazy(() =>
     default: m.AuctionsPage,
   })),
 );
+const DynamicGuidePage = lazy(() =>
+  import('@/features/auctions/pages/dynamic-guide.page').then((m) => ({
+    default: m.DynamicGuidePage,
+  })),
+);
 const HomePage = lazy(() =>
   import('@/features/auctions/pages/home.page').then((m) => ({
     default: m.HomePage,
@@ -152,6 +157,8 @@ export function AppRouter() {
               element={<NotificationsPage />}
             />
           </Route>
+
+          <Route path={routes.dynamicGuide} element={<DynamicGuidePage />} />
 
           <Route path={routes.items} element={<ItemsPage />} />
           <Route path={routePatterns.item} element={<ItemDetailPage />} />
