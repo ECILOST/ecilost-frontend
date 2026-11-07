@@ -104,6 +104,16 @@ const ScheduleRoomPage = lazy(() =>
     default: m.ScheduleRoomPage,
   })),
 );
+const ProfilePage = lazy(() =>
+  import('@/features/gamification/pages/profile.page').then((m) => ({
+    default: m.ProfilePage,
+  })),
+);
+const LeaderboardPage = lazy(() =>
+  import('@/features/gamification/pages/leaderboard.page').then((m) => ({
+    default: m.LeaderboardPage,
+  })),
+);
 const RechargePage = lazy(() =>
   import('@/features/wallet/pages/recharge.page').then((m) => ({
     default: m.RechargePage,
@@ -156,6 +166,8 @@ export function AppRouter() {
               path={routes.notifications}
               element={<NotificationsPage />}
             />
+            <Route path={routes.profile} element={<ProfilePage />} />
+            <Route path={routes.leaderboard} element={<LeaderboardPage />} />
           </Route>
 
           <Route path={routes.dynamicGuide} element={<DynamicGuidePage />} />

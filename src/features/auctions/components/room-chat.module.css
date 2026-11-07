@@ -68,6 +68,7 @@
 
 .meta {
   display: flex;
+  align-items: center;
   gap: 8px;
   font-size: var(--text-2xs);
   color: var(--eci-text-faint);

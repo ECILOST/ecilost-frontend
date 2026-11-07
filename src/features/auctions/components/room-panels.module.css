@@ -41,9 +41,20 @@
   border-radius: 50%;
 }
 
-.alias {
+/* Alias y, al lado, las medallas que luce: ocupan el espacio entre el avatar y el monto. */
+.who {
+  display: flex;
   flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.alias {
+  overflow: hidden;
   font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-weight: 500;
 }
 

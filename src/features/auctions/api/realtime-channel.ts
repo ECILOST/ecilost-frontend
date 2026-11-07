@@ -28,6 +28,8 @@ export interface ChatMessageWire {
   alias: string;
   body: string;
   createdAt: string;
+  /** Medallas del autor. Opcional: un engagement anterior no las manda. */
+  badges?: unknown;
 }
 
 /** Lo que pasa en el chat de una sala. */
@@ -186,6 +188,7 @@ export function createSocketRealtimeChannel({
           alias: payload.alias ?? 'Participante',
           body: payload.body,
           createdAt: payload.createdAt ?? new Date().toISOString(),
+          badges: payload.badges,
         },
       });
     });

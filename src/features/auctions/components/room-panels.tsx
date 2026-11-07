@@ -1,6 +1,7 @@
 import { CoinAmount, formatCoins } from '@/shared/components/ui/coin';
 import { Icon, type IconName } from '@/shared/components/ui/icon';
 import { ItemArt } from '@/shared/components/ui/item-art';
+import { MedalBadges } from '@/features/gamification/components/medal-badges';
 import { formatAgo, formatCountdown } from '../domain/auction-rules';
 import { useCountdown } from '../hooks/use-countdown';
 import type { Bid, Room, RoomActivity, Round } from '../model/auction';
@@ -47,7 +48,10 @@ export function RecentBids({ bids }: { bids: Bid[] }) {
                 }}
                 aria-hidden="true"
               />
-              <span className={styles.alias}>{bid.alias}</span>
+              <span className={styles.who}>
+                <span className={styles.alias}>{bid.alias}</span>
+                <MedalBadges medals={bid.badges} />
+              </span>
               <CoinAmount
                 value={bid.amount}
                 size="sm"

@@ -46,6 +46,7 @@ import type {
 import type { AuctionGateway } from '../ports/auction.gateway';
 import type { ChatMessageWire, RealtimeChannel } from './realtime-channel';
 import { type RoomActivityWire, toRoomActivity } from './room-activity';
+import { toMedalIds } from '@/features/gamification/domain/medals';
 
 /** Cada cuanto se relee la sala cuando no hay canal en vivo. */
 const POLL_INTERVAL_MS = 2_000;
@@ -466,6 +467,7 @@ export function createHttpAuctionGateway(deps: {
         body: wire.body,
         at: wire.createdAt,
         mine: chat.alias !== null && wire.alias === chat.alias,
+        badges: toMedalIds(wire.badges),
       });
 
       return deps.realtime.joinChat(roomId, (event) => {

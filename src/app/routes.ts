@@ -20,6 +20,10 @@ export const routes = {
   wallet: '/billetera',
   myBids: '/mis-pujas',
   notifications: '/notificaciones',
+  /** Perfil del estudiante: estadisticas, medallas y ultimas subastas. */
+  profile: '/mi-perfil',
+  /** Top semanal: los diez estudiantes con mas subastas ganadas desde el lunes. */
+  leaderboard: '/top-semanal',
   /** Guia de las subastas dinamicas: la puede leer cualquier sesion. */
   dynamicGuide: '/subastas-dinamicas',
 

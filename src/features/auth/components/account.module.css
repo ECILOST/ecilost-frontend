@@ -61,3 +61,30 @@
   font-size: var(--text-xs);
   color: var(--eci-text-dim);
 }
+
+/* Al perfil se llega desde el avatar: es "lo mio", como el nombre y la salida. */
+.profileLink {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 8px;
+  min-height: var(--control-h);
+  margin-top: var(--s-1);
+  padding: 0 12px;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-sm);
+  color: var(--eci-text);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.profileLink:hover {
+  border-color: var(--eci-cyan-line);
+  color: var(--eci-text);
+  text-decoration: none;
+}
+
+.profileLink > svg {
+  color: var(--eci-cyan);
+}

@@ -1,4 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { routes } from '@/app/routes';
+import { Icon } from '@/shared/components/ui/icon';
 import { Button } from '@/shared/components/ui/button';
 import { Pill } from '@/shared/components/ui/pill';
 import { ROLE_LABELS } from '../domain/role';
@@ -81,6 +84,16 @@ export function Account() {
           <Pill tone="cyan" dot>
             {ROLE_LABELS[principal.role]}
           </Pill>
+          {principal.canBid ? (
+            <Link
+              className={styles.profileLink}
+              to={routes.profile}
+              onClick={() => setOpen(false)}
+            >
+              <Icon name="medal" size={18} />
+              Mi perfil y medallas
+            </Link>
+          ) : null}
           <Button variant="quiet" onClick={() => void logout()}>
             Salir
           </Button>

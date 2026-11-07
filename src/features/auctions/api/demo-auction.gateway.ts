@@ -23,6 +23,7 @@ import type {
   RoundStatus,
 } from '../model/auction';
 import type { AuctionGateway } from '../ports/auction.gateway';
+import type { MedalId } from '@/features/gamification/model/gamification';
 
 /*
  * Adaptador de DEMOSTRACION: salas, rondas y pujas en memoria, con rivales simulados.
@@ -44,12 +45,18 @@ const MAX_ROUND_MS = 8 * 60_000;
 const EXTENSION_MS = 10_000;
 const MINUTE = 60_000;
 
-const RIVALS = [
-  { id: 'r-ana', alias: 'Ana_123' },
-  { id: 'r-carlos', alias: 'CarlosM' },
-  { id: 'r-vale', alias: 'ValeU' },
-  { id: 'r-sofi', alias: 'SofiT' },
+const RIVALS: Array<{ id: string; alias: string; badges: MedalId[] }> = [
+  { id: 'r-ana', alias: 'Ana_123', badges: ['WEEKLY_PODIUM'] },
+  { id: 'r-carlos', alias: 'CarlosM', badges: ['PERFECT_SEAL', 'STREAK_3'] },
+  { id: 'r-vale', alias: 'ValeU', badges: [] },
+  { id: 'r-sofi', alias: 'SofiT', badges: ['DETECTIVE'] },
 ];
+/** Medallas que luce cada alias en la sala, como las adjuntaria engagement. */
+const MY_BADGES: MedalId[] = ['DUTCH_KING'];
+const badgesOf = (id: string): MedalId[] =>
+  id === ME
+    ? MY_BADGES
+    : (RIVALS.find((rival) => rival.id === id)?.badges ?? []);
 const aliasOf = (id: string) =>
   id === ME
     ? 'Tú'
@@ -915,6 +922,7 @@ export function createDemoAuctionGateway(
         amount: bid.amount,
         at: iso(bid.at),
         mine: bid.bidderId === ME,
+        badges: badgesOf(bid.bidderId),
       }));
     return {
       room: roomView(room),
@@ -1044,6 +1052,7 @@ export function createDemoAuctionGateway(
         body: message.body,
         at: iso(message.at),
         mine: message.authorId === ME,
+        badges: badgesOf(message.authorId),
       })),
     };
   }

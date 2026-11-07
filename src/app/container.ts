@@ -10,6 +10,9 @@ import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
 import { createHttpLotGateway } from '@/features/lots/api/http-lot.gateway';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import { createHttpMediaGateway } from '@/features/media/api/http-media.gateway';
+import { createHttpGamificationGateway } from '@/features/gamification/api/http-gamification.gateway';
+import { createLazyGamificationGateway } from '@/features/gamification/api/lazy-gamification.gateway';
+import type { GamificationGateway } from '@/features/gamification/ports/gamification.gateway';
 import { createHttpWalletGateway } from '@/features/wallet/api/http-wallet.gateway';
 import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import type { MediaGateway } from '@/features/media/ports/media.gateway';
@@ -47,6 +50,11 @@ export interface Container {
   auctions: AuctionGateway;
   /** Programacion de salas por el funcionario, ya contra ecilost-auction-service. */
   rooms: RoomGateway;
+  /**
+   * Perfil, top semanal y medallas del estudiante. Lo sirve ecilost-engagement-service desde
+   * su modelo de lectura en MongoDB; en modo demo, datos fijos en memoria.
+   */
+  gamification: GamificationGateway;
 }
 
 export function createContainer(appConfig: AppConfig = config): Container {
@@ -123,5 +131,12 @@ export function createContainer(appConfig: AppConfig = config): Container {
           }),
         }),
     rooms: createHttpRoomGateway(auctionHttp),
+    gamification: appConfig.auctionsDemo
+      ? createLazyGamificationGateway(() =>
+          import('@/features/gamification/api/demo-gamification.gateway').then(
+            (m) => m.createDemoGamificationGateway({ latencyMs: 150 }),
+          ),
+        )
+      : createHttpGamificationGateway(engagementHttp),
   };
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Field, Input } from '@/shared/components/ui/field';
+import { MedalBadges } from '@/features/gamification/components/medal-badges';
 import { APP_TIME_ZONE } from '@/shared/format/date';
 import { chatLength, MAX_CHAT_MESSAGE_LENGTH } from '../domain/room-chat';
 import { useRoomChat } from '../hooks/use-room-chat';
@@ -111,6 +112,7 @@ export function RoomChat({
                     <span className={styles.alias}>
                       {message.mine ? 'Tú' : message.alias}
                     </span>
+                    <MedalBadges medals={message.badges} />
                     <time dateTime={message.at}>
                       {TIME.format(new Date(message.at))}
                     </time>
