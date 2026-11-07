@@ -1,4 +1,6 @@
 import type { RoundMode } from '@/features/auctions/model/auction';
+import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
+import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import type { HttpClient } from '@/shared/api/http-client';
 import { ApiError } from '@/shared/api/problem-details';
 import { isMedalId, toMedalIds } from '../domain/medals';
@@ -39,9 +41,11 @@ interface ProfileWire {
   recent: Array<{
     roundId: string;
     roomId: string;
-    itemId: string;
-    itemName: string;
-    imageUrl?: string | null;
+    /**
+     * Que se subasto, como lo guarda auction: engagement no conoce nombres ni fotos, asi que
+     * se piden a catalog (igual que en la sala).
+     */
+    entry: { kind: string; catalogId: string } | null;
     mode: string;
     amount: string | number;
     result: string;
@@ -75,6 +79,10 @@ const toMode = (value: string | null | undefined): RoundMode | null =>
   MODES.includes(value as RoundMode) ? (value as RoundMode) : null;
 
 const toNumber = (value: string | number) => Math.round(Number(value) || 0);
+
+/** Lo que se muestra mientras (o si no) catalog dice el nombre. */
+const placeholderName = (kind: string | undefined) =>
+  kind === 'LOT' ? 'Lote del catálogo' : 'Objeto del catálogo';
 
 /**
  * Perfil de quien todavia no ha participado. Engagement crea el documento con el primer
@@ -129,9 +137,9 @@ export function toProfile(wire: ProfileWire): StudentProfile {
         {
           roundId: entry.roundId,
           roomId: entry.roomId,
-          itemId: entry.itemId,
-          itemName: entry.itemName,
-          imageUrl: entry.imageUrl ?? null,
+          itemId: entry.entry?.catalogId ?? entry.roundId,
+          itemName: placeholderName(entry.entry?.kind),
+          imageUrl: null,
           mode,
           amount: toNumber(entry.amount),
           result: entry.result === 'WON' ? 'WON' : 'LOST',
@@ -171,11 +179,55 @@ export function toLeaderboard(wire: LeaderboardWire): Leaderboard {
  */
 export function createHttpGamificationGateway(
   http: HttpClient,
+  catalog?: {
+    items: Pick<ItemGateway, 'findById'>;
+    lots: Pick<LotGateway, 'findById'>;
+  },
 ): GamificationGateway {
+  /**
+   * Nombre y foto de las ultimas subastas. Son a lo sumo cinco y se piden en paralelo; si
+   * catalog no responde por una, esa queda con el nombre generico y el perfil se muestra
+   * igual.
+   */
+  async function describe(
+    wire: ProfileWire,
+    profile: StudentProfile,
+  ): Promise<StudentProfile> {
+    if (!catalog) return profile;
+    const recent = await Promise.all(
+      profile.recent.map(async (auction, index) => {
+        const entry = wire.recent.find(
+          (item) => item.roundId === auction.roundId,
+        )?.entry;
+        if (!entry) return auction;
+        try {
+          if (entry.kind === 'LOT') {
+            const lot = await catalog.lots.findById(entry.catalogId);
+            return {
+              ...auction,
+              itemName: lot.name,
+              imageUrl: lot.coverUrl ?? null,
+            };
+          }
+          const item = await catalog.items.findById(entry.catalogId);
+          return {
+            ...auction,
+            itemName: item.name,
+            imageUrl: item.photos[0]?.url ?? null,
+          };
+        } catch {
+          return profile.recent[index];
+        }
+      }),
+    );
+    return { ...profile, recent };
+  }
+
   return {
     async myProfile() {
       try {
-        return toProfile(await http.get<ProfileWire>('/profiles/me'));
+        const wire = await http.get<ProfileWire>('/profiles/me');
+        return await describe(wire, toProfile(wire));
       } catch (error) {
         if (error instanceof ApiError && error.status === 404)
           return emptyProfile();

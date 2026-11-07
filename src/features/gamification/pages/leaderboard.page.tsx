@@ -22,9 +22,16 @@ const DAY_MONTH = new Intl.DateTimeFormat('es-CO', {
   month: 'long',
 });
 
+/**
+ * Engagement manda las semanas como fechas (`2026-11-02`). `new Date` las leeria como la
+ * medianoche UTC, que en Bogota es el dia anterior: se leen al mediodia local.
+ */
+const toDay = (value: string) =>
+  new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00` : value);
+
 function weekRange(from: string, to: string): string {
-  const start = new Date(from);
-  const end = new Date(to);
+  const start = toDay(from);
+  const end = toDay(to);
   return start.getMonth() === end.getMonth()
     ? `${DAY.format(start)} – ${DAY_MONTH.format(end)}`
     : `${DAY_MONTH.format(start)} – ${DAY_MONTH.format(end)}`;

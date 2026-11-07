@@ -243,6 +243,56 @@ describe('Contrato con engagement', () => {
     expect(profile.medals).toEqual([]);
   });
 
+  it('el nombre y la foto de las ultimas subastas se piden a catalog, como en la sala', async () => {
+    const wire = {
+      ...profileWire,
+      recent: [
+        {
+          roundId: 'r1',
+          roomId: 'room',
+          entry: { kind: 'ITEM', catalogId: 'item-1' },
+          mode: 'DUTCH',
+          amount: '180.00',
+          result: 'WON',
+          at: '2026-11-04T15:00:00Z',
+        },
+        {
+          roundId: 'r2',
+          roomId: 'room',
+          entry: { kind: 'LOT', catalogId: 'lot-1' },
+          mode: 'SEALED',
+          amount: '95.00',
+          result: 'LOST',
+          at: '2026-11-03T15:00:00Z',
+        },
+      ],
+    };
+    const http = { get: () => Promise.resolve(wire) } as unknown as HttpClient;
+    const catalog = {
+      items: {
+        findById: () =>
+          Promise.resolve({
+            name: 'Calculadora Casio',
+            photos: [{ url: 'https://foto' }],
+          }),
+      },
+      // Catalog falla con el lote: queda con el nombre generico y el perfil se ve igual.
+      lots: { findById: () => Promise.reject(new Error('caido')) },
+    };
+
+    const profile = await createHttpGamificationGateway(
+      http,
+      catalog as never,
+    ).myProfile();
+    expect(
+      profile.recent.map((auction) => [auction.itemName, auction.imageUrl]),
+    ).toEqual([
+      ['Calculadora Casio', 'https://foto'],
+      ['Lote del catálogo', null],
+    ]);
+    expect(profile.recent[0].amount).toBe(180);
+  });
+
   it('las insignias de la sala son a lo sumo dos y solo conocidas', () => {
     expect(toMedalIds(['DUTCH_KING', 'X', 'STREAK_3', 'FIRST_WIN'])).toEqual([
       'DUTCH_KING',

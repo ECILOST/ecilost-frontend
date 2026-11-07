@@ -137,6 +137,9 @@ export function createContainer(appConfig: AppConfig = config): Container {
             (m) => m.createDemoGamificationGateway({ latencyMs: 150 }),
           ),
         )
-      : createHttpGamificationGateway(engagementHttp),
+      : createHttpGamificationGateway(engagementHttp, {
+          items: itemGateway,
+          lots: lotGateway,
+        }),
   };
 }
