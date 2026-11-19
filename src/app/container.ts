@@ -127,7 +127,8 @@ export function createContainer(appConfig: AppConfig = config): Container {
           engagement: engagementHttp,
           realtime: createSocketRealtimeChannel({
             url: appConfig.services.realtime,
-            getToken: tokens.get,
+            tokens,
+            requestSessionRecovery: sessionLost.emit,
           }),
         }),
     rooms: createHttpRoomGateway(auctionHttp),
