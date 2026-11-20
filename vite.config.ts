@@ -70,6 +70,13 @@ export default defineConfig({
     },
   },
   test: {
+    coverage: {
+      provider: 'v8',
+      thresholds: { lines: 80 },
+      reporter: ['text-summary', 'html', 'lcov'],
+      include: ['src/**/*.ts', 'src/**/*.tsx', 'middleware.ts'],
+      exclude: ['src/generated/**', '**/*.d.ts', '**/*.spec.*', '**/*.test.*'],
+    },
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
