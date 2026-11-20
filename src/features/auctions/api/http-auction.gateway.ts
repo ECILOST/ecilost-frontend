@@ -881,9 +881,9 @@ function coalesce(task: () => Promise<void>): () => Promise<void> {
 /** Una notificacion tal como la guarda engagement. */
 interface InboxNotification {
   id: string;
-  kind: 'OUTBID' | 'ROUND_CLOSED' | 'ROUND_WON';
+  kind: 'OUTBID' | 'ROUND_CLOSED' | 'ROUND_WON' | 'PICKUP_READY';
   roomId: string;
-  payload: { position?: number; currentPrice?: string };
+  payload: { position?: number; currentPrice?: string; roundId?: string };
   createdAt: string;
   readAt: string | null;
 }
@@ -892,6 +892,13 @@ function toAppNotification(entry: InboxNotification): AppNotification {
   const price = Number(entry.payload.currentPrice ?? 0).toLocaleString('es-CO');
   const item = entry.payload.position ? `el objeto ${entry.payload.position}` : 'la ronda';
   const base = { id: entry.id, at: entry.createdAt, read: entry.readAt !== null, roomId: entry.roomId };
+
+  if (entry.kind === 'PICKUP_READY') {
+    return {
+      ...base, kind: 'PICKUP_READY', pickupRoundId: entry.payload.roundId,
+      title: 'Coordina tu recogida', body: 'El pago está confirmado. Abre el asistente para elegir un horario.',
+    };
+  }
 
   if (entry.kind === 'ROUND_WON') {
     return { ...base, kind: 'WON', title: '¡Ganaste este objeto!', body: `Ganaste ${item} por ${price} ECICoin.` };

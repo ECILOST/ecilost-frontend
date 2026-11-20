@@ -20,6 +20,10 @@ export const routes = {
   wallet: '/billetera',
   myBids: '/mis-pujas',
   notifications: '/notificaciones',
+  pickups: '/mis-recogidas',
+  pickup: (roundId: string) => `/mis-recogidas/${encodeURIComponent(roundId)}`,
+  staffPickups: '/gestion-recogidas',
+  staffPickup: (roundId: string) => `/gestion-recogidas/${encodeURIComponent(roundId)}`,
   /** Perfil del estudiante: estadisticas, medallas y ultimas subastas. */
   profile: '/mi-perfil',
   /** Top semanal: los diez estudiantes con mas subastas ganadas desde el lunes. */
@@ -55,6 +59,8 @@ export const routes = {
 
 /** Patron de ruta para el router, donde el id todavia no tiene valor. */
 export const routePatterns = {
+  pickup: '/mis-recogidas/:roundId',
+  staffPickup: '/gestion-recogidas/:roundId',
   auction: '/subastas/:id',
   room: '/salas/:id',
   item: '/items/:id',

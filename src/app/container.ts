@@ -18,6 +18,7 @@ import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import type { MediaGateway } from '@/features/media/ports/media.gateway';
 import { createHttpRoomGateway } from '@/features/rooms/api/http-room.gateway';
 import type { RoomGateway } from '@/features/rooms/ports/room.gateway';
+import { createPickupGateway } from '@/features/pickups/pickup.gateway';
 import { createHttpClient } from '@/shared/api/http-client';
 import {
   createSessionChannel,
@@ -55,6 +56,7 @@ export interface Container {
    * su modelo de lectura en MongoDB; en modo demo, datos fijos en memoria.
    */
   gamification: GamificationGateway;
+  pickups: ReturnType<typeof createPickupGateway>;
 }
 
 export function createContainer(appConfig: AppConfig = config): Container {
@@ -132,6 +134,7 @@ export function createContainer(appConfig: AppConfig = config): Container {
           }),
         }),
     rooms: createHttpRoomGateway(auctionHttp),
+    pickups: createPickupGateway(engagementHttp, itemGateway, lotGateway),
     gamification: appConfig.auctionsDemo
       ? createLazyGamificationGateway(() =>
           import('@/features/gamification/api/demo-gamification.gateway').then(

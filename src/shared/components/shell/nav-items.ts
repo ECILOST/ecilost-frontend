@@ -63,6 +63,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'timer',
     requires: 'canScheduleRooms',
   },
+  { to: routes.staffPickups, label: 'Recogidas', icon: 'check', requires: 'canManageCatalog' },
   {
     to: routes.rechargeWallet,
     label: 'Recargas',

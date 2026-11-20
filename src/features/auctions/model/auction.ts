@@ -234,10 +234,11 @@ export interface MyBid {
 }
 
 export type NotificationKind =
-  'OUTBID' | 'ROOM_SOON' | 'FOLLOW_ONLY' | 'WON' | 'LIMIT' | 'ROOM_CLOSED';
+  'OUTBID' | 'ROOM_SOON' | 'FOLLOW_ONLY' | 'WON' | 'LIMIT' | 'ROOM_CLOSED' | 'PICKUP_READY';
 
 export interface AppNotification {
   id: string;
+  pickupRoundId?: string;
   kind: NotificationKind;
   title: string;
   body: string;

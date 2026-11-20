@@ -610,6 +610,17 @@ export function createTestContainer(
     auctions: createDemoAuctionGateway({ rivals: false, tickMs: 0 }),
     rooms: createFakeRoomGateway(),
     gamification: createDemoGamificationGateway(),
+    pickups: {
+      list: async () => [],
+      conversation: async () => { throw new Error('Recogida no encontrada'); },
+      slots: async () => [],
+      createSlot: async () => undefined,
+      book: async () => undefined,
+      code: async () => ({ code: 'example-code' }),
+      message: async () => undefined,
+      deliver: async () => undefined,
+      missed: async () => undefined,
+    },
     ...overrides,
   };
 }

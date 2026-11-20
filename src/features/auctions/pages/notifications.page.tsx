@@ -20,6 +20,7 @@ const KIND: Record<NotificationKind, { icon: IconName; tone: string }> = {
   ROOM_SOON: { icon: 'timer', tone: styles.yellow },
   FOLLOW_ONLY: { icon: 'eye', tone: styles.blue },
   WON: { icon: 'trophy', tone: styles.green },
+  PICKUP_READY: { icon: 'check', tone: styles.green },
   LIMIT: { icon: 'minus', tone: styles.pink },
   ROOM_CLOSED: { icon: 'check', tone: styles.blue },
 };
@@ -130,7 +131,11 @@ export function NotificationsPage() {
               .join(' ');
             return (
               <li key={entry.id}>
-                {entry.roomId ? (
+                {entry.kind === 'PICKUP_READY' ? (
+                  <Link className={className} to={entry.pickupRoundId ? routes.pickup(entry.pickupRoundId) : routes.pickups}>
+                    {body}
+                  </Link>
+                ) : entry.roomId ? (
                   <Link className={className} to={routes.room(entry.roomId)}>
                     {body}
                   </Link>
