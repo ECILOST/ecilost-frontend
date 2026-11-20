@@ -1,12 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createTokenStore } from '@/shared/api/token-store';
 
-type Handler = (payload?: Record<string, unknown>) => void;
+type Handler = (payload?: unknown) => void;
+type Authorize = (send: (credentials: { token: string | null }) => void) => void;
+
+let authorize: Authorize;
 
 const socket = {
   connected: true,
+  active: true,
   handlers: new Map<string, Handler>(),
   emit: vi.fn(),
   emitWithAck: vi.fn(),
+  sendAuth: vi.fn(),
+  connect: vi.fn((): void => {
+    socket.active = true;
+    authorize(socket.sendAuth);
+  }),
+  disconnect: vi.fn(),
   timeout() {
     return this;
   },
@@ -16,28 +27,47 @@ const socket = {
   },
 };
 
-vi.mock('socket.io-client', () => ({ io: vi.fn(() => socket) }));
+vi.mock('socket.io-client', () => ({
+  io: vi.fn((_url: string, options: { auth: Authorize }) => {
+    authorize = options.auth;
+    authorize(socket.sendAuth);
+    return socket;
+  }),
+}));
 
 const { createSocketRealtimeChannel } = await import('./realtime-channel');
 
 describe('createSocketRealtimeChannel', () => {
   beforeEach(() => {
+    socket.connected = true;
+    socket.active = true;
     socket.handlers.clear();
     socket.emit.mockClear();
     socket.emitWithAck.mockReset();
+    socket.sendAuth.mockClear();
+    socket.connect.mockClear();
+    socket.disconnect.mockClear();
   });
 
+  function fixture() {
+    const tokens = createTokenStore();
+    tokens.set('jwt');
+    const requestSessionRecovery = vi.fn();
+    const channel = createSocketRealtimeChannel({ url: '', tokens, requestSessionRecovery });
+    const fire = (name: string, payload?: unknown) => socket.handlers.get(name)?.(payload);
+    return { channel, tokens, requestSessionRecovery, fire };
+  }
+
   function listen() {
-    const channel = createSocketRealtimeChannel({ url: '', getToken: () => 'jwt' });
+    const { channel, fire } = fixture();
     const listener = vi.fn();
     channel.joinRoom('room-1', listener);
-    const fire = (name: string, payload: Record<string, unknown>) => socket.handlers.get(name)?.(payload);
     return { listener, fire };
   }
 
   it('entra a la sala al escucharla', () => {
     listen();
-    // Con el token vigente: el del handshake vence y la conexion puede durar mas.
+    // Se manda el token vigente para que Engagement pueda consultar la sala en Auction.
     expect(socket.emit).toHaveBeenCalledWith('room.join', { roomId: 'room-1', token: 'jwt' });
   });
 
@@ -67,14 +97,96 @@ describe('createSocketRealtimeChannel', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
+  describe('vencimiento de la conexion', () => {
+    function serverClosed(fire: ReturnType<typeof fixture>['fire']) {
+      socket.connected = false;
+      socket.active = false;
+      fire('disconnect', 'io server disconnect');
+    }
+
+    it('reconecta con el token ya renovado y resincroniza la sala y el chat', () => {
+      const { channel, tokens, requestSessionRecovery, fire } = fixture();
+      const roomListener = vi.fn();
+      channel.joinRoom('room-1', roomListener);
+      channel.joinChat('room-1', vi.fn());
+      tokens.set('jwt-renewed');
+
+      serverClosed(fire);
+
+      expect(requestSessionRecovery).not.toHaveBeenCalled();
+      expect(socket.connect).toHaveBeenCalledOnce();
+      expect(socket.sendAuth).toHaveBeenLastCalledWith({ token: 'jwt-renewed' });
+      socket.connected = true;
+      fire('connect');
+
+      expect(socket.emit).toHaveBeenLastCalledWith('room.join', { roomId: 'room-1', token: 'jwt-renewed' });
+      expect(socket.emitWithAck).toHaveBeenLastCalledWith('chat.join', { roomId: 'room-1', token: 'jwt-renewed' });
+      expect(roomListener).toHaveBeenCalledWith({ name: 'resync' });
+    });
+
+    it('pide un solo canje y espera el token nuevo antes de reconectar', () => {
+      const { channel, tokens, requestSessionRecovery, fire } = fixture();
+      channel.joinRoom('room-1', vi.fn());
+
+      serverClosed(fire);
+      fire('connect_error', new Error('auth rejected'));
+      expect(requestSessionRecovery).toHaveBeenCalledOnce();
+      expect(socket.connect).not.toHaveBeenCalled();
+
+      tokens.set('jwt-renewed');
+      expect(socket.connect).toHaveBeenCalledOnce();
+      expect(socket.sendAuth).toHaveBeenLastCalledWith({ token: 'jwt-renewed' });
+
+      socket.active = false;
+      fire('connect_error', new Error('auth still rejected'));
+      expect(requestSessionRecovery).toHaveBeenCalledOnce();
+      expect(socket.connect).toHaveBeenCalledOnce();
+    });
+
+    it('deja los reintentos de transporte a Socket.IO', () => {
+      const { channel, requestSessionRecovery, fire } = fixture();
+      channel.joinRoom('room-1', vi.fn());
+      socket.connected = false;
+      fire('disconnect', 'transport close');
+      fire('connect_error', new Error('transport unavailable'));
+
+      expect(requestSessionRecovery).not.toHaveBeenCalled();
+      expect(socket.connect).not.toHaveBeenCalled();
+    });
+
+    it('no reconecta si la recuperacion deja la sesion cerrada', () => {
+      const { channel, tokens, requestSessionRecovery, fire } = fixture();
+      channel.joinRoom('room-1', vi.fn());
+      requestSessionRecovery.mockImplementation(() => tokens.set(null));
+
+      serverClosed(fire);
+      fire('connect_error', new Error('no session'));
+      tokens.set('another-session');
+
+      expect(requestSessionRecovery).toHaveBeenCalledOnce();
+      expect(socket.connect).not.toHaveBeenCalled();
+    });
+
+    it('cancela la reconexion al dejar la ultima suscripcion', () => {
+      const { channel, tokens, fire } = fixture();
+      const stop = channel.joinRoom('room-1', vi.fn());
+
+      serverClosed(fire);
+      stop();
+      tokens.set('jwt-renewed');
+
+      expect(socket.disconnect).toHaveBeenCalledOnce();
+      expect(socket.connect).not.toHaveBeenCalled();
+    });
+  });
+
   describe('chat', () => {
     const message = { id: 'm-1', roomId: 'room-1', alias: 'Participante AAAA', body: 'hola', createdAt: '2030-01-01T10:00:00.000Z' };
 
     function chat() {
-      const channel = createSocketRealtimeChannel({ url: '', getToken: () => 'jwt' });
+      const { channel, fire } = fixture();
       const listener = vi.fn();
       const stop = channel.joinChat('room-1', listener);
-      const fire = (name: string, payload?: Record<string, unknown>) => socket.handlers.get(name)?.(payload);
       return { channel, listener, stop, fire };
     }
 
