@@ -96,6 +96,7 @@ export function MyBidsPage() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Mis pujas</h1>
+          <Link className={buttonClass('secondary')} to={routes.pickups}>Mis recogidas</Link>
           <p className={styles.subtitle}>
             Lo que estás pujando ahora y cómo terminaron tus subastas.
           </p>

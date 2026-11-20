@@ -1,4 +1,8 @@
 import type { Bid, Room, RoomActivity } from '../model/auction';
+import { toMedalIds } from '@/features/gamification/domain/medals';
+import type { MedalId } from '@/features/gamification/model/gamification';
+
+const withBadges = (badges: MedalId[]) => (badges.length > 0 ? { badges } : {});
 
 /**
  * Una entrada de `GET /rooms/:roomId/activity` de engagement, tal como viaja. Nunca dice
@@ -15,6 +19,8 @@ export type RoomActivityWire =
       extended: boolean;
       endsAt: string;
       at: string;
+      /** Medallas del postor, si engagement las adjunta. */
+      badges?: unknown;
     }
   | {
       id: string;
@@ -79,6 +85,8 @@ export function toRoomActivity(
         amount,
         at: item.at,
         mine,
+        // Sin medallas no se agrega el campo: la puja queda igual que antes.
+        ...withBadges(toMedalIds(item.badges)),
       };
     });
 

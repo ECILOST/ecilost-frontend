@@ -1,0 +1,31 @@
+.box {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  padding: 16px 18px;
+  border: 1px solid var(--eci-cyan-line);
+  border-radius: var(--r-lg);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
+}
+
+.box > svg {
+  margin-top: 2px;
+  color: var(--eci-cyan);
+}
+
+.box strong {
+  font-size: var(--text-sm);
+}
+
+.box p {
+  margin-top: 4px;
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  color: var(--eci-text-soft);
+}
+
+.compact {
+  font-size: var(--text-xs);
+  color: var(--eci-text-dim);
+}

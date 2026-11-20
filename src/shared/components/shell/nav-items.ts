@@ -38,6 +38,12 @@ export const NAV_ITEMS: NavItem[] = [
     requires: 'canBid',
   },
   { to: routes.myBids, label: 'Mis pujas', icon: 'bolt', requires: 'canBid' },
+  {
+    to: routes.leaderboard,
+    label: 'Top semanal',
+    icon: 'trophy',
+    requires: 'canBid',
+  },
 
   {
     to: routes.items,
@@ -57,6 +63,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: 'timer',
     requires: 'canScheduleRooms',
   },
+  { to: routes.staffPickups, label: 'Recogidas', icon: 'check', requires: 'canManageCatalog' },
   {
     to: routes.rechargeWallet,
     label: 'Recargas',

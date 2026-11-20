@@ -30,3 +30,6 @@ yarn-error.log*
 
 # Vercel CLI (vercel link)
 .vercel/
+
+# SonarQube and coverage reports
+/.scannerwork/

@@ -57,6 +57,9 @@
   --eci-green-text: #6ff0b9;
 
   --eci-pink-deep: #e83a64;
+  /* Podio del top semanal: el oro es el amarillo de siempre. */
+  --eci-silver: #d7def2;
+  --eci-bronze: #ff9e5e;
 
   --grad-cyan: linear-gradient(135deg, var(--eci-cyan), var(--eci-cyan-2));
   --grad-coin: linear-gradient(135deg, var(--eci-yellow), var(--eci-orange));

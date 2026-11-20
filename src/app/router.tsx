@@ -104,6 +104,17 @@ const ScheduleRoomPage = lazy(() =>
     default: m.ScheduleRoomPage,
   })),
 );
+const ProfilePage = lazy(() =>
+  import('@/features/gamification/pages/profile.page').then((m) => ({
+    default: m.ProfilePage,
+  })),
+);
+const LeaderboardPage = lazy(() =>
+  import('@/features/gamification/pages/leaderboard.page').then((m) => ({
+    default: m.LeaderboardPage,
+  })),
+);
+const PickupsPage = lazy(() => import('@/features/pickups/pickups.page'));
 const RechargePage = lazy(() =>
   import('@/features/wallet/pages/recharge.page').then((m) => ({
     default: m.RechargePage,
@@ -152,10 +163,14 @@ export function AppRouter() {
             <Route path={routes.auctions} element={<AuctionsPage />} />
             <Route path={routes.wallet} element={<WalletPage />} />
             <Route path={routes.myBids} element={<MyBidsPage />} />
+            <Route path={routes.pickups} element={<PickupsPage />} />
+            <Route path={routePatterns.pickup} element={<PickupsPage />} />
             <Route
               path={routes.notifications}
               element={<NotificationsPage />}
             />
+            <Route path={routes.profile} element={<ProfilePage />} />
+            <Route path={routes.leaderboard} element={<LeaderboardPage />} />
           </Route>
 
           <Route path={routes.dynamicGuide} element={<DynamicGuidePage />} />
@@ -174,6 +189,8 @@ export function AppRouter() {
             403 seguro.
           */}
           <Route element={<RequireCapability capability="canManageCatalog" />}>
+            <Route path={routes.staffPickups} element={<PickupsPage staff />} />
+            <Route path={routePatterns.staffPickup} element={<PickupsPage staff />} />
             <Route path={routes.newItem} element={<NewItemPage />} />
             <Route path={routePatterns.editItem} element={<EditItemPage />} />
             <Route path={routes.newLot} element={<LotFormPage />} />

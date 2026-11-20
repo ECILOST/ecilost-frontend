@@ -1,4 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
+import type { TokenStore } from '@/shared/api/token-store';
 
 /** Lo que el canal de ecilost-engagement-service empuja sobre una sala. */
 export type RoomEvent =
@@ -28,6 +29,8 @@ export interface ChatMessageWire {
   alias: string;
   body: string;
   createdAt: string;
+  /** Medallas del autor. Opcional: un engagement anterior no las manda. */
+  badges?: unknown;
 }
 
 /** Lo que pasa en el chat de una sala. */
@@ -97,12 +100,16 @@ interface Payload {
  */
 export function createSocketRealtimeChannel({
   url,
-  getToken,
+  tokens,
+  requestSessionRecovery,
 }: {
   url: string;
-  getToken: () => string | null;
+  tokens: Pick<TokenStore, 'get' | 'subscribe'>;
+  requestSessionRecovery: () => void;
 }): RealtimeChannel {
+  const { get: getToken, subscribe: subscribeToToken } = tokens;
   let socket: Socket | null = null;
+  let unsubscribeFromToken: (() => void) | undefined;
   const listeners = new Map<string, Set<(event: RoomEvent) => void>>();
   const chatListeners = new Map<string, Set<(event: ChatEvent) => void>>();
   /** La ultima respuesta a `chat.join` de cada sala, para quien empieza a escuchar despues. */
@@ -138,8 +145,10 @@ export function createSocketRealtimeChannel({
     } catch {
       event = { name: 'chat.joined', ok: false, reason: 'unavailable' };
     }
-    // Pudo dejar de escucharse mientras se esperaba la respuesta.
-    if (!chatListeners.has(roomId)) return;
+    // Pudo cerrarse la conexion o dejar de escucharse mientras se esperaba la respuesta.
+    if (socket !== connection || !connection.connected || !chatListeners.has(roomId)) {
+      return;
+    }
     chatJoined.set(roomId, event);
     dispatchChat(roomId, event);
   }
@@ -152,30 +161,87 @@ export function createSocketRealtimeChannel({
     return true;
   };
 
+  function stopWaitingForToken() {
+    unsubscribeFromToken?.();
+    unsubscribeFromToken = undefined;
+  }
+
+  function closeIdleSocket() {
+    if (listeners.size || chatListeners.size) return;
+    stopWaitingForToken();
+    const idle = socket;
+    socket = null;
+    idle?.disconnect();
+  }
+
   function connect(): Socket {
     if (socket) return socket;
 
-    socket = io(`${url}/realtime`, {
-      auth: (send) => send({ token: getToken() }),
+    let handshakeToken: string | null = null;
+    let recoveryRequested = false;
+    const connection = io(`${url}/realtime`, {
+      auth: (send) => {
+        handshakeToken = getToken();
+        send({ token: handshakeToken });
+      },
       transports: ['websocket'],
     });
+    socket = connection;
+
+    function recoverConnection() {
+      if (
+        socket !== connection ||
+        connection.active ||
+        (!listeners.size && !chatListeners.size)
+      ) {
+        return;
+      }
+
+      const token = getToken();
+      if (!token) return;
+      if (token !== handshakeToken) {
+        stopWaitingForToken();
+        connection.connect();
+        return;
+      }
+
+      unsubscribeFromToken ??= subscribeToToken((next) => {
+        if (next === null) stopWaitingForToken();
+        else recoverConnection();
+      });
+      // Un rechazo tras el canje no debe iniciar otro canje inmediatamente.
+      if (!recoveryRequested) {
+        recoveryRequested = true;
+        requestSessionRecovery();
+      }
+    }
+
+    connection.on('disconnect', (reason) => {
+      if (socket !== connection) return;
+      chatJoined.clear();
+      if (reason === 'io server disconnect') recoverConnection();
+    });
+    // Si el transporte se cae, Socket.IO reintenta. Un rechazo del handshake detiene
+    // sus reintentos y requiere recuperar una credencial para conectar otra vez.
+    connection.on('connect_error', recoverConnection);
 
     // Al (re)conectar se vuelve a entrar a cada sala y se pide releer: los eventos que
-    // pasaron mientras no habia conexion no se van a recibir. Cada `room.join` lleva el token
-    // vigente: engagement lo usa para preguntarle a auction por la sala, y el del handshake
-    // vence a los quince minutos aunque la conexion siga abierta.
-    socket.on('connect', () => {
+    // pasaron mientras no habia conexion no se van a recibir. Engagement usa el token de
+    // `room.join` para preguntarle a auction por la sala.
+    connection.on('connect', () => {
+      recoveryRequested = false;
+      stopWaitingForToken();
       for (const roomId of listeners.keys()) {
-        socket?.emit('room.join', { roomId, token: getToken() });
+        connection.emit('room.join', { roomId, token: getToken() });
         dispatch(roomId, { name: 'resync' });
       }
       // El chat tambien se vuelve a abrir: el historial trae lo que se perdio sin conexion.
       for (const roomId of chatListeners.keys()) {
-        if (socket) void enterChat(socket, roomId);
+        void enterChat(connection, roomId);
       }
     });
 
-    socket.on('chat.message', (payload: Partial<ChatMessageWire>) => {
+    connection.on('chat.message', (payload: Partial<ChatMessageWire>) => {
       if (!payload?.roomId || !payload.id || typeof payload.body !== 'string')
         return;
       dispatchChat(payload.roomId, {
@@ -186,12 +252,13 @@ export function createSocketRealtimeChannel({
           alias: payload.alias ?? 'Participante',
           body: payload.body,
           createdAt: payload.createdAt ?? new Date().toISOString(),
+          badges: payload.badges,
         },
       });
     });
 
     for (const name of [...ROOM_EVENTS, ...PERSONAL_EVENTS]) {
-      socket.on(name, (payload: Payload) => {
+      connection.on(name, (payload: Payload) => {
         if (!payload.roomId) return;
         if (name !== 'room.status' && !payload.roundId) return;
         // El mismo evento llega a la sala y al canal personal: se entrega una sola vez por
@@ -202,7 +269,7 @@ export function createSocketRealtimeChannel({
       });
     }
 
-    return socket;
+    return connection;
   }
 
   function toRoomEvent(
@@ -238,6 +305,7 @@ export function createSocketRealtimeChannel({
         if (current && current.size === 0) {
           listeners.delete(roomId);
           socket?.emit('room.leave', { roomId });
+          closeIdleSocket();
         }
       };
     },
@@ -263,6 +331,7 @@ export function createSocketRealtimeChannel({
           chatListeners.delete(roomId);
           chatJoined.delete(roomId);
           socket?.emit('chat.leave', { roomId });
+          closeIdleSocket();
         }
       };
     },

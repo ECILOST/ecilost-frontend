@@ -10,11 +10,15 @@ import type { ItemGateway } from '@/features/catalog/ports/item.gateway';
 import { createHttpLotGateway } from '@/features/lots/api/http-lot.gateway';
 import type { LotGateway } from '@/features/lots/ports/lot.gateway';
 import { createHttpMediaGateway } from '@/features/media/api/http-media.gateway';
+import { createHttpGamificationGateway } from '@/features/gamification/api/http-gamification.gateway';
+import { createLazyGamificationGateway } from '@/features/gamification/api/lazy-gamification.gateway';
+import type { GamificationGateway } from '@/features/gamification/ports/gamification.gateway';
 import { createHttpWalletGateway } from '@/features/wallet/api/http-wallet.gateway';
 import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
 import type { MediaGateway } from '@/features/media/ports/media.gateway';
 import { createHttpRoomGateway } from '@/features/rooms/api/http-room.gateway';
 import type { RoomGateway } from '@/features/rooms/ports/room.gateway';
+import { createPickupGateway } from '@/features/pickups/pickup.gateway';
 import { createHttpClient } from '@/shared/api/http-client';
 import {
   createSessionChannel,
@@ -47,6 +51,12 @@ export interface Container {
   auctions: AuctionGateway;
   /** Programacion de salas por el funcionario, ya contra ecilost-auction-service. */
   rooms: RoomGateway;
+  /**
+   * Perfil, top semanal y medallas del estudiante. Lo sirve ecilost-engagement-service desde
+   * su modelo de lectura en MongoDB; en modo demo, datos fijos en memoria.
+   */
+  gamification: GamificationGateway;
+  pickups: ReturnType<typeof createPickupGateway>;
 }
 
 export function createContainer(appConfig: AppConfig = config): Container {
@@ -119,9 +129,21 @@ export function createContainer(appConfig: AppConfig = config): Container {
           engagement: engagementHttp,
           realtime: createSocketRealtimeChannel({
             url: appConfig.services.realtime,
-            getToken: tokens.get,
+            tokens,
+            requestSessionRecovery: sessionLost.emit,
           }),
         }),
     rooms: createHttpRoomGateway(auctionHttp),
+    pickups: createPickupGateway(engagementHttp, itemGateway, lotGateway),
+    gamification: appConfig.auctionsDemo
+      ? createLazyGamificationGateway(() =>
+          import('@/features/gamification/api/demo-gamification.gateway').then(
+            (m) => m.createDemoGamificationGateway({ latencyMs: 150 }),
+          ),
+        )
+      : createHttpGamificationGateway(engagementHttp, {
+          items: itemGateway,
+          lots: lotGateway,
+        }),
   };
 }

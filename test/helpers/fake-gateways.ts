@@ -43,6 +43,7 @@ import type {
   WalletTransaction,
 } from '@/features/wallet/model/wallet';
 import type { WalletGateway } from '@/features/wallet/ports/wallet.gateway';
+import { createDemoGamificationGateway } from '@/features/gamification/api/demo-gamification.gateway';
 import { ApiError, ProblemType } from '@/shared/api/problem-details';
 import { createSessionChannel } from '@/shared/api/session-channel';
 import { createTokenStore } from '@/shared/api/token-store';
@@ -608,6 +609,18 @@ export function createTestContainer(
     // Sin rivales ni reloj propio: las pruebas no dependen del azar ni del tiempo real.
     auctions: createDemoAuctionGateway({ rivals: false, tickMs: 0 }),
     rooms: createFakeRoomGateway(),
+    gamification: createDemoGamificationGateway(),
+    pickups: {
+      list: async () => [],
+      conversation: async () => { throw new Error('Recogida no encontrada'); },
+      slots: async () => [],
+      createSlot: async () => undefined,
+      book: async () => undefined,
+      code: async () => ({ code: 'example-code' }),
+      message: async () => undefined,
+      deliver: async () => undefined,
+      missed: async () => undefined,
+    },
     ...overrides,
   };
 }

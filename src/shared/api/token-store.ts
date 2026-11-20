@@ -9,14 +9,25 @@
 export interface TokenStore {
   get(): string | null;
   set(token: string | null): void;
+  subscribe(listener: (token: string | null) => void): () => void;
 }
 
 export function createTokenStore(): TokenStore {
   let token: string | null = null;
+  const listeners = new Set<(token: string | null) => void>();
+
   return {
     get: () => token,
     set: (next) => {
+      if (token === next) return;
       token = next;
+      listeners.forEach((listener) => listener(next));
+    },
+    subscribe: (listener) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
     },
   };
 }

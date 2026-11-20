@@ -1,3 +1,4 @@
+import type { MedalId } from '@/features/gamification/model/gamification';
 /**
  * Contratos de las subastas tal como los consume la interfaz.
  *
@@ -141,6 +142,11 @@ export interface ChatMessage {
   at: string;
   /** Lo escribio quien mira. */
   mine: boolean;
+  /**
+   * Medallas que luce el autor junto al alias (hasta dos). Las añade engagement desde el
+   * perfil de quien escribe, sin revelar quien es: solo viajan los identificadores.
+   */
+  badges?: MedalId[];
 }
 
 /**
@@ -170,6 +176,8 @@ export interface Bid {
   amount: number;
   at: string;
   mine: boolean;
+  /** Medallas del postor, si el servicio las manda junto a la puja. */
+  badges?: MedalId[];
 }
 
 export type RoomActivityKind =
@@ -226,10 +234,11 @@ export interface MyBid {
 }
 
 export type NotificationKind =
-  'OUTBID' | 'ROOM_SOON' | 'FOLLOW_ONLY' | 'WON' | 'LIMIT' | 'ROOM_CLOSED';
+  'OUTBID' | 'ROOM_SOON' | 'FOLLOW_ONLY' | 'WON' | 'LIMIT' | 'ROOM_CLOSED' | 'PICKUP_READY';
 
 export interface AppNotification {
   id: string;
+  pickupRoundId?: string;
   kind: NotificationKind;
   title: string;
   body: string;

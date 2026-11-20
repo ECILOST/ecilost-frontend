@@ -1,7 +1,6 @@
 # ecilost-frontend
 
-Cliente web de **ECI Lost & Auction**. Consume la API de los microservicios: la sesion la
-emite `ecilost-auth-service` y el inventario lo sirve `ecilost-catalog-service`.
+Cliente web de **ECI Lost & Auction**. Auth emite la sesión, Catalog gestiona el inventario, Wallet administra Ecicoin y Auction controla las salas y las pujas. Engagement entrega notificaciones, chat, gamificación y eventos en vivo.
 
 React 19 con Vite y TypeScript. El tooling es el mismo del back (vitest, oxlint, prettier)
 para que un `npm test` signifique lo mismo en los dos lados.
@@ -9,29 +8,27 @@ para que un `npm test` signifique lo mismo en los dos lados.
 ## Puesta en marcha
 
 ```bash
-npm install
+npm ci
 cp .env.example .env.local
 npm run dev
 ```
 
-Queda en <http://localhost:5173>, que es el puerto que `ecilost-auth-service` tiene
-configurado en `POST_LOGIN_REDIRECT_URL`. Necesita los dos servicios arriba: **auth en 3000**
-y **catalog en 3001**. Sin ellos la aplicacion arranca igual, pero se queda en la pantalla de
-entrada: el canje de la sesion responde 502 y no hay sesion que mostrar.
+Abre [la aplicación local](http://localhost:5173). Configura en Auth la URL de retorno del frontend y levanta los servicios de la tabla para probar el recorrido completo. Auth y Catalog cubren el inicio de sesión y la consulta de objetos. Wallet, Auction y Engagement completan el flujo de subastas.
 
 ### Por que todo pasa por el proxy de Vite
 
-Ningun servicio habilita CORS, y la cookie de sesion es `httpOnly` con `Path=/auth`. Las dos
-cosas obligan a que el navegador vea un solo origen, asi que `vite.config.ts` republica los
-servicios bajo el de la aplicacion:
+El proxy de Vite publica las rutas HTTP bajo el origen del frontend. La cookie `HttpOnly` usa `Path=/auth`, por lo que ese prefijo se conserva. Socket.IO comparte el origen local mediante `/socket.io`.
 
 | Ruta del navegador | Servicio | Reescritura |
 |---|---|---|
-| `/auth/*` | auth-service (3000) | ninguna, a proposito: la cookie solo viaja bajo `/auth` |
-| `/api/catalog/*` | catalog-service (3001) | se recorta el prefijo |
+| `/auth/*` | Auth (3000) | Conserva `/auth` |
+| `/api/catalog/*` | Catalog (3001) | Quita `/api/catalog` |
+| `/api/wallet/*` | Wallet (3002) | Sustituye `/api/wallet` por `/wallet` |
+| `/api/auction/*` | Auction (3003) | Quita `/api/auction` |
+| `/api/engagement/*` | Engagement (3005) | Quita `/api/engagement` |
+| `/socket.io` | Engagement (3005) | Conserva el path y habilita WebSocket |
 
-Cuando exista `ecilost-api-gateway`, las dos variables de `.env` pasan a ser su URL publica y
-el proxy deja de hacer falta.
+Los contratos HTTP de Auth y Catalog están disponibles en [Auth Swagger](http://localhost:3000/docs) y [Catalog Swagger](http://localhost:3001/docs). Para Auction, Wallet y Engagement, consulta el contrato OpenAPI en el repositorio del servicio.
 
 ## Despliegue en Vercel
 
@@ -113,11 +110,7 @@ red y sin servidor.
 
 ## Estado
 
-Implementado de punta a punta: sesion con Google, guards por capacidad, catalogo de objetos
-y ficha con multimedia (HU-08).
-
-Pendiente, siguiendo la misma estructura: formulario de registro y edicion de objetos, subida
-de multimedia (HU-07, el puerto y el adaptador ya estan en `features/media`) y lotes.
+La aplicación incluye sesión con Google y acceso por capacidad, consulta y administración del inventario, lotes, billetera, programación de salas, subastas en vivo, chat y gamificación. El menú muestra las acciones asociadas al rol y cada servicio aplica sus propios permisos.
 
 ### Salas en vivo (HU-18, HU-19, HU-22, HU-23)
 
@@ -127,6 +120,7 @@ La sala la gobierna el reloj de `ecilost-auction-service`; la interfaz solo pint
   evento del canal `/realtime` de engagement (`round.price`, `round.extended`,
   `round.activated`, `round.closed`, `room.status`) dispara una relectura. Al reconectar se
   relee todo; un sondeo lento cubre lo que se pierda.
+- Cuando vence el JWT del handshake, Engagement cierra el socket. El cliente usa el JWT más reciente o pide recuperar la sesión. Al reconectar, restaura sala y chat y resincroniza el estado.
 - **Contador**: `endsAt` del servidor corregido con `serverTime`. Llegar a cero no cierra nada;
   la ronda cambia cuando el servidor lo anuncia. Una extension anti-sniping mueve el contador al
   instante y muestra "Cierre extendido".
@@ -135,3 +129,15 @@ La sala la gobierna el reloj de `ecilost-auction-service`; la interfaz solo pint
   activa o por que se detuvo (limite alcanzado o saldo insuficiente).
 - **Sala terminada**: se muestra el resumen y desaparecen las acciones de puja; auction rechaza
   igual cualquier puja tardia.
+
+## Cobertura y SonarQube
+
+Ejecuta `npm ci` y luego `npm run test:cov` para generar `coverage/index.html` y
+`coverage/lcov.info`. La cobertura corresponde a la suite que ejecuta `npm test`.
+Vitest exige al menos un 80 % de cobertura global de líneas por repositorio.
+
+El proyecto de SonarQube Cloud es `ECILOST_ecilost-frontend` en la organización `ecilost`.
+Para importar LCOV, desactiva **Automatic Analysis** en **Administration > Analysis Method**.
+Configura `SONAR_TOKEN` como secreto de GitHub Actions con permiso de análisis.
+En cada push a la rama predeterminada, CI invoca `sonarcloud.yml` con el LCOV
+generado por `npm run test:cov` y espera el resultado del Quality Gate.
