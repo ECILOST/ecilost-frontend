@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useSession } from '@/features/auth/hooks/use-session';
 import { LoginPage } from '@/features/auth/pages/login.page';
+import { LandingPage } from '@/features/landing/pages/landing.page';
 import { NotFound } from '@/shared/components/not-found';
 import { PageShell } from '@/shared/components/shell/page-shell';
 import { RequireAuth } from '@/shared/guards/require-auth';
@@ -10,8 +11,9 @@ import { routePatterns, routes } from './routes';
 
 /*
  * Cada pantalla se descarga cuando se visita, no al abrir la aplicacion: un estudiante no
- * baja las de funcionario, ni nadie la sala en vivo hasta entrar en una. El login va en el
- * paquete inicial porque es la primera pantalla de quien llega sin sesion. La espera y los
+ * baja las de funcionario, ni nadie la sala en vivo hasta entrar en una. La portada publica y
+ * el login van en el paquete inicial porque son la primera pantalla de quien llega sin
+ * sesion: cargarlas aparte solo retrasaria lo primero que se pinta. La espera y los
  * errores de carga los atiende `RouteBoundary`, dentro del marco.
  */
 const AuctionDetailPage = lazy(() =>
@@ -149,7 +151,8 @@ export function AppRouter() {
     <Routes>
       <Route path={routes.login} element={<LoginPage />} />
 
-      <Route element={<RequireAuth />}>
+      {/* En `/` sin sesion se ve la portada publica; con sesion, el inicio de cada rol. */}
+      <Route element={<RequireAuth anonymousHome={<LandingPage />} />}>
         <Route element={<PageShell />}>
           <Route index element={<HomeRoute />} />
           {/* Destino del login en auth-service: se conserva y lleva a la portada. */}

@@ -8,14 +8,14 @@ import { PhotoPlate } from './photo-plate';
  * colores entre visitas.
  */
 const PAIRS: Array<[string, string]> = [
-  ['var(--eci-blue)', 'var(--eci-cyan)'],
-  ['var(--eci-purple)', 'var(--eci-blue)'],
-  ['var(--eci-pink)', 'var(--eci-yellow)'],
-  ['var(--eci-cyan)', 'var(--eci-purple)'],
-  ['var(--eci-yellow)', 'var(--eci-blue)'],
-  ['var(--eci-blue)', 'var(--eci-pink)'],
-  ['var(--eci-purple)', 'var(--eci-cyan)'],
-  ['var(--eci-blue)', 'var(--eci-yellow)'],
+  ['var(--deco-purple)', 'var(--deco-teal)'],
+  ['var(--deco-blue)', 'var(--deco-purple)'],
+  ['var(--deco-pink)', 'var(--deco-blue)'],
+  ['var(--deco-teal)', 'var(--deco-purple)'],
+  ['var(--deco-purple)', 'var(--deco-blue)'],
+  ['var(--deco-blue)', 'var(--deco-teal)'],
+  ['var(--deco-teal)', 'var(--deco-blue)'],
+  ['var(--deco-purple)', 'var(--deco-pink)'],
 ];
 
 function hash(seed: string): number {
@@ -30,10 +30,10 @@ export function artColors(seed: string): [string, string, string, string] {
   const [c1, c2] = PAIRS[hash(seed) % PAIRS.length];
   // Los dos acentos que no estan en el par, para las piezas sueltas del collage grande.
   const extras = [
-    'var(--eci-yellow)',
-    'var(--eci-pink)',
-    'var(--eci-cyan)',
-    'var(--eci-purple)',
+    'var(--deco-pink)',
+    'var(--deco-teal)',
+    'var(--deco-blue)',
+    'var(--deco-purple)',
   ].filter((color) => color !== c1 && color !== c2);
   return [c1, c2, extras[0], extras[1]];
 }

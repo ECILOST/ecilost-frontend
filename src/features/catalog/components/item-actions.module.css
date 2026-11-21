@@ -10,7 +10,7 @@
   padding: var(--s-5);
   border: 1px dashed var(--eci-line-strong);
   border-radius: var(--r-lg);
-  background: rgb(255 255 255 / 2%);
+  background: color-mix(in srgb, var(--color-highlight) 2%, transparent);
 }
 
 .title {

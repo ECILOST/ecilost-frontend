@@ -1,7 +1,7 @@
 .layout {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 22px;
   min-height: 470px;
   padding: 24px;
@@ -27,46 +27,10 @@
 /* Vas ganando y ganaste: verde propio, distinto del cian de la accion principal. */
 .green {
   --tone: var(--eci-green);
-  --tone-ink: #02281a;
+  --tone-ink: var(--color-text);
 }
 
-/* Mancha grande del color del estado, desde la esquina superior izquierda. */
-.stain {
-  position: absolute;
-  left: -90px;
-  top: -120px;
-  z-index: -1;
-  width: 440px;
-  height: 460px;
-  background: var(--tone);
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.55;
-}
-
-/* Pieza azul/violeta de la esquina inferior derecha, detras de la caja del precio. */
-.corner {
-  position: absolute;
-  right: -120px;
-  bottom: -140px;
-  z-index: -1;
-  width: 360px;
-  height: 360px;
-  border-radius: 50%;
-  background: var(--eci-blue);
-  filter: blur(70px);
-  opacity: 0.45;
-}
-
-.green .corner {
-  background: var(--eci-purple);
-}
-
-.pink .corner {
-  background: var(--eci-purple);
-}
-
-.confetti i {
+.green .pink .confetti i {
   position: absolute;
   width: 10px;
   height: 22px;
@@ -118,10 +82,8 @@
   width: 100%;
   height: 290px;
   border: 1px solid var(--glass-edge-strong);
-  background: rgb(6 21 40 / 35%);
-  box-shadow:
-    var(--glass-shine),
-    0 0 50px -16px var(--tone);
+  background: color-mix(in srgb, var(--color-surface-raised) 35%, transparent);
+  box-shadow: var(--glass-shine);
 }
 
 .content {
@@ -138,7 +100,7 @@
   color: var(--tone-ink);
   font: 800 1.375rem/1.15 var(--font-display);
   text-transform: uppercase;
-  box-shadow: 0 10px 30px color-mix(in srgb, var(--tone) 35%, transparent);
+  box-shadow: var(--shadow-card);
   animation: pop var(--t-slow) var(--ease-spring);
 }
 
@@ -167,7 +129,7 @@
   padding: 12px 14px;
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-md);
-  background: rgb(6 21 40 / 70%);
+  background: color-mix(in srgb, var(--color-surface-raised) 70%, transparent);
   box-shadow: var(--glass-shine);
   backdrop-filter: blur(10px);
 }
@@ -186,7 +148,7 @@
 
 .figureStrong {
   padding: 16px 16px 18px;
-  background: rgb(10 28 52 / 85%);
+  background: color-mix(in srgb, var(--color-surface-raised) 85%, transparent);
 }
 
 .figureStrong .figureLabel {
@@ -200,14 +162,14 @@
   padding: 12px 14px;
   border: 1px solid;
   border-radius: var(--r-md);
-  background: rgb(6 21 40 / 70%);
+  background: color-mix(in srgb, var(--color-surface-raised) 70%, transparent);
   font-size: var(--text-xs);
   font-weight: 700;
 }
 
 .strip-cyan {
   border-color: var(--eci-cyan-line);
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .strip-green {
@@ -222,19 +184,19 @@
 
 .strip-yellow {
   border-color: var(--eci-yellow-line);
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
   margin-top: auto;
 }
 
 @media (width < 640px) {
   .layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .art {

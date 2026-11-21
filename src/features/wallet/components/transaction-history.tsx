@@ -21,7 +21,7 @@ export function TransactionHistory() {
   } = useWalletTransactions();
   const transactions = data?.pages.flatMap((page) => page.items) ?? [];
 
-  if (isPending) return <Loading label="Cargando tus movimientos..." />;
+  if (isPending) return <Loading label="Cargando tus movimientos..." skeleton="list" />;
   if (error) return <ErrorState error={error} onRetry={() => void refetch()} />;
   if (transactions.length === 0) {
     return (

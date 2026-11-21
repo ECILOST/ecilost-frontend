@@ -1,3 +1,5 @@
+import type { AppNotification } from '@/features/auctions/model/auction';
+import type { NotificationGateway } from '@/features/auctions/ports/notification.gateway';
 import type { Container } from '@/app/container';
 import { createDemoAuctionGateway } from '@/features/auctions/api/demo-auction.gateway';
 import { Role } from '@/features/auth/domain/role';
@@ -608,6 +610,7 @@ export function createTestContainer(
     wallet: createFakeWalletGateway(),
     // Sin rivales ni reloj propio: las pruebas no dependen del azar ni del tiempo real.
     auctions: createDemoAuctionGateway({ rivals: false, tickMs: 0 }),
+    notifications: createFakeNotificationGateway(),
     rooms: createFakeRoomGateway(),
     gamification: createDemoGamificationGateway(),
     pickups: {
@@ -622,5 +625,18 @@ export function createTestContainer(
       missed: async () => undefined,
     },
     ...overrides,
+  };
+}
+
+/** Bandeja en memoria: lo que engagement tendria guardado para la persona. */
+export function createFakeNotificationGateway(
+  inbox: AppNotification[] = [],
+): NotificationGateway {
+  const entries = inbox.map((entry) => ({ ...entry }));
+  return {
+    list: async () => entries.map((entry) => ({ ...entry })),
+    markAllRead: async () => {
+      for (const entry of entries) entry.read = true;
+    },
   };
 }

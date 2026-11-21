@@ -36,6 +36,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<SessionStatus>('loading');
   const [principal, setPrincipal] = useState<Principal | null>(null);
+  const [expired, setExpired] = useState(false);
+  /** Hubo sesion en esta pestaña: si el canje falla despues, es que caduco. */
+  const hadSession = useRef(false);
   const renewal = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   /** Cuando caduca el access token vigente; `null` sin sesion. */
   const expiresAt = useRef<number | null>(null);
@@ -57,6 +60,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       expiresAt.current = Date.now() + token.expires_in * 1000;
       setPrincipal(await auth.me());
       setStatus('authenticated');
+      hadSession.current = true;
+      setExpired(false);
 
       clearTimeout(renewal.current);
       renewal.current = setTimeout(
@@ -69,6 +74,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } catch {
       // Sin cookie, con la cookie caducada o con la cuenta suspendida el servicio responde
       // 401, y para la interfaz los tres casos significan lo mismo: no hay sesion.
+      if (hadSession.current) setExpired(true);
       clear();
     }
   }, [auth, tokens, clear]);
@@ -122,8 +128,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       principal,
+      expired,
       login: () => window.location.assign(auth.loginUrl()),
       logout: async () => {
+        // Salir a proposito no es caducar: el login no debe decir "tu sesion termino".
+        hadSession.current = false;
+        setExpired(false);
         try {
           await auth.logout();
         } finally {
@@ -133,7 +143,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         }
       },
     }),
-    [status, principal, auth, clear],
+    [status, principal, expired, auth, clear],
   );
 
   return <SessionContext value={value}>{children}</SessionContext>;

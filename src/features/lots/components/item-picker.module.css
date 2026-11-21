@@ -1,5 +1,6 @@
 .picker {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-3);
   justify-items: start;
   margin: 0;
@@ -36,6 +37,7 @@
 
 .list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-2);
   width: 100%;
 }
@@ -67,12 +69,12 @@
 
 /* El elegido se marca con el borde y no solo con la casilla: se ve de un vistazo cuantos van. */
 .row:has(:checked) {
-  border-color: var(--eci-cyan);
+  border-color: var(--eci-cyan-text);
   background: var(--eci-cyan-soft);
 }
 
 .row:has(:focus-visible) {
-  outline: 2px solid var(--eci-cyan);
+  outline: 2px solid var(--color-focus);
   outline-offset: 3px;
 }
 
@@ -81,7 +83,7 @@
   width: 18px;
   height: 18px;
   /* La casilla del sistema, teñida: una propia de divs perderia el teclado y el lector. */
-  accent-color: var(--eci-cyan);
+  accent-color: var(--eci-cyan-text);
   cursor: pointer;
 }
 

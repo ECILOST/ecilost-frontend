@@ -8,7 +8,9 @@
   display: grid;
   gap: var(--s-3);
   justify-items: start;
-  max-width: 560px;
+  max-width: min(560px, 100%);
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: var(--s-5);
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-lg);
@@ -17,6 +19,9 @@
 }
 
 .title {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: 700;
@@ -25,8 +30,8 @@
 }
 
 .body {
-  color: var(--eci-text-soft);
-  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
 }
 
 .list {
@@ -38,7 +43,7 @@
 
 .list li::before {
   content: '— ';
-  color: var(--eci-pink);
+  color: var(--eci-pink-text);
 }
 
 .actions {
@@ -50,23 +55,39 @@
 
 .neutral {
   border-style: dashed;
-  background: rgb(255 255 255 / 2%);
+  background: color-mix(in srgb, var(--color-highlight) 2%, transparent);
 }
 
 .alert {
-  border-color: rgb(255 61 113 / 35%);
-  background: linear-gradient(180deg, var(--eci-pink-soft), var(--eci-surface) 60%);
+  border-color: var(--eci-pink-line);
+  background: linear-gradient(180deg, var(--color-error-bg), var(--color-surface-raised) 70%);
 }
 
 .alert .title {
-  color: var(--eci-pink);
+  color: var(--color-error);
 }
 
+.title > svg {
+  flex: none;
+  margin-top: 0.1em;
+}
+
+/* Exito en verde (antes usaba el "cian", que en el tema claro es el ambar de los botones). */
 .success {
-  border-color: rgb(47 227 154 / 30%);
-  background: linear-gradient(180deg, var(--eci-cyan-soft), var(--eci-surface) 60%);
+  border-color: var(--eci-green-line);
+  background: linear-gradient(180deg, var(--color-success-bg), var(--color-surface-raised) 70%);
 }
 
 .success .title {
-  color: var(--eci-cyan);
+  color: var(--color-success);
+}
+
+/* Sin conexion: no es culpa de nadie ni algo roto, asi que va en advertencia y no en error. */
+.offline {
+  border-color: var(--eci-yellow-line);
+  background: linear-gradient(180deg, var(--color-warning-bg), var(--color-surface-raised) 70%);
+}
+
+.offline .title {
+  color: var(--color-warning);
 }

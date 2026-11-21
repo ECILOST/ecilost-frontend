@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Button } from './ui/button';
 import { Notice } from './ui/notice';
 
 /** Lo que una pantalla le deja dicho a la siguiente. */
@@ -45,5 +46,18 @@ export function Flash() {
 
   if (!message) return null;
 
-  return <Notice tone="success" live="status" title={message} />;
+  // Se queda hasta que la persona lo cierra o cambia de pantalla: un aviso que se va solo
+  // puede desaparecer antes de leerse.
+  return (
+    <Notice
+      tone="success"
+      live="status"
+      title={message}
+      actions={
+        <Button variant="quiet" onClick={() => setMessage(null)}>
+          Entendido
+        </Button>
+      }
+    />
+  );
 }

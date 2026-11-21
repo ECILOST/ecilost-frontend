@@ -2,84 +2,132 @@
   display: flex;
 }
 
+.list {
+  display: flex;
+}
+
 .link {
-  display: inline-flex;
+  position: relative;
+  display: flex;
   align-items: center;
-  gap: var(--s-2);
-  color: var(--eci-text-dim);
+  gap: var(--s-3);
+  min-height: var(--control-h);
+  color: var(--color-text-muted);
   font-family: var(--font-text);
-  font-size: var(--text-sm);
   font-weight: 500;
   text-decoration: none;
-  transition: color var(--t-fast) linear;
+  transition:
+    color var(--t-fast) linear,
+    background-color var(--t-fast) linear;
 }
 
 .link:hover {
-  color: var(--eci-text);
   text-decoration: none;
 }
 
-/* --- Barra superior (escritorio): texto, la activa subrayada en cian --------- */
-.top {
-  gap: 26px;
+.active {
+  color: var(--color-text);
+  font-weight: 700;
 }
 
-.top .link {
-  padding: 6px 0 4px;
-  border-bottom: 2px solid transparent;
+/* --- En la cabecera (escritorio) ------------------------------------------- */
+.bar {
+  align-items: center;
+  gap: var(--s-2);
 }
 
-.top .active {
-  border-bottom-color: var(--eci-cyan);
-  color: var(--eci-text);
+.bar .list {
+  align-items: center;
+  gap: var(--s-1);
 }
 
-/* --- Barra inferior (movil) ------------------------------------------------- */
-.bottom {
-  position: fixed;
-  right: var(--page-gutter);
-  bottom: var(--s-2);
-  left: var(--page-gutter);
-  z-index: 20;
-  justify-content: space-around;
-  padding: 4px var(--s-2);
-  border: 1px solid var(--eci-line);
+/* El grupo secundario se separa con un filete corto: proximidad, no otro color. */
+.bar .secondary {
+  padding-left: var(--s-2);
+  border-left: 1px solid var(--color-border-strong);
+}
+
+.bar .link {
+  padding: 0 14px;
   border-radius: var(--r-chip);
-  /* Translucida y con desenfoque: la pantalla sigue viendose debajo, como en una emision. */
-  background: rgb(6 21 40 / 88%);
-  backdrop-filter: blur(14px);
-  box-shadow: var(--shadow-float);
+  font-size: var(--text-md);
 }
 
-.bottom .link {
+.bar .secondary .link {
+  font-size: var(--text-sm);
+}
+
+@media (hover: hover) {
+  .bar .link:hover {
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+}
+
+/*
+ * Activa: pastilla ambar suave con borde. Se reconoce por la forma y el peso aunque no se
+ * distinga el color.
+ */
+.bar .active,
+.bar .active:hover {
+  background: var(--color-primary-soft);
+  box-shadow: inset 0 0 0 1px var(--color-primary-border);
+}
+
+/* --- Dentro del cajon (movil) ---------------------------------------------- */
+.drawer {
+  flex-direction: column;
+  gap: var(--s-3);
+}
+
+.drawer .list {
   flex-direction: column;
   gap: 2px;
-  flex: 1;
-  padding: 6px 0;
-  font-size: var(--text-2xs);
 }
 
-.bottom .active {
-  color: var(--eci-cyan);
+.drawer .secondary {
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--color-border);
 }
 
-/* La seccion activa se marca con color y con un punto: nunca con el color a secas. */
-.bottom .active::after {
+.drawer .link {
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: var(--text-lg);
+}
+
+.drawer .secondary .link {
+  font-size: var(--text-md);
+}
+
+.drawer .link > svg {
+  flex: none;
+  color: var(--color-text-subtle);
+}
+
+@media (hover: hover) {
+  .drawer .link:hover {
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+}
+
+/* Activa: relleno, barra a la izquierda e icono en tinta. Tres señales, ninguna es solo color. */
+.drawer .active {
+  background: var(--color-primary-soft);
+}
+
+.drawer .active::before {
   content: '';
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: currentcolor;
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  left: 0;
+  width: 4px;
+  border-radius: var(--r-chip);
+  background: var(--color-text);
 }
 
-@media (width >= 768px) {
-  .bottom {
-    display: none;
-  }
-}
-
-@media (width < 768px) {
-  .top {
-    display: none;
-  }
+.drawer .active > svg {
+  color: var(--color-text);
 }

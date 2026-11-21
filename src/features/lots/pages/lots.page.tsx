@@ -39,7 +39,7 @@ export function LotsPage() {
 
       <Flash />
 
-      {isPending ? <Loading label="Cargando los lotes..." /> : null}
+      {isPending ? <Loading label="Cargando los lotes..." skeleton="list" /> : null}
       {error ? (
         <ErrorState error={error} onRetry={() => void refetch()} />
       ) : null}

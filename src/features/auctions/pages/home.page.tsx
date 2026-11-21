@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { routes } from '@/app/routes';
+import { EmptyState } from '@/shared/components/empty-state';
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
 import { buttonClass } from '@/shared/components/ui/button';
@@ -26,7 +27,7 @@ const HOW: Array<{
     icon: 'search',
     title: 'Descubre',
     text: 'Explora los objetos perdidos del campus que salen a subasta.',
-    tone: 'var(--eci-cyan)',
+    tone: 'var(--eci-cyan-2)',
   },
   {
     icon: 'bolt',
@@ -100,22 +101,6 @@ export function HomePage() {
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
-        <span
-          className={`${styles.blob} ${styles.blobBlue}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.blob} ${styles.blobCyan}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.blob} ${styles.blobYellow}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.blob} ${styles.blobPink}`}
-          aria-hidden="true"
-        />
         <span className={styles.sticker} aria-hidden="true">
           ¡Puede ser
           <br />
@@ -198,11 +183,26 @@ export function HomePage() {
           </Link>
         </div>
 
-        {isPending ? <Loading label="Cargando subastas..." /> : null}
+        {isPending ? <Loading label="Cargando subastas..." skeleton="cards" /> : null}
         {isError ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : null}
-        {items ? (
+        {items && next.length === 0 ? (
+          <EmptyState
+            title="No hay más subastas programadas"
+            actions={
+              <Link
+                className={buttonClass('secondary', 'md')}
+                to={routes.auctions}
+              >
+                Ver el catálogo
+              </Link>
+            }
+          >
+            Cuando se programen nuevas salas aparecerán aquí.
+          </EmptyState>
+        ) : null}
+        {items && next.length > 0 ? (
           <div className={styles.cards}>
             {next.map((item) => (
               <AuctionCard key={item.id} item={item} order="meta-first" />

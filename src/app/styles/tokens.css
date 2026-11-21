@@ -1,92 +1,206 @@
 /*
- * Tokens de ECILOST, tomados del diseño de Claude Design (`ECI Lost.dc.html`).
+ * Tokens de ECILOST. Paleta clara "ambar y beige" tomada de la referencia del catalogo:
+ * fondo beige calido, tarjetas crema, acciones en ambar con tinta casi negra y manchas de
+ * color (violeta, turquesa, azul, rosa) solo como decoracion detras de los objetos.
  *
  * Es la unica capa que declara valores crudos: ningun componente escribe un hexadecimal, un
  * radio ni una duracion a mano. Cambiar la paleta entera es cambiar este archivo.
  *
- * Los nombres `--eci-*` se conservan de la version anterior para que las pantallas de
- * administracion (catalogo, lotes, recargas) adopten la paleta nueva sin reescribirse.
+ * Dos capas:
+ *  1. Tokens semanticos `--color-*` (primario, fondo, superficie, texto, bordes, exito,
+ *     error, advertencia). Son los que debe usar todo codigo nuevo.
+ *  2. Nombres historicos `--eci-*`. Se conservan para que las pantallas existentes adopten la
+ *     paleta sin reescribirse. Ojo: `--eci-cyan` ya no es cian, es el AMBAR primario; el
+ *     nombre se mantiene porque significa "accion principal".
+ *
+ * Contraste verificado (WCAG 2.2, ratio sobre fondo #EFE6D6 / superficie #F7F0E4 / ambar #FBCB6E):
+ *  - texto #1F1A14: 13.9 / 15.2 / 11.4
+ *  - texto suave #4D4337: 7.8 / 8.5 / 6.4
+ *  - texto tenue #6B5F51: 5.0 / 5.5 (minimo AA en texto normal)
+ *  - texto ambar #7A4F00: 5.8 / 6.3
+ *  - error #B3311F: 5.0 / 5.5; exito #1E6B47: 5.2 / 5.7; advertencia #7A5600: 5.4 / 5.9
+ *  - anillo de foco #1E2A4A: 11.4 sobre fondo, 9.3 sobre ambar (>= 3:1 de componente)
+ *  - blanco sobre error #B3311F: 6.2; blanco sobre exito #1E6B47: 6.5
+ *  - deshabilitado: texto #6B5F51 sobre #E6DDCF = 4.6, y ademas borde punteado (no solo color)
+ *  - boton de Google: texto #1F1F1F sobre blanco 16.5; borde #747775 sobre blanco 4.5
+ *  El relleno ambar contra el fondo beige es 1.2:1, por eso el boton primario lleva un borde
+ *  ambar oscuro: el texto ya lo identifica (11.4:1), el borde le da silueta.
+ *  `tokens.spec.ts` recalcula estos ratios: si alguien cambia un color y rompe AA, falla.
  */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* --- Base ----------------------------------------------------------------- */
-  --eci-void: #04101f; /* fondo de la aplicacion */
-  --eci-night: #061528; /* cabecera, paneles de primer nivel */
-  --eci-surface: #0a1c34; /* tarjetas */
-  --eci-surface-alt: #0e2440; /* capsulas, filtros, contadores */
-  --eci-surface-high: #123566; /* pieza destacada: objeto en subasta, puesto */
-  --eci-surface-glow: #0f2a4c; /* fila propia en la lista de pujas */
-  --eci-line: rgb(255 255 255 / 8%);
-  --eci-line-strong: rgb(255 255 255 / 16%);
-  /* Placa de las fotografias: blanca, porque casi todas las fotos de producto lo son. */
+  /* ======================= Paleta base (valores crudos) ======================= */
+  --palette-beige-100: #fbf7ef;
+  --palette-beige-200: #f7f0e4;
+  --palette-beige-300: #efe6d6;
+  --palette-beige-400: #e6ddcf;
+  --palette-beige-500: #d9ccb6;
+  --palette-amber-200: #fde2a6;
+  --palette-amber-300: #fbcb6e;
+  --palette-amber-400: #f7bc4c;
+  --palette-amber-500: #efae36;
+  --palette-amber-800: #7a4f00;
+  --palette-ink-900: #1f1a14;
+  --palette-ink-700: #4d4337;
+  --palette-ink-600: #5a4e40;
+  --palette-ink-500: #62564a;
+  --palette-ink-400: #6b5f51;
+  --palette-navy: #1e2a4a;
+  --palette-orange: #e8731a;
+
+  /* ======================= Tokens semanticos ======================= */
+  --color-bg: var(--palette-beige-300);
+  --color-surface: var(--palette-beige-200);
+  --color-surface-raised: var(--palette-beige-100);
+  --color-surface-sunken: var(--palette-beige-400);
+
+  --color-primary: var(--palette-amber-300);
+  --color-primary-hover: var(--palette-amber-400);
+  --color-primary-active: var(--palette-amber-500);
+  --color-primary-soft: var(--palette-amber-200);
+  --color-on-primary: var(--palette-ink-900);
+  /* Ambar legible como texto o icono sobre beige. */
+  --color-primary-text: var(--palette-amber-800);
+
+  --color-text: var(--palette-ink-900);
+  --color-text-muted: var(--palette-ink-700);
+  --color-text-subtle: var(--palette-ink-400);
+  --color-brand-ink: var(--palette-navy);
+
+  --color-border: rgb(74 56 30 / 14%);
+  --color-border-strong: rgb(74 56 30 / 26%);
+  --color-primary-border: color-mix(in srgb, var(--palette-amber-800) 45%, transparent);
+  --color-focus: var(--palette-navy);
+  /* Anillo de foco: grosor y separacion unicos para toda la aplicacion. */
+  --focus-ring: 3px solid var(--color-focus);
+  --focus-offset: 3px;
+
+  --color-success: #1e6b47;
+  --color-success-bg: #dcefe2;
+  --color-error: #b3311f;
+  --color-error-bg: #f8ddd5;
+  --color-error-hover: #962717;
+  --color-warning: #7a5600;
+  --color-warning-bg: #fbe8bd;
+  --color-info: #2c55a8;
+  --color-info-bg: #dde6f7;
+
+  --color-disabled-bg: var(--palette-beige-400);
+  --color-disabled-text: var(--palette-ink-400);
+  --color-disabled-border: var(--color-border-strong);
+  /* Texto sobre rellenos fuertes (error, exito). */
+  --color-on-strong: #ffffff;
+
+  /*
+   * Veladuras. Sustituyen a los blancos y negros translucidos que cada modulo escribia a
+   * mano (herencia del tema oscuro): se usan con `color-mix(in srgb, <token> N%, transparent)`.
+   *  - highlight: brillo, reflejos y lineas claras.
+   *  - shade: sombras y oscurecidos; marron calido en vez de negro, que en beige se ve sucio.
+   *  - scrim: fondo de los dialogos modales.
+   *  - stage: escenario a pantalla completa (anuncio de modalidad), siempre con texto blanco.
+   */
+  --color-highlight: #ffffff;
+  --color-shade: #5a401c;
+  --color-scrim: rgb(31 26 20 / 55%);
+  --color-stage: var(--palette-ink-900);
+
+  /*
+   * Boton "Continuar con Google": colores fijados por las guias de marca de Google Sign-In,
+   * no por la paleta. La G multicolor va dentro de su SVG y no se recolorea.
+   */
+  --google-bg: #ffffff;
+  --google-border: #747775;
+  --google-text: #1f1f1f;
+  --google-bg-hover: #f8f9fa;
+  --google-bg-active: #eef0f1;
+
+  /* Formas decorativas: nunca llevan texto encima, solo viven detras de los objetos. */
+  --deco-purple: #a07cf0;
+  --deco-pink: #ef6fae;
+  --deco-teal: #4fd8b4;
+  --deco-blue: #5f8ff2;
+  --deco-yellow: #f6c544;
+  --deco-orange: var(--palette-orange);
+  --deco-grad-a: linear-gradient(135deg, var(--deco-purple), var(--deco-pink));
+  --deco-grad-b: linear-gradient(135deg, var(--deco-teal), #3fc3d8);
+  --deco-grad-c: linear-gradient(135deg, var(--deco-blue), #7aa6ff);
+
+  /* ======================= Nombres historicos (--eci-*) ======================= */
+  --eci-void: var(--color-bg);
+  --eci-night: var(--color-surface);
+  --eci-surface: var(--color-surface);
+  --eci-surface-alt: var(--color-surface-sunken);
+  --eci-surface-high: var(--color-surface-raised);
+  --eci-surface-glow: #fcefd0;
+  --eci-line: var(--color-border);
+  --eci-line-strong: var(--color-border-strong);
   --eci-photo-plate: #ffffff;
 
-  /* --- Texto ---------------------------------------------------------------- */
-  --eci-text: #ffffff;
-  --eci-text-soft: #a9bcdd;
-  --eci-text-label: #9bb0d4;
-  --eci-text-dim: #7c8fb5;
-  --eci-text-faint: #5e729a;
-  --eci-text-body: #c9d8f2;
-  /* Tinta sobre relleno claro (cian, amarillo). */
-  --eci-on-accent: #03242c;
+  --eci-text: var(--color-text);
+  --eci-text-soft: var(--color-text-muted);
+  --eci-text-label: var(--palette-ink-600);
+  --eci-text-dim: var(--palette-ink-500);
+  --eci-text-faint: var(--palette-ink-400);
+  --eci-text-body: #3a3128;
+  --eci-on-accent: var(--color-on-primary);
 
   /*
-   * --- Acentos ---------------------------------------------------------------
-   * Un color, un significado: cian es la accion principal y "vas ganando", rosa es pujar,
-   * "en vivo" y "te superaron", amarillo es ECICoin y tiempo.
+   * Un color, un significado: ambar (antes cian) es la accion principal; coral es pujar y
+   * "en vivo"; dorado es ECICoin y tiempo; verde es ganar. Cada relleno tiene su variante
+   * `-text` oscura para usarse como texto con contraste AA.
    */
-  --eci-cyan: #19e5d5;
-  --eci-cyan-2: #2bd3f5;
-  --eci-pink: #ff4f78;
-  --eci-pink-text: #ff7c9b;
-  --eci-yellow: #ffc84a;
-  --eci-orange: #ff9a3e;
-  --eci-blue: #2b6bff;
-  --eci-blue-text: #7faaff;
-  --eci-purple: #7b5cff;
-  --eci-purple-text: #b3a1ff;
-  /*
-   * Verde propio para "vas ganando", "ganaste" y confirmaciones. Antes era un alias del cian,
-   * y entonces "pulsa aqui" y "vas ganando" se confundian: el cian es una accion, el verde un
-   * estado.
-   */
-  --eci-green: #2fe39a;
-  --eci-green-text: #6ff0b9;
+  --eci-cyan: var(--color-primary);
+  --eci-cyan-2: var(--color-primary-hover);
+  --eci-cyan-text: var(--color-primary-text);
+  --eci-pink: #f27c5c;
+  --eci-pink-text: var(--color-error);
+  --eci-pink-deep: #c2410c;
+  --eci-yellow: #f2b53a;
+  --eci-yellow-text: var(--color-warning);
+  --eci-orange: var(--palette-orange);
+  --eci-blue: var(--deco-blue);
+  --eci-blue-text: var(--color-info);
+  --eci-purple: var(--deco-purple);
+  --eci-purple-text: #6a45b5;
+  --eci-green: #3fbf8a;
+  --eci-green-text: var(--color-success);
+  --eci-silver: #b8bdc9;
+  --eci-bronze: #d9894a;
 
-  --eci-pink-deep: #e83a64;
-  /* Podio del top semanal: el oro es el amarillo de siempre. */
-  --eci-silver: #d7def2;
-  --eci-bronze: #ff9e5e;
-
-  --grad-cyan: linear-gradient(135deg, var(--eci-cyan), var(--eci-cyan-2));
+  --grad-cyan: linear-gradient(180deg, var(--palette-amber-300), var(--palette-amber-400));
   --grad-coin: linear-gradient(135deg, var(--eci-yellow), var(--eci-orange));
-  --grad-avatar: linear-gradient(135deg, var(--eci-purple), var(--eci-blue));
+  --grad-avatar: linear-gradient(135deg, #f08a3a, var(--palette-orange));
 
-  /* Tintes translucidos: mismo color, fondo de capsula. */
-  --eci-cyan-soft: rgb(25 229 213 / 14%);
-  --eci-pink-soft: rgb(255 79 120 / 16%);
-  --eci-yellow-soft: rgb(255 200 74 / 14%);
-  --eci-blue-soft: rgb(43 107 255 / 22%);
-  --eci-purple-soft: rgb(123 92 255 / 20%);
-  --eci-green-soft: rgb(47 227 154 / 14%);
-  --eci-green-line: rgb(47 227 154 / 40%);
-  --eci-purple-line: rgb(123 92 255 / 45%);
-  --eci-neutral-soft: rgb(255 255 255 / 7%);
+  /* Tintes de capsula: mismo color, fondo suave. */
+  --eci-cyan-soft: rgb(251 203 110 / 45%);
+  --eci-pink-soft: rgb(242 124 92 / 12%);
+  --eci-yellow-soft: rgb(242 181 58 / 22%);
+  --eci-blue-soft: rgb(95 143 242 / 18%);
+  --eci-purple-soft: rgb(160 124 240 / 18%);
+  --eci-green-soft: rgb(63 191 138 / 18%);
+  --eci-green-line: rgb(30 107 71 / 35%);
+  --eci-purple-line: rgb(106 69 181 / 35%);
+  --eci-neutral-soft: rgb(74 56 30 / 6%);
 
-  --eci-cyan-line: rgb(25 229 213 / 35%);
-  --eci-pink-line: rgb(255 79 120 / 45%);
-  --eci-yellow-line: rgb(255 200 74 / 40%);
-  --eci-blue-line: rgb(43 107 255 / 40%);
+  --eci-cyan-line: rgb(122 79 0 / 35%);
+  --eci-pink-line: rgb(179 49 31 / 35%);
+  --eci-yellow-line: rgb(122 86 0 / 35%);
+  --eci-blue-line: rgb(44 85 168 / 35%);
 
   /* --- Tipografia ----------------------------------------------------------- */
-  --font-display: 'Sora', 'Segoe UI', system-ui, sans-serif;
-  --font-text: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /*
+   * Fredoka (redonda y pesada) para titulares, marca y cifras; Inter para el texto corrido.
+   * Se sirven desde el propio paquete (@fontsource, importadas en main.tsx), no desde un CDN:
+   * la portada carga igual sin acceso a terceros. Roboto solo la usa el boton de Google.
+   */
+  --font-display: 'Fredoka Variable', 'Nunito', 'Segoe UI Rounded', system-ui, sans-serif;
+  --font-text: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-google: 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-script: var(--font-display);
 
-  --text-2xs: 0.625rem;
+  --text-2xs: 0.6875rem;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;
   --text-md: 0.9375rem;
@@ -94,11 +208,10 @@
   --text-xl: 1.375rem;
   --text-2xl: 1.875rem;
   --text-3xl: 2.625rem;
-  /* Cifras protagonistas: precio, reloj, saldo. */
   --text-hero: 2.875rem;
 
   --tracking-tight: -0.01em;
-  --tracking-caps: 0.1em;
+  --tracking-caps: 0.12em;
 
   /* --- Forma ---------------------------------------------------------------- */
   --r-chip: 999px;
@@ -107,7 +220,6 @@
   --r-lg: 24px;
   --r-xl: 30px;
 
-  /* Radios irregulares de las manchas de color. */
   --blob-a: 58% 42% 39% 61% / 45% 38% 62% 55%;
   --blob-b: 48% 52% 60% 40% / 55% 42% 58% 45%;
   --blob-c: 54% 46% 40% 60% / 52% 44% 56% 48%;
@@ -122,36 +234,38 @@
   --s-6: 32px;
   --s-7: 48px;
   --s-8: 64px;
-  /* Mas ancho que antes (1120): en pantallas grandes la columna central se veia perdida. */
   --page-max: 1280px;
-  --page-gutter: clamp(12px, 2.4vw, 28px);
-  /* Ritmo vertical de pagina: mas apretado en el movil, donde cada pixel cuenta. */
+  --page-gutter: clamp(16px, 2.4vw, 28px);
   --page-gap: clamp(12px, 2vw, 20px);
   --page-pad-top: clamp(12px, 2.4vw, 24px);
-  /* Alto de los controles: el minimo tactil, sin pasarse. */
   --control-h: 44px;
+  --header-h: 64px;
 
   /* --- Profundidad ---------------------------------------------------------- */
-  --shadow-card: 0 20px 44px -30px rgb(0 0 0 / 95%);
-  --shadow-float: 0 20px 44px rgb(0 0 0 / 50%);
-  --glow-cyan: 0 14px 32px rgb(25 229 213 / 35%);
-  --glow-pink: 0 14px 32px rgb(255 79 120 / 38%);
-  --glow-green: 0 14px 32px rgb(47 227 154 / 30%);
-  --glow-blue: 0 14px 32px rgb(43 107 255 / 35%);
-  --glow-purple: 0 14px 32px rgb(123 92 255 / 38%);
-  --glow-yellow: 0 14px 32px rgb(255 200 74 / 30%);
+  --shadow-card: 0 12px 30px -20px rgb(90 64 28 / 45%);
+  --shadow-float: 0 18px 40px -14px rgb(90 64 28 / 35%);
+  /*
+   * Antes eran halos de color (resplandor "neon"). Ahora todos son la misma sombra calida y
+   * corta: dan relieve al boton sin teñir el texto de alrededor. Se conservan los nombres
+   * para no tocar cada modulo.
+   */
+  --glow-cyan: 0 6px 14px -10px rgb(90 64 28 / 45%);
+  --glow-pink: var(--glow-cyan);
+  --glow-green: var(--glow-cyan);
+  --glow-blue: var(--glow-cyan);
+  --glow-purple: var(--glow-cyan);
+  --glow-yellow: var(--glow-cyan);
 
   /*
-   * --- Superficies de cristal ---------------------------------------------------------
-   * Paneles translucidos con un borde que brilla arriba y se apaga abajo: es lo que separa
-   * un panel del fondo sin dibujar una caja. Se usan con `background` + `border-color`.
+   * Superficies "de cristal": en el tema claro son paneles crema opacos con un borde fino.
+   * Se conserva el nombre para no tocar cada componente que los usa.
    */
-  --glass: linear-gradient(180deg, rgb(20 38 66 / 72%), rgb(10 26 50 / 64%));
-  --glass-high: linear-gradient(180deg, rgb(30 56 96 / 70%), rgb(14 34 64 / 66%));
-  --glass-edge: rgb(140 180 255 / 14%);
-  --glass-edge-strong: rgb(140 180 255 / 24%);
-  --glass-shine: inset 0 1px 0 rgb(255 255 255 / 6%);
-  --glass-blur: blur(14px);
+  --glass: linear-gradient(180deg, var(--palette-beige-100), var(--palette-beige-200));
+  --glass-high: linear-gradient(180deg, #fffdf8, var(--palette-beige-100));
+  --glass-edge: var(--color-border);
+  --glass-edge-strong: var(--color-border-strong);
+  --glass-shine: inset 0 1px 0 rgb(255 255 255 / 70%);
+  --glass-blur: none;
 
   /* --- Movimiento ----------------------------------------------------------- */
   --t-fast: 140ms;
@@ -161,11 +275,6 @@
   --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-/*
- * Quien pide menos movimiento recibe la misma interfaz sin transiciones ni entradas. No se
- * desactiva solo la animacion decorativa: tambien la de estado, porque un cambio brusco es
- * preferible a un movimiento que la persona pidio no ver.
- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

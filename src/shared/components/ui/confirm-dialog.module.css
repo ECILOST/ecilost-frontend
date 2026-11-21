@@ -15,7 +15,7 @@
 }
 
 .dialog::backdrop {
-  background: rgb(4 6 12 / 72%);
+  background: var(--color-scrim);
   /* El desenfoque dice que lo de detras esta apagado, no solo mas oscuro. */
   backdrop-filter: blur(6px);
 }

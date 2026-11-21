@@ -11,18 +11,17 @@
   min-inline-size: 0;
 }
 
+/*
+ * Las capsulas bajan de linea en vez de deslizarse: a 320 px una fila oculta escondia los
+ * filtros de la derecha sin ninguna pista de que existian.
+ */
 .row {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--s-2);
-  overflow-x: auto;
-  scrollbar-width: none;
   /* Espacio para que el anillo de foco de la primera y la ultima capsula no se corte. */
   padding: 3px;
   margin: -3px;
-}
-
-.row::-webkit-scrollbar {
-  display: none;
 }
 
 /*
@@ -38,6 +37,6 @@
 }
 
 .option:has(:focus-visible) {
-  outline: 2px solid var(--eci-cyan);
+  outline: 2px solid var(--color-focus);
   outline-offset: 3px;
 }

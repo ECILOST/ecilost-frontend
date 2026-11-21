@@ -11,63 +11,14 @@
   isolation: isolate;
 }
 
-/*
- * Las manchas de la portada son luz: difuminadas y detras del objeto destacado. Antes eran
- * formas solidas y, en el movil, tapaban el titulo.
- */
-.blob {
-  position: absolute;
-  z-index: -1;
-  border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.blobBlue {
-  right: 40px;
-  top: -40px;
-  width: 460px;
-  height: 380px;
-  background: var(--eci-blue);
-}
-
-.blobCyan {
-  right: -80px;
-  top: 200px;
-  width: 340px;
-  height: 300px;
-  background: var(--eci-cyan);
-  opacity: 0.32;
-}
-
-.blobYellow {
-  right: 360px;
-  top: 260px;
-  width: 200px;
-  height: 160px;
-  background: var(--eci-yellow);
-  opacity: 0.22;
-}
-
-.blobPink {
-  right: 300px;
-  top: 0;
-  width: 220px;
-  height: 200px;
-  background: var(--eci-pink);
-  opacity: 0.32;
-}
-
 .sticker {
   position: absolute;
   left: calc(50% - 10px);
   top: 54px;
   z-index: 2;
   font: italic 800 1.375rem var(--font-script);
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   text-align: center;
-  text-shadow: 0 0 18px rgb(25 229 213 / 55%);
   transform: rotate(-12deg);
   pointer-events: none;
 }
@@ -93,7 +44,7 @@
   height: 7px;
   border-radius: 50%;
   background: var(--eci-pink);
-  box-shadow: 0 0 8px var(--eci-pink);
+  box-shadow: none;
   animation: live-dot 1.2s ease-in-out infinite;
 }
 
@@ -142,7 +93,7 @@
   top: 14px;
   right: 16px;
   font: 800 1.375rem var(--font-display);
-  color: rgb(255 255 255 / 10%);
+  color: color-mix(in srgb, var(--color-highlight) 10%, transparent);
 }
 
 .howGuide {
@@ -152,10 +103,7 @@
   padding: 18px;
   border: 1px solid var(--eci-purple-line);
   border-radius: 22px;
-  background:
-    radial-gradient(80% 120% at 100% 0%, rgb(123 92 255 / 30%), transparent 70%),
-    radial-gradient(60% 100% at 0% 100%, rgb(255 79 120 / 18%), transparent 70%),
-    var(--glass);
+  background: var(--glass);
   color: var(--eci-text);
   text-decoration: none;
   transition:
@@ -184,7 +132,8 @@
 
 .heroGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* `minmax(0, …)`: sin el, la tarjeta flotante (300px) estiraba la columna en el movil. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
   gap: 40px;
 }
@@ -195,10 +144,17 @@
   letter-spacing: -0.035em;
 }
 
+/*
+ * Antes era texto con degradado ambar-azul recortado: sobre el beige el ambar claro quedaba
+ * por debajo de 2:1. Ahora el texto es tinta y el ambar va detras, como un resaltador: el
+ * acento se ve igual de fuerte y el contraste es el del texto normal (13.9:1).
+ */
 .accent {
-  background: linear-gradient(90deg, var(--eci-cyan), var(--eci-cyan-2) 60%, var(--eci-blue-text));
-  background-clip: text;
-  color: transparent;
+  padding: 0 0.08em;
+  background: linear-gradient(transparent 58%, var(--color-primary) 58%, var(--color-primary) 92%, transparent 92%);
+  color: var(--color-text);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .lead {
@@ -227,7 +183,7 @@
   border-radius: 28px;
   box-shadow:
     var(--glass-shine),
-    0 30px 60px -30px rgb(0 0 0 / 80%);
+    0 30px 60px -30px color-mix(in srgb, var(--color-shade) 48%, transparent);
 }
 
 .ring {
@@ -246,7 +202,7 @@
   padding: 20px;
   border: 1px solid var(--glass-edge-strong);
   border-radius: 26px;
-  background: rgb(8 24 46 / 78%);
+  background: color-mix(in srgb, var(--color-surface-raised) 78%, transparent);
   box-shadow:
     var(--glass-shine),
     var(--shadow-float);
@@ -291,22 +247,19 @@
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
 }
 
-.cards :global(a) > div:first-child {
-  height: 150px;
-}
 
 @media (width < 960px) {
   .heroGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 70px;
   }
 
   .cards {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(min(160px, 100%), 1fr));
   }
 
   .sticker {
@@ -321,18 +274,16 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .blob {
-    opacity: 0.28;
   }
-}
 
 @media (width < 560px) {
   .how {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .featuredArt {
-    height: 260px;
+    height: auto;
+    aspect-ratio: 4 / 3;
   }
 
   .floating {

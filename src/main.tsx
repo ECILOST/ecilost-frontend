@@ -5,6 +5,9 @@ import { createContainer } from './app/container';
 import { AppProviders } from './app/providers/app-providers';
 import { createQueryClient } from './app/providers/query-client';
 import { AppRouter } from './app/router';
+// Fuentes servidas desde el propio paquete: la portada carga igual sin acceso a un CDN.
+import '@fontsource-variable/fredoka/wght.css';
+import '@fontsource-variable/inter/wght.css';
 import './app/styles/index.css';
 
 // Arranque de la aplicacion, equivalente al `main.ts` de los servicios: aqui se construyen

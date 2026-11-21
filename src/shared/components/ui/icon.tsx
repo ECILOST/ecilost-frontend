@@ -37,7 +37,10 @@ export type IconName =
   | 'users'
   | 'sparkle'
   | 'flame'
-  | 'medal';
+  | 'medal'
+  | 'menu'
+  | 'logout'
+  | 'wifiOff';
 
 /**
  * Un glifo por nombre, todos dibujados sobre la misma reticula de 24 y con el mismo grosor
@@ -90,6 +93,10 @@ export const ICON_PATHS: Record<IconName, string> = {
     'M12 20.5c3.6 0 6-2.5 6-5.8 0-4.2-3.8-6-4.4-10.2-2.4 1.6-4.4 4.4-4.4 7.2-.9-.7-1.5-1.6-1.7-2.9C6.2 10.4 6 12.4 6 14.7c0 3.3 2.4 5.8 6 5.8z',
   medal:
     'M8.5 3.5h7l-2 5.5h-3zM12 9.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11zM12 12.5l.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  wifiOff:
+    'M3.5 3.5l17 17M8.5 16a5 5 0 0 1 7 0M5 12.5a10 10 0 0 1 4.2-2.4M19 12.5a10 10 0 0 0-3.4-2.1M2 9a14.5 14.5 0 0 1 4.6-3M22 9a14.5 14.5 0 0 0-10-4M12 19.5v.1',
+  logout: 'M14 4.5h4.5v15H14M10 8l-4 4 4 4M6 12h9',
 };
 
 /**

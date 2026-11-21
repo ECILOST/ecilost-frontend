@@ -13,6 +13,8 @@ import { ItemArt } from '@/shared/components/ui/item-art';
 import { Pill } from '@/shared/components/ui/pill';
 import { ScreenHeader } from '@/shared/components/ui/screen-header';
 import { Toggle } from '@/shared/components/ui/toggle';
+import { Notice } from '@/shared/components/ui/notice';
+import { useOnline } from '@/shared/hooks/use-online';
 import { AutoBidPanel } from '../../components/auto-bid-panel';
 import {
   ConfirmBidDialog,
@@ -93,6 +95,17 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
   const dutchClaim = useDutchClaim(roomId);
   const sealBid = useSealBid(roomId);
   const { data: wallet } = useWallet();
+  /*
+   * Sin conexion no se puede pujar: la puja no llegaria y la persona creeria que va ganando.
+   * Se avisa, se deshabilitan las acciones y, al volver la red, se pide el estado de la sala
+   * de nuevo (el canal en vivo se reconecta solo, pero lo que paso mientras tanto no llega).
+   */
+  const online = useOnline();
+  const offline = !online;
+
+  useEffect(() => {
+    if (online) void refetch();
+  }, [online, refetch]);
 
   const [intent, setIntent] = useState<BidIntent | null>(null);
   const [insufficient, setInsufficient] = useState<BidIntent | null>(null);
@@ -115,6 +128,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
   const available = wallet ? Number(wallet.availableBalance) : null;
 
   function start(kind: BidIntent['kind'], amount: number) {
+    if (offline) return;
     setOutcome(null);
     // Mejorar la propia puja solo reserva la diferencia: compararla entera con el saldo
     // bloqueaba mejoras que si alcanzaban.
@@ -125,7 +139,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
   }
 
   function confirm() {
-    if (!intent) return;
+    if (!intent || offline) return;
     const done = (state: LiveRoom) => {
       setIntent(null);
       if (intent.kind === 'bid' && state.round)
@@ -189,7 +203,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
       <>
         {header}
         <div className={styles.page}>
-          {isPending ? <Loading label="Entrando a la sala..." /> : null}
+          {isPending ? <Loading label="Entrando a la sala..." skeleton="detail" /> : null}
           {isError ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : null}
@@ -219,6 +233,12 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
     <>
       {header}
       <div className={styles.page}>
+        {offline ? (
+          <Notice tone="offline" live="alert" title="Perdiste la conexión con la sala">
+            Las pujas quedan en pausa hasta que vuelva el internet. Cuando vuelva, te
+            mostramos el precio y el reloj actualizados; no hace falta recargar.
+          </Notice>
+        ) : null}
         {mutationError ? <ErrorState error={mutationError} /> : null}
 
         <div className={styles.grid}>
@@ -296,7 +316,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                   <DutchPanel
                     round={round}
                     available={available}
-                    pending={dutchClaim.isPending}
+                    pending={dutchClaim.isPending || offline}
                     watchers={live.participants}
                     onClaim={() => {
                       setOutcome(null);
@@ -310,7 +330,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                   <SealedPanel
                     round={round}
                     available={available}
-                    pending={sealBid.isPending}
+                    pending={sealBid.isPending || offline}
                     participants={live.participants}
                     onSeal={(amount) => sealBid.mutate({ roundId: round.id, amount })}
                   />
@@ -322,6 +342,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                       <Button
                         variant="bid"
                         size="block"
+                        disabled={offline}
                         onClick={() => start('bid', nextBid)}
                         icon={<Icon name="bolt" size={20} />}
                       >
@@ -332,6 +353,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                         <Button
                           variant="secondary"
                           size="block"
+                          disabled={offline}
                           onClick={() => start('buy', round.buyNowPrice ?? 0)}
                           icon={<Icon name="cart" size={18} />}
                         >
@@ -343,7 +365,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                     <div className={styles.customBid}>
                       <CustomBidForm
                         minimum={nextBid}
-                        disabled={placeBid.isPending}
+                        disabled={placeBid.isPending || offline}
                         onBid={(amount) => start('bid', amount)}
                       />
                     </div>
@@ -368,7 +390,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
                 autoBid={live.autoBid}
                 round={round}
                 nextBid={nextBid}
-                pending={autoBid.isPending}
+                pending={autoBid.isPending || offline}
                 onChange={(config) =>
                   autoBid.mutate({ roundId: round.id, config })
                 }
@@ -390,7 +412,7 @@ export function LiveRoomView({ roomId }: { roomId: string }) {
             intent={intent}
             onClose={() => setIntent(null)}
             onConfirm={confirm}
-            pending={placeBid.isPending || buyNow.isPending}
+            pending={placeBid.isPending || buyNow.isPending || offline}
             itemId={round.itemId}
             itemName={round.itemName}
             imageUrl={round.imageUrl}

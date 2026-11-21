@@ -28,7 +28,7 @@ export function RoomPage() {
           back={{ to: routes.home, label: 'Volver al inicio' }}
         />
         <div className={styles.page}>
-          {isPending ? <Loading label="Cargando la sala..." /> : null}
+          {isPending ? <Loading label="Cargando la sala..." skeleton="detail" /> : null}
           {isError ? (
             <ErrorState error={error} onRetry={() => void refetch()} />
           ) : null}
