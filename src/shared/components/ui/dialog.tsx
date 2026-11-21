@@ -50,7 +50,13 @@ export function Dialog({
   if (!open) return null;
 
   return createPortal(
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay}>
+      <button
+        type="button"
+        className={styles.backdrop}
+        aria-label="Cerrar diálogo"
+        onClick={onClose}
+      />
       <div
         ref={panel}
         className={[styles.panel, styles[tone], styles[size]].join(' ')}
@@ -58,7 +64,6 @@ export function Dialog({
         aria-modal="true"
         aria-labelledby={titleId}
         tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
       >
         <span id={titleId} className="u-sr-only">
           {title}
