@@ -36,8 +36,10 @@ export function AuctionMeta({ item }: { item: AuctionItem }) {
 }
 
 /**
- * Tarjeta del catalogo y de la portada: el objeto sobre su collage, la capsula "En vivo"
- * encima, y debajo nombre, precio y estado. Toda la tarjeta es un enlace a la ficha.
+ * Tarjeta del catalogo y de la portada, con el tratamiento de los ejemplos de la portada
+ * publica: manchas planas de color y el objeto (foto, dibujo o inicial) en un plato blanco.
+ * Debajo, nombre, precio y estado. En el movil pasa a fila (arte a la izquierda) para que
+ * dos tarjetas no queden apretadas una al lado de la otra. Toda la tarjeta es un enlace.
  */
 export function AuctionCard({
   item,
@@ -78,7 +80,10 @@ export function AuctionCard({
       <ItemArt
         seed={item.id}
         label={item.name}
+        hint={item.category}
         src={item.imageUrl}
+        variant="object"
+        dimmed={closed}
         className={styles.art}
       >
         {live ? (

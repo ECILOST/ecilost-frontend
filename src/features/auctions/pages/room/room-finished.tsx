@@ -3,7 +3,7 @@ import { routes } from '@/app/routes';
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
 import { buttonClass } from '@/shared/components/ui/button';
-import { CoinAmount } from '@/shared/components/ui/coin';
+import { Coin, CoinAmount } from '@/shared/components/ui/coin';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import { Pill } from '@/shared/components/ui/pill';
 import { APP_TIME_ZONE } from '@/shared/format/date';
@@ -86,7 +86,7 @@ export function PublicRoomSummary({ summary }: { summary: RoomSummary }) {
         ))}
         <li className={`${styles.resumeRow} ${styles.total}`}>
           <span className={styles.totalBadge} aria-hidden="true">
-            EC
+            <Coin size={40} />
           </span>
           <div className={styles.resumeText}>
             <span className={styles.resumeName}>Total recaudado</span>
@@ -202,7 +202,7 @@ export function RoomFinishedView({ room }: { room: Room }) {
         })}
         <li className={`${styles.resumeRow} ${styles.total}`}>
           <span className={styles.totalBadge} aria-hidden="true">
-            EC
+            <Coin size={40} />
           </span>
           <div className={styles.resumeText}>
             <span className={styles.resumeName}>Total gastado en la sala</span>

@@ -52,6 +52,7 @@ function Featured({ item }: { item: AuctionItem }) {
       <ItemArt
         seed={item.id}
         label={item.name}
+        hint={item.category}
         src={item.imageUrl}
         className={styles.featuredArt}
       />
@@ -110,7 +111,6 @@ export function HomePage() {
         <div className={styles.heroGrid}>
           <div>
             <span className={styles.kicker}>
-              <span className={styles.kickerDot} aria-hidden="true" />
               Subastas en vivo · Campus ECI
             </span>
             <h1 className={styles.title}>

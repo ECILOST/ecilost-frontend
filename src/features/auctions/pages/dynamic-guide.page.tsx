@@ -55,7 +55,7 @@ export function DynamicGuidePage() {
       <h2 className={styles.sectionTitle}>Las modalidades</h2>
       <div className={styles.modes}>
         <ModeCard
-          color="var(--eci-cyan)"
+          color="var(--deco-teal)"
           icon="arrow-up"
           label="Clásica"
           kind="Ascendente"

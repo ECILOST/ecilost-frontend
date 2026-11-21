@@ -110,3 +110,31 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
+
+/*
+ * Movil: fila con el escenario a la izquierda. En dos columnas de 160 px el dibujo, el
+ * nombre y el lugar quedaban amontonados.
+ */
+@media (width < 560px) {
+  .card {
+    grid-template-columns: clamp(104px, 34vw, 136px) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: var(--s-3);
+    row-gap: var(--s-1);
+    padding: var(--s-2);
+  }
+
+  .stage {
+    grid-row: 1 / span 2;
+  }
+
+  .name {
+    align-self: end;
+    margin-top: 0;
+  }
+
+  .meta {
+    align-self: start;
+  }
+}
