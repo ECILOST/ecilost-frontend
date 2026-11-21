@@ -1,5 +1,6 @@
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
   width: 100%;
   max-width: var(--page-max);
@@ -17,10 +18,7 @@
   padding: 26px 28px;
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-xl);
-  background:
-    radial-gradient(60% 140% at 0% 0%, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 70%),
-    radial-gradient(50% 140% at 100% 100%, color-mix(in srgb, var(--eci-purple) 12%, transparent), transparent 70%),
-    var(--glass);
+  background: var(--glass);
   box-shadow: var(--glass-shine), var(--shadow-card);
 }
 
@@ -124,9 +122,7 @@
   padding: 16px 18px;
   border: 1px solid color-mix(in srgb, var(--tone) 28%, transparent);
   border-radius: 22px;
-  background:
-    radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, var(--tone) 12%, transparent), transparent 70%),
-    var(--glass);
+  background: var(--glass);
   box-shadow: var(--glass-shine);
 }
 
@@ -280,9 +276,7 @@
   padding: 18px 20px;
   border: 1px solid color-mix(in srgb, var(--medal) 40%, transparent);
   border-radius: var(--r-lg);
-  background:
-    radial-gradient(90% 120% at 0% 0%, color-mix(in srgb, var(--medal) 14%, transparent), transparent 70%),
-    var(--glass);
+  background: var(--glass);
   box-shadow: var(--glass-shine);
 }
 
@@ -372,7 +366,7 @@
   }
 
   .columns {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .side {
@@ -386,7 +380,7 @@
   }
 
   .hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     padding: 22px 18px;
     text-align: center;

@@ -40,18 +40,18 @@ describe('Portada', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('si el correo no es institucional, sugiere la cuenta de la Escuela y ofrece reintentar', async () => {
+  it('si Google rechaza la cuenta, sugiere otra cuenta de Google y ofrece reintentar', async () => {
     renderApp({
       route: '/login?error=domain_not_allowed',
       container: anonymous(),
     });
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toHaveTextContent(/esa cuenta no es de la escuela/i);
-    expect(alert).toHaveTextContent('@escuelaing.edu.co');
+    expect(alert).toHaveTextContent(/no pudimos usar esa cuenta de google/i);
+    expect(alert).not.toHaveTextContent('@escuelaing.edu.co');
     expect(alert).not.toHaveTextContent('domain_not_allowed');
     expect(
-      screen.getByRole('button', { name: /usar mi cuenta institucional/i }),
+      screen.getByRole('button', { name: /probar con otra cuenta/i }),
     ).toBeInTheDocument();
   });
 

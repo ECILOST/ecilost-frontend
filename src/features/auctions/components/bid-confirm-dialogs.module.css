@@ -29,7 +29,7 @@
 
 .body {
   display: grid;
-  grid-template-columns: 1fr 1.05fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 22px;
   padding: 22px;
 }
@@ -44,6 +44,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
 }
 
 .box {
@@ -75,6 +76,10 @@
   gap: 12px;
   font-size: var(--text-xs);
   color: var(--eci-text-soft);
+}
+
+.line span {
+  min-width: 0;
 }
 
 .line strong {
@@ -124,16 +129,24 @@
   text-align: center;
 }
 
+/* Lado a lado cuando caben; en 320 px uno sobre otro, con el primario abajo y a mano. */
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(9.5rem, 100%), 1fr));
   gap: 12px;
   margin-top: 6px;
 }
 
 @media (width < 640px) {
   .body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .art {
+    height: auto;
+    aspect-ratio: 16 / 7;
   }
 }
 

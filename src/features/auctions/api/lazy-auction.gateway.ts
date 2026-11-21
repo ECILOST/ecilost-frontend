@@ -59,8 +59,5 @@ export function createLazyAuctionGateway(
       gateway().then((g) => g.sendChatMessage(roomId, text)),
     roomSummary: (id) => gateway().then((g) => g.roomSummary(id)),
     myBids: () => gateway().then((g) => g.myBids()),
-    notifications: () => gateway().then((g) => g.notifications()),
-    markNotificationsRead: () =>
-      gateway().then((g) => g.markNotificationsRead()),
   };
 }

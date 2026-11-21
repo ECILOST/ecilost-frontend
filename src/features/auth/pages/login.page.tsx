@@ -8,7 +8,7 @@ import { Icon } from '@/shared/components/ui/icon';
 import { Notice } from '@/shared/components/ui/notice';
 import { useOnline } from '@/shared/hooks/use-online';
 import { GoogleSignInButton } from '../components/google-sign-in-button';
-import { INSTITUTIONAL_DOMAINS, resolveLoginError } from '../domain/auth-error';
+import { resolveLoginError } from '../domain/auth-error';
 import { useSession } from '../hooks/use-session';
 import styles from './login.page.module.css';
 
@@ -86,13 +86,11 @@ export function LoginPage() {
             <>
               <div className={styles.heading}>
                 <h1 id="login-title" className={styles.title}>
-                  Ingresa con tu cuenta de la Escuela
+                  Ingresa con tu cuenta de Google
                 </h1>
                 <p className={styles.hint}>
-                  Usa tu correo institucional{' '}
-                  <span className={styles.domain}>@{INSTITUTIONAL_DOMAINS[0]}</span> o{' '}
-                  <span className={styles.domain}>@{INSTITUTIONAL_DOMAINS[1]}</span>.
-                  La contraseña la pide Google: ECI Lost nunca la ve.
+                  Sirve tu Gmail personal o la cuenta de la Escuela. La contraseña la
+                  pide Google: ECI Lost nunca la ve.
                 </p>
               </div>
 

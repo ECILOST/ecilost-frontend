@@ -5,7 +5,7 @@
   border: 1px solid var(--eci-cyan-line);
   border-radius: var(--r-lg);
   background: var(--eci-surface);
-  box-shadow: 0 0 26px color-mix(in srgb, var(--color-primary) 7%, transparent);
+  box-shadow: none;
 }
 
 .head {

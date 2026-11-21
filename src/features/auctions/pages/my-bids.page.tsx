@@ -96,9 +96,9 @@ export function MyBidsPage() {
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Mis pujas</h1>
-          <Link className={buttonClass('secondary')} to={routes.pickups}>Mis recogidas</Link>
           <p className={styles.subtitle}>
-            Lo que estás pujando ahora y cómo terminaron tus subastas.
+            Lo que estás pujando ahora y cómo terminaron tus subastas.{' '}
+            <Link to={routes.pickups}>Ver mis recogidas</Link>
           </p>
         </div>
         <div className={styles.tabs} role="tablist" aria-label="Mis pujas">
@@ -154,7 +154,7 @@ export function MyBidsPage() {
         </div>
       ) : null}
 
-      {isPending ? <Loading label="Cargando tus pujas..." /> : null}
+      {isPending ? <Loading label="Cargando tus pujas..." skeleton="list" /> : null}
       {isError ? (
         <ErrorState error={error} onRetry={() => void refetch()} />
       ) : null}

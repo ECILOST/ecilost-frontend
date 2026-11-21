@@ -1,5 +1,6 @@
 .picker {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-3);
   justify-items: start;
   margin: 0;
@@ -36,6 +37,7 @@
 
 .list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-2);
   width: 100%;
 }

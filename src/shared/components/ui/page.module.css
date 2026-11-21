@@ -4,6 +4,7 @@
  */
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   gap: var(--page-gap);
   width: 100%;

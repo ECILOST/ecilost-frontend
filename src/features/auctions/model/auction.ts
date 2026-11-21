@@ -233,8 +233,8 @@ export interface MyBid {
   autoBidLimit: number | null;
 }
 
-export type NotificationKind =
-  'OUTBID' | 'ROOM_SOON' | 'FOLLOW_ONLY' | 'WON' | 'LIMIT' | 'ROOM_CLOSED' | 'PICKUP_READY';
+/** Solo los avisos que engagement emite de verdad. */
+export type NotificationKind = 'OUTBID' | 'WON' | 'ROOM_CLOSED' | 'PICKUP_READY';
 
 export interface AppNotification {
   id: string;

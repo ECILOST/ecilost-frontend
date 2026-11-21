@@ -110,7 +110,7 @@ export function AuctionsPage() {
         ))}
       </div>
 
-      {isPending ? <Loading label="Cargando el catálogo..." /> : null}
+      {isPending ? <Loading label="Cargando el catálogo..." skeleton="cards" /> : null}
       {isError ? (
         <ErrorState error={error} onRetry={() => void refetch()} />
       ) : null}

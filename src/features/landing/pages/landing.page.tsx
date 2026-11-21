@@ -25,7 +25,7 @@ const STEPS: Array<{ title: string; body: string }> = [
   },
   {
     title: 'Pujas con ECICoin y lo recoges',
-    body: 'Entras con tu correo institucional, pujas con ECICoin y, si ganas, lo recoges en el punto de entrega.',
+    body: 'Entras con tu cuenta de Google, pujas con ECICoin y, si ganas, lo recoges en el punto de entrega.',
   },
 ];
 
@@ -147,8 +147,8 @@ export function LandingPage() {
             ¿Listo para tu primera puja?
           </h2>
           <p className={styles.closingBody}>
-            Ingresa con tu correo institucional de Google. La contraseña la pide
-            Google: ECI Lost nunca la ve.
+            Ingresa con tu cuenta de Google, la personal o la de la Escuela. La
+            contraseña la pide Google: ECI Lost nunca la ve.
           </p>
           <Link className={buttonClass('primary', 'lg')} to={routes.login}>
             Ingresar

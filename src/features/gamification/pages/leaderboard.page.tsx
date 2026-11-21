@@ -143,7 +143,6 @@ export function LeaderboardPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.glow} aria-hidden="true" />
       <header className={styles.header}>
         <div>
           <span className={styles.eyebrow}>Ranking</span>
@@ -176,7 +175,7 @@ export function LeaderboardPage() {
         </div>
       </header>
 
-      {isPending ? <Loading label="Cargando el ranking..." /> : null}
+      {isPending ? <Loading label="Cargando el ranking..." skeleton="list" /> : null}
       {isError ? (
         <ErrorState error={error} onRetry={() => void refetch()} />
       ) : null}

@@ -1,52 +1,52 @@
 /*
- * El color ya no son manchas planas recortadas: son luces difuminadas detras de una reticula
- * muy tenue, como un escenario. Las manchas solidas se leian como formas sueltas que
- * competian con el objeto; la luz lo enmarca sin dibujar nada.
+ * El objeto sobre manchas planas de color, como en la referencia del catalogo "ECI LOST":
+ * formas organicas saturadas que asoman por las esquinas, sobre la superficie crema. Son
+ * solo decoracion: nunca llevan texto encima y el objeto va siempre en su plato blanco.
+ *
+ * Las alturas son proporciones (`aspect-ratio`) y no pixeles: asi el arte escala con su
+ * columna de 320 a 1920 px sin recortar el objeto ni dejar huecos.
  */
 .art {
   position: relative;
   overflow: hidden;
-  background:
-    linear-gradient(color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 1px, transparent 1px) 0 0 / 28px 28px,
-    linear-gradient(90deg, color-mix(in srgb, var(--color-highlight) 3.5%, transparent) 1px, transparent 1px) 0 0 / 28px 28px,
-    radial-gradient(120% 90% at 50% 110%, color-mix(in srgb, var(--color-shade) 33%, transparent), transparent 60%),
-    var(--eci-night);
+  background: var(--color-surface);
   isolation: isolate;
 }
 
 .blob {
   position: absolute;
   z-index: -1;
-  filter: blur(38px);
-  opacity: 0.62;
+  opacity: 0.9;
 }
 
 /* --- Tarjeta: dos manchas que desbordan por esquinas opuestas --------------- */
 .card {
-  height: 170px;
+  aspect-ratio: 16 / 10;
 }
 
 .card .b1 {
-  left: -40px;
-  top: -30px;
-  width: 210px;
-  height: 190px;
+  left: -14%;
+  top: -18%;
+  width: 62%;
+  height: 78%;
   background: var(--c1);
   border-radius: 58% 42% 45% 55% / 48% 52% 48% 52%;
 }
 
 .card .b2 {
-  right: -40px;
-  bottom: -34px;
-  width: 200px;
-  height: 180px;
+  right: -12%;
+  bottom: -20%;
+  width: 56%;
+  height: 72%;
   background: var(--c2);
   border-radius: 52% 48% 60% 40% / 50% 46% 54% 50%;
 }
 
 /* --- Protagonista: cuatro manchas y borde azul con halo --------------------- */
 .hero {
-  height: 430px;
+  aspect-ratio: 4 / 3;
+  max-height: 460px;
+  width: 100%;
   border: 1px solid var(--glass-edge-strong);
   border-radius: var(--r-xl);
   box-shadow:
@@ -55,49 +55,38 @@
     0 0 60px -10px color-mix(in srgb, var(--c1) 30%, transparent);
 }
 
-.hero .blob {
-  filter: blur(60px);
-  opacity: 0.55;
-}
-
-@media (width < 720px) {
-  .hero {
-    height: 300px;
-  }
-}
-
 .hero .b1 {
-  left: -70px;
-  top: -50px;
-  width: 400px;
-  height: 360px;
+  left: -12%;
+  top: -12%;
+  width: 62%;
+  height: 72%;
   background: var(--c1);
   border-radius: var(--blob-a);
 }
 
 .hero .b2 {
-  right: -80px;
-  bottom: -90px;
-  width: 380px;
-  height: 330px;
+  right: -12%;
+  bottom: -18%;
+  width: 58%;
+  height: 68%;
   background: var(--c2);
   border-radius: var(--blob-b);
 }
 
 .hero .b3 {
-  left: 40%;
-  top: -40px;
-  width: 200px;
-  height: 180px;
+  left: 58%;
+  top: 6%;
+  width: 14%;
+  height: 18%;
   background: var(--c3);
   border-radius: var(--blob-c);
 }
 
 .hero .b4 {
-  right: 22%;
-  bottom: 40px;
-  width: 120px;
-  height: 110px;
+  left: 8%;
+  bottom: 10%;
+  width: 9%;
+  height: 12%;
   background: var(--c4);
   border-radius: var(--blob-d);
 }
@@ -127,20 +116,21 @@
   pointer-events: none;
 }
 
-/* --- Miniatura: dos degradados radiales ------------------------------------- */
+/* --- Miniatura: dos manchas planas ----------------------------------------- */
 .thumb {
   flex: none;
   width: 52px;
   height: 52px;
   border-radius: var(--r-sm);
+  /* Dos manchas de borde definido, igual que en el arte grande pero a 52 px. */
   background:
-    radial-gradient(75% 75% at 28% 26%, var(--c1) 0, transparent 68%),
-    radial-gradient(75% 75% at 76% 78%, var(--c2) 0, transparent 68%),
-    var(--eci-surface-high);
+    radial-gradient(circle at 30% 30%, var(--c1) 0 38%, transparent 39%),
+    radial-gradient(circle at 74% 74%, var(--c2) 0 40%, transparent 41%),
+    var(--color-surface-raised);
 }
 
 .plain {
-  height: 250px;
+  aspect-ratio: 16 / 9;
   border-radius: var(--r-xl);
   background: var(--eci-surface-high);
 }
@@ -175,23 +165,23 @@
   place-items: center;
   width: 84px;
   aspect-ratio: 1;
-  border: 1px solid color-mix(in srgb, var(--color-highlight) 22%, transparent);
+  /* Plato blanco: el mismo gesto que las fichas de la portada. */
+  border: 3px solid var(--color-highlight);
   border-radius: 26px;
-  background: linear-gradient(150deg, color-mix(in srgb, var(--color-highlight) 18%, transparent), color-mix(in srgb, var(--color-highlight) 4%, transparent));
+  background: var(--eci-photo-plate);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 25%, transparent),
-    0 18px 40px -12px color-mix(in srgb, var(--color-shade) 42%, transparent);
-  backdrop-filter: blur(10px);
+    0 0 0 1px var(--color-border),
+    0 18px 32px -14px color-mix(in srgb, var(--color-shade) 45%, transparent);
   font-family: var(--font-display);
   font-size: 2.25rem;
   font-weight: 700;
-  text-shadow: 0 4px 18px color-mix(in srgb, var(--color-shade) 24%, transparent);
+  color: var(--color-text);
   transform: rotate(-4deg);
   transition: transform var(--t-med) var(--ease-spring);
 }
 
 .hero .token {
-  width: 132px;
+  width: clamp(88px, 24%, 132px);
   border-radius: 38px;
   font-size: 3.5rem;
 }

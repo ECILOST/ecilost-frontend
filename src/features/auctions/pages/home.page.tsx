@@ -101,22 +101,6 @@ export function HomePage() {
   return (
     <div className={styles.page}>
       <section className={styles.hero}>
-        <span
-          className={`${styles.blob} ${styles.blobBlue}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.blob} ${styles.blobCyan}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.blob} ${styles.blobYellow}`}
-          aria-hidden="true"
-        />
-        <span
-          className={`${styles.blob} ${styles.blobPink}`}
-          aria-hidden="true"
-        />
         <span className={styles.sticker} aria-hidden="true">
           ¡Puede ser
           <br />
@@ -199,7 +183,7 @@ export function HomePage() {
           </Link>
         </div>
 
-        {isPending ? <Loading label="Cargando subastas..." /> : null}
+        {isPending ? <Loading label="Cargando subastas..." skeleton="cards" /> : null}
         {isError ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : null}

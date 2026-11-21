@@ -32,7 +32,7 @@ export function ManagedRoomDetailPage() {
   if (isPending) {
     return (
       <Page>
-        <Loading label="Cargando la sala..." />
+        <Loading label="Cargando la sala..." skeleton="detail" />
       </Page>
     );
   }

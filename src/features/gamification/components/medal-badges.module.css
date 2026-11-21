@@ -65,9 +65,7 @@
 
 .unlocked {
   border-color: color-mix(in srgb, var(--medal) 40%, transparent);
-  background:
-    radial-gradient(90% 70% at 50% 0%, color-mix(in srgb, var(--medal) 16%, transparent), transparent 75%),
-    var(--eci-neutral-soft);
+  background: var(--eci-neutral-soft);
 }
 
 .medallion {
@@ -82,7 +80,7 @@
 }
 
 .unlocked .medallion {
-  box-shadow: 0 0 26px color-mix(in srgb, var(--medal) 45%, transparent);
+  box-shadow: none;
 }
 
 .locked .medallion {

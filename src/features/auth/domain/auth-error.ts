@@ -14,16 +14,10 @@
  * sin tildes y en jerga. El codigo tecnico va a la consola, no a la pantalla.
  */
 
-/** Dominios de las cuentas institucionales de la Escuela. */
-export const INSTITUTIONAL_DOMAINS = [
-  'escuelaing.edu.co',
-  'mail.escuelaing.edu.co',
-] as const;
-
 export type LoginErrorKind =
   | 'cancelled'
   | 'offline'
-  | 'not_institutional'
+  | 'account_not_allowed'
   | 'forbidden'
   | 'suspended'
   | 'email_not_verified'
@@ -42,8 +36,6 @@ export interface LoginError {
   hint?: string;
 }
 
-const INSTITUTIONAL_HINT = `Usa tu correo que termina en @${INSTITUTIONAL_DOMAINS[0]} o @${INSTITUTIONAL_DOMAINS[1]}.`;
-
 export const LOGIN_ERRORS: Record<LoginErrorKind, LoginError> = {
   cancelled: {
     kind: 'cancelled',
@@ -59,13 +51,13 @@ export const LOGIN_ERRORS: Record<LoginErrorKind, LoginError> = {
       'Revisa tu wifi o tus datos móviles. Cuando vuelvas a tener internet, intenta de nuevo.',
     retryLabel: 'Reintentar',
   },
-  not_institutional: {
-    kind: 'not_institutional',
-    title: 'Esa cuenta no es de la Escuela',
+  account_not_allowed: {
+    kind: 'account_not_allowed',
+    title: 'No pudimos usar esa cuenta de Google',
     message:
-      'ECI Lost solo admite cuentas institucionales. Vuelve a intentarlo y elige tu cuenta de la Escuela en Google.',
-    hint: INSTITUTIONAL_HINT,
-    retryLabel: 'Usar mi cuenta institucional',
+      'Google no nos dejó entrar con la cuenta que elegiste. Vuelve a intentarlo y elige otra de tus cuentas de Google.',
+    hint: 'Sirve cualquier cuenta de Google: tu Gmail personal o la de la Escuela.',
+    retryLabel: 'Probar con otra cuenta',
   },
   forbidden: {
     kind: 'forbidden',
@@ -106,19 +98,20 @@ export const LOGIN_ERRORS: Record<LoginErrorKind, LoginError> = {
 
 /**
  * Codigos que puede mandar ecilost-auth-service en `?error=`, mas los de OAuth 2.0 (RFC 6749
- * 4.1.2.1) que Google reenvia. Los de dominio cubren los nombres razonables que puede usar
- * el servicio para "correo fuera del dominio permitido"; cualquier otro cae en `server`.
+ * 4.1.2.1) que Google reenvia. Se admite cualquier cuenta de Google; los codigos de dominio
+ * quedan por si el servicio llega a rechazar alguna cuenta y se explican sin pedir un dominio
+ * concreto. Cualquier otro cae en `server`.
  */
 const CODE_TO_KIND: Record<string, LoginErrorKind> = {
   access_denied: 'cancelled',
   user_cancelled: 'cancelled',
   consent_required: 'cancelled',
 
-  domain_not_allowed: 'not_institutional',
-  email_domain_not_allowed: 'not_institutional',
-  invalid_domain: 'not_institutional',
-  unauthorized_domain: 'not_institutional',
-  hd_mismatch: 'not_institutional',
+  domain_not_allowed: 'account_not_allowed',
+  email_domain_not_allowed: 'account_not_allowed',
+  invalid_domain: 'account_not_allowed',
+  unauthorized_domain: 'account_not_allowed',
+  hd_mismatch: 'account_not_allowed',
 
   forbidden: 'forbidden',
   insufficient_permissions: 'forbidden',

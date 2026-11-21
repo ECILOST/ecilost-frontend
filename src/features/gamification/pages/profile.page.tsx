@@ -138,7 +138,7 @@ export function ProfilePage() {
   const { data: profile, isPending, isError, error, refetch } = useMyProfile();
   const { data: account } = useProfile();
 
-  if (isPending) return <Loading label="Cargando tu perfil..." />;
+  if (isPending) return <Loading label="Cargando tu perfil..." skeleton="detail" />;
   if (isError)
     return (
       <div className={styles.page}>

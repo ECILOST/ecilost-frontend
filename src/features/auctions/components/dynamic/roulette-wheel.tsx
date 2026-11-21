@@ -122,7 +122,8 @@ export function RouletteWheel({
             const b = point(end);
             const label = point(index * SEGMENT_ANGLE, 70);
             const dimmed = highlight !== null && highlight !== segment;
-            const ink = segment === 'WILDCARD' ? 'var(--eci-on-accent)' : 'var(--color-on-strong)';
+            // Tinta en todos los gajos: el blanco sobre coral, azul o violeta claros no se leia.
+            const ink = 'var(--color-text)';
             return (
               <g key={segment} className={dimmed ? styles.segmentDim : styles.segment}>
                 <path

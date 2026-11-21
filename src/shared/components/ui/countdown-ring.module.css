@@ -7,7 +7,7 @@
   height: var(--size);
   border-radius: 50%;
   background: conic-gradient(var(--eci-pink) 0 var(--progress), color-mix(in srgb, var(--color-highlight) 20%, transparent) 0);
-  box-shadow: 0 10px 32px color-mix(in srgb, var(--eci-pink) 35%, transparent);
+  box-shadow: var(--shadow-card);
 }
 
 .face {

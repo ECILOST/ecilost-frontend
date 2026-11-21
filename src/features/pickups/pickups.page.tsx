@@ -63,7 +63,7 @@ function PickupList({ staff }: { staff: boolean }) {
     refetchInterval: 15_000,
   });
 
-  if (list.isPending) return <Loading label="Cargando recogidas…" />;
+  if (list.isPending) return <Loading label="Cargando recogidas…" skeleton="list" />;
   if (list.isError)
     return (
       <ErrorState error={list.error} onRetry={() => void list.refetch()} />

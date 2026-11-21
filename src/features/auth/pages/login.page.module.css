@@ -132,23 +132,8 @@
   line-height: 1.6;
 }
 
-/* El dominio se lee de un vistazo y nunca se parte por la mitad. */
-.domain {
-  font-weight: 600;
-  color: var(--color-text);
-  white-space: nowrap;
-}
-
 .errorHint {
   margin-top: var(--s-2);
   font-weight: 600;
   color: var(--color-text);
-}
-
-/* En 320 px el dominio largo no cabe en una linea: ahi si se permite partirlo. */
-@media (width < 360px) {
-  .domain {
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
 }

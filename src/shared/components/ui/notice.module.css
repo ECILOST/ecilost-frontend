@@ -8,7 +8,9 @@
   display: grid;
   gap: var(--s-3);
   justify-items: start;
-  max-width: 560px;
+  max-width: min(560px, 100%);
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: var(--s-5);
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-lg);
@@ -57,7 +59,7 @@
 }
 
 .alert {
-  border-color: color-mix(in srgb, var(--eci-pink) 35%, transparent);
+  border-color: var(--eci-pink-line);
   background: linear-gradient(180deg, var(--color-error-bg), var(--color-surface-raised) 70%);
 }
 
@@ -70,11 +72,22 @@
   margin-top: 0.1em;
 }
 
+/* Exito en verde (antes usaba el "cian", que en el tema claro es el ambar de los botones). */
 .success {
-  border-color: color-mix(in srgb, var(--eci-green) 30%, transparent);
-  background: linear-gradient(180deg, var(--eci-cyan-soft), var(--eci-surface) 60%);
+  border-color: var(--eci-green-line);
+  background: linear-gradient(180deg, var(--color-success-bg), var(--color-surface-raised) 70%);
 }
 
 .success .title {
-  color: var(--eci-cyan-text);
+  color: var(--color-success);
+}
+
+/* Sin conexion: no es culpa de nadie ni algo roto, asi que va en advertencia y no en error. */
+.offline {
+  border-color: var(--eci-yellow-line);
+  background: linear-gradient(180deg, var(--color-warning-bg), var(--color-surface-raised) 70%);
+}
+
+.offline .title {
+  color: var(--color-warning);
 }

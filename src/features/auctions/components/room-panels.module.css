@@ -200,11 +200,19 @@
 .stripLive {
   border-color: color-mix(in srgb, var(--eci-pink) 55%, transparent);
   background: var(--eci-surface-high);
-  box-shadow: 0 0 26px color-mix(in srgb, var(--eci-pink) 16%, transparent);
+  box-shadow: none;
 }
 
-.stripClosed {
-  opacity: 0.6;
+/*
+ * Lo ya subastado se atenua en la imagen y no en el texto: con `opacity` en toda la pieza
+ * el nombre y el estado bajaban de 4.5:1.
+ */
+.stripClosed > :not(.stripName, .stripState) {
+  opacity: 0.55;
+}
+
+.stripClosed .stripName {
+  color: var(--color-text-muted);
 }
 
 .stripName {
@@ -217,7 +225,7 @@
 }
 
 .stripState {
-  font-size: 0.5625rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   color: var(--eci-text-dim);
 }

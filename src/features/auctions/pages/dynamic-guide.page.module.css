@@ -1,6 +1,7 @@
 /* Guia de subastas dinamicas: una pagina para leer con calma, con ritmo y poco texto seguido. */
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--s-6);
   width: min(100%, var(--page-max));
   margin: 0 auto;
@@ -17,10 +18,7 @@
   overflow: hidden;
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-xl);
-  background:
-    radial-gradient(60% 80% at 85% 40%, color-mix(in srgb, var(--eci-blue) 28%, transparent), transparent 70%),
-    radial-gradient(50% 70% at 10% 0%, color-mix(in srgb, var(--eci-purple) 22%, transparent), transparent 70%),
-    var(--glass);
+  background: var(--glass);
   box-shadow: var(--glass-shine);
 }
 
@@ -50,10 +48,13 @@
   letter-spacing: -0.03em;
 }
 
+/* Resaltador en vez de texto con degradado: el rosa y el violeta claros no llegaban a AA. */
 .title span {
-  background: linear-gradient(90deg, var(--eci-pink), var(--eci-purple) 50%, var(--eci-blue-text));
-  background-clip: text;
-  color: transparent;
+  padding: 0 0.08em;
+  background: linear-gradient(transparent 58%, var(--color-primary) 58%, var(--color-primary) 92%, transparent 92%);
+  color: var(--color-text);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .lead {
@@ -114,12 +115,8 @@
   padding: var(--s-5);
   border: 1px solid color-mix(in srgb, var(--mode) 35%, transparent);
   border-radius: var(--r-xl);
-  background:
-    radial-gradient(80% 50% at 0% 0%, color-mix(in srgb, var(--mode) 20%, transparent), transparent 70%),
-    var(--glass);
-  box-shadow:
-    var(--glass-shine),
-    0 0 50px -30px var(--mode);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
   transition:
     transform var(--t-med) var(--ease-out),
     box-shadow var(--t-med) linear;
@@ -127,13 +124,12 @@
 
 .mode:hover {
   transform: translateY(-3px);
-  box-shadow:
-    var(--glass-shine),
-    0 0 60px -20px var(--mode);
+  box-shadow: var(--glass-shine);
 }
 
 .modeHead {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--s-3);
 }
@@ -152,10 +148,9 @@
   height: 44px;
   border-radius: 14px;
   background: var(--mode);
-  box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 30%, transparent),
-    0 0 24px -6px var(--mode);
-  color: var(--color-on-strong);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 30%, transparent);
+  /* Tinta y no blanco: los rellenos de modalidad son claros (ambar, turquesa). */
+  color: var(--color-text);
 }
 
 .modeKind {
@@ -167,7 +162,8 @@
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--mode) 55%, var(--color-on-strong));
+  /* Antes: el color de la modalidad aclarado con blanco, ilegible sobre beige (< 2:1). */
+  color: var(--color-text-muted);
 }
 
 .modeTagline {
@@ -209,7 +205,7 @@
 
 .bars .barOn {
   background: linear-gradient(180deg, color-mix(in srgb, var(--mode) 55%, var(--color-highlight)), var(--mode));
-  box-shadow: 0 0 18px var(--mode);
+  box-shadow: none;
 }
 
 .envelopes {
@@ -226,7 +222,7 @@
   border: 1px solid color-mix(in srgb, var(--mode) 35%, transparent);
   border-radius: 12px;
   background: color-mix(in srgb, var(--mode) 12%, transparent);
-  color: color-mix(in srgb, var(--mode) 60%, var(--color-on-strong));
+  color: color-mix(in srgb, var(--mode) 35%, var(--color-text));
 }
 
 .envelopes small {
@@ -236,8 +232,8 @@
 
 .envelopes .envelopeMine {
   background: var(--mode);
-  box-shadow: 0 0 20px -4px var(--mode);
-  color: var(--color-on-strong);
+  box-shadow: none;
+  color: var(--color-text);
 }
 
 .mysteryBox {
@@ -255,7 +251,7 @@
   height: 72px;
   border-radius: 20px;
   background: linear-gradient(150deg, color-mix(in srgb, var(--mode) 70%, var(--color-highlight)), var(--mode));
-  box-shadow: 0 0 30px -6px var(--mode);
+  box-shadow: none;
   font-family: var(--font-display);
   font-size: 2.5rem;
   font-weight: 800;
@@ -276,7 +272,7 @@
   background: color-mix(in srgb, var(--mode) 18%, transparent);
   font-size: var(--text-xs);
   font-weight: 600;
-  color: color-mix(in srgb, var(--mode) 50%, var(--color-on-strong));
+  color: color-mix(in srgb, var(--mode) 35%, var(--color-text));
 }
 
 .mysteryClues .locked {
@@ -309,9 +305,7 @@
   padding: var(--s-5);
   border: 1px solid var(--eci-yellow-line);
   border-radius: var(--r-xl);
-  background:
-    radial-gradient(60% 100% at 0% 50%, color-mix(in srgb, var(--eci-yellow) 16%, transparent), transparent 70%),
-    var(--glass);
+  background: var(--glass);
 }
 
 .wildcard h2 {
@@ -389,7 +383,7 @@
 
 @media (width < 860px) {
   .hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .heroWheel {
@@ -397,7 +391,7 @@
   }
 
   .modes {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

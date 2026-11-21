@@ -11,12 +11,12 @@ export function NotFound() {
         titleAs="h1"
         title="Esta dirección no existe"
         actions={
-          <Link className={buttonClass('secondary')} to={routes.items}>
-            Ir al catálogo
+          <Link className={buttonClass('primary')} to={routes.home}>
+            Ir al inicio
           </Link>
         }
       >
-        Puede que el objeto se haya retirado, o que el enlace esté incompleto.
+        Puede que lo que buscabas se haya retirado o que el enlace esté incompleto.
       </Notice>
     </Page>
   );

@@ -20,8 +20,6 @@ export interface ProblemDetails {
   errors?: string[];
 }
 
-export const PROBLEM_CONTENT_TYPE = 'application/problem+json';
-
 /** Catalogo de tipos del back. Copiarlo evita que cada pantalla invente su cadena. */
 export const ProblemType = {
   VALIDATION: '/problems/validacion',

@@ -175,7 +175,7 @@
 
   /* Tintes de capsula: mismo color, fondo suave. */
   --eci-cyan-soft: rgb(251 203 110 / 45%);
-  --eci-pink-soft: rgb(242 124 92 / 18%);
+  --eci-pink-soft: rgb(242 124 92 / 12%);
   --eci-yellow-soft: rgb(242 181 58 / 22%);
   --eci-blue-soft: rgb(95 143 242 / 18%);
   --eci-purple-soft: rgb(160 124 240 / 18%);
@@ -244,12 +244,17 @@
   /* --- Profundidad ---------------------------------------------------------- */
   --shadow-card: 0 12px 30px -20px rgb(90 64 28 / 45%);
   --shadow-float: 0 18px 40px -14px rgb(90 64 28 / 35%);
-  --glow-cyan: 0 8px 20px -8px rgb(239 174 54 / 70%);
-  --glow-pink: 0 8px 20px -8px rgb(194 65 12 / 45%);
-  --glow-green: 0 8px 20px -8px rgb(30 107 71 / 40%);
-  --glow-blue: 0 8px 20px -8px rgb(44 85 168 / 40%);
-  --glow-purple: 0 8px 20px -8px rgb(106 69 181 / 40%);
-  --glow-yellow: 0 8px 20px -8px rgb(242 181 58 / 60%);
+  /*
+   * Antes eran halos de color (resplandor "neon"). Ahora todos son la misma sombra calida y
+   * corta: dan relieve al boton sin teñir el texto de alrededor. Se conservan los nombres
+   * para no tocar cada modulo.
+   */
+  --glow-cyan: 0 6px 14px -10px rgb(90 64 28 / 45%);
+  --glow-pink: var(--glow-cyan);
+  --glow-green: var(--glow-cyan);
+  --glow-blue: var(--glow-cyan);
+  --glow-purple: var(--glow-cyan);
+  --glow-yellow: var(--glow-cyan);
 
   /*
    * Superficies "de cristal": en el tema claro son paneles crema opacos con un borde fino.

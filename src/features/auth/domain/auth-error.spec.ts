@@ -9,9 +9,9 @@ describe('resolveLoginError', () => {
 
   it.each([
     ['access_denied', 'cancelled'],
-    ['domain_not_allowed', 'not_institutional'],
-    ['email_domain_not_allowed', 'not_institutional'],
-    ['hd_mismatch', 'not_institutional'],
+    ['domain_not_allowed', 'account_not_allowed'],
+    ['email_domain_not_allowed', 'account_not_allowed'],
+    ['hd_mismatch', 'account_not_allowed'],
     ['forbidden', 'forbidden'],
     ['account_suspended', 'suspended'],
     ['email_not_verified', 'email_not_verified'],
@@ -48,10 +48,10 @@ describe('resolveLoginError', () => {
     );
   });
 
-  it('el correo no institucional sugiere la cuenta de la Escuela', () => {
+  it('una cuenta rechazada sugiere otra cuenta de Google sin exigir un dominio', () => {
     const error = resolveLoginError({ code: 'domain_not_allowed' });
-    expect(error?.hint).toMatch(/@escuelaing\.edu\.co/);
-    expect(error?.hint).toMatch(/@mail\.escuelaing\.edu\.co/);
+    expect(error?.hint).toMatch(/cualquier cuenta de google/i);
+    expect(`${error?.title} ${error?.message} ${error?.hint}`).not.toMatch(/escuelaing/);
   });
 
   it('todo mensaje dice que paso, que hacer y ofrece reintentar, sin jerga tecnica', () => {

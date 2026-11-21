@@ -8,6 +8,7 @@ import { EcicoinBalance } from '@/features/wallet/components/ecicoin-balance';
 import { RouteBoundary } from '../route-boundary';
 import { Brand } from './brand';
 import { MobileMenu } from './mobile-menu';
+import { OfflineBanner } from './offline-banner';
 import { SectionNav } from './section-nav';
 import styles from './page-shell.module.css';
 
@@ -76,6 +77,8 @@ export function PageShell({ focus = false }: { focus?: boolean }) {
           </div>
         </header>
       )}
+
+      <OfflineBanner />
 
       {/* `tabIndex={-1}` para poder recibir el foco sin entrar en el orden de tabulacion. */}
       <main className={styles.main} id={MAIN_ID} ref={main} tabIndex={-1}>
