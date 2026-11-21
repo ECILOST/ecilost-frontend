@@ -16,7 +16,7 @@
   width: 560px;
   height: 380px;
   border-radius: 50%;
-  background: rgb(255 200 74 / 12%);
+  background: color-mix(in srgb, var(--eci-yellow) 12%, transparent);
   filter: blur(120px);
   transform: translateX(-50%);
   pointer-events: none;
@@ -35,7 +35,7 @@
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .title {
@@ -71,7 +71,7 @@
   padding: 2px 8px;
   border-radius: var(--r-chip);
   background: var(--eci-cyan-soft);
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   font-size: var(--text-2xs);
   font-weight: 800;
   letter-spacing: var(--tracking-caps);
@@ -286,7 +286,7 @@
 }
 
 .nudge > svg {
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .nudge p {

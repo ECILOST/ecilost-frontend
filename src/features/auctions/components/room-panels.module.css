@@ -30,7 +30,7 @@
 }
 
 .mine {
-  border-color: rgb(25 229 213 / 30%);
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
   background: var(--eci-surface-glow);
 }
 
@@ -90,22 +90,22 @@
 }
 
 .pinkIcon {
-  background: rgb(255 79 120 / 20%);
+  background: color-mix(in srgb, var(--eci-pink) 20%, transparent);
   color: var(--eci-pink-text);
 }
 
 .greyIcon {
-  background: rgb(124 143 181 / 20%);
+  background: color-mix(in srgb, var(--eci-silver) 20%, transparent);
   color: var(--eci-text-soft);
 }
 
 .cyanIcon {
-  background: rgb(25 229 213 / 20%);
-  color: var(--eci-cyan);
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--eci-cyan-text);
 }
 
 .blueIcon {
-  background: rgb(43 107 255 / 22%);
+  background: color-mix(in srgb, var(--eci-blue) 22%, transparent);
   color: var(--eci-blue-text);
 }
 
@@ -186,7 +186,7 @@
   align-content: start;
   gap: 4px;
   padding: 12px;
-  border: 1px solid rgb(255 255 255 / 7%);
+  border: 1px solid color-mix(in srgb, var(--color-highlight) 7%, transparent);
   border-radius: 20px;
   background: var(--eci-surface);
 }
@@ -198,9 +198,9 @@
 }
 
 .stripLive {
-  border-color: rgb(255 79 120 / 55%);
+  border-color: color-mix(in srgb, var(--eci-pink) 55%, transparent);
   background: var(--eci-surface-high);
-  box-shadow: 0 0 26px rgb(255 79 120 / 16%);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--eci-pink) 16%, transparent);
 }
 
 .stripClosed {
@@ -228,5 +228,5 @@
 }
 
 .stateNext {
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }

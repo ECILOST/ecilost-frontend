@@ -15,6 +15,7 @@ import { modeLook } from '../domain/modes';
 import { useLeaderboard } from '../hooks/use-gamification';
 import type { LeaderboardEntry, LeaderboardWeek } from '../model/gamification';
 import styles from './leaderboard.page.module.css';
+import { inkOf } from '../domain/ink';
 
 const DAY = new Intl.DateTimeFormat('es-CO', { day: 'numeric' });
 const DAY_MONTH = new Intl.DateTimeFormat('es-CO', {
@@ -115,7 +116,10 @@ function Row({ entry }: { entry: LeaderboardEntry }) {
         <span className={styles.cellLabel}>Pujas </span>
         {entry.bids}
       </span>
-      <span className={styles.rowMode} style={{ color: mode?.color }}>
+      <span
+        className={styles.rowMode}
+        style={{ color: mode ? inkOf(mode.color) : undefined }}
+      >
         {mode?.label ?? '—'}
       </span>
     </li>

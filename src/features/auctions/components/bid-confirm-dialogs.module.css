@@ -37,7 +37,7 @@
 .art {
   height: 190px;
   border-radius: 22px;
-  background: rgb(18 53 102 / 35%);
+  background: color-mix(in srgb, var(--color-surface-raised) 35%, transparent);
 }
 
 .side {
@@ -58,7 +58,7 @@
 }
 
 .boxPink {
-  border-color: rgb(255 79 120 / 32%);
+  border-color: color-mix(in srgb, var(--eci-pink) 32%, transparent);
 }
 
 .boxTitle {
@@ -92,16 +92,16 @@
 }
 
 .yellow.yellow {
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
   font-size: var(--text-md);
 }
 
 .cyan.cyan {
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .pink.pink {
-  color: var(--eci-pink);
+  color: var(--eci-pink-text);
 }
 
 .big.big {

@@ -82,21 +82,21 @@ export function RouletteWheel({
             </radialGradient>
           ))}
           <radialGradient id="wheel-rim" cx="50%" cy="40%" r="65%">
-            <stop offset="0%" stopColor="#1d3a66" />
-            <stop offset="100%" stopColor="#081830" />
+            <stop offset="0%" stopColor="var(--color-surface-raised)" />
+            <stop offset="100%" stopColor="var(--color-surface-sunken)" />
           </radialGradient>
           <radialGradient id="wheel-hub" cx="40%" cy="35%" r="70%">
-            <stop offset="0%" stopColor="#1b3159" />
-            <stop offset="100%" stopColor="#050f1f" />
+            <stop offset="0%" stopColor="var(--color-surface)" />
+            <stop offset="100%" stopColor="var(--color-surface-sunken)" />
           </radialGradient>
           <radialGradient id="wheel-shade" cx="50%" cy="50%" r="50%">
-            <stop offset="78%" stopColor="#000" stopOpacity="0" />
-            <stop offset="100%" stopColor="#000" stopOpacity="0.3" />
+            <stop offset="78%" stopColor="var(--color-shade)" stopOpacity="0" />
+            <stop offset="100%" stopColor="var(--color-shade)" stopOpacity="0.3" />
           </radialGradient>
         </defs>
 
         {/* Aro exterior con bombillas */}
-        <circle cx={CENTER} cy={CENTER} r={133} fill="url(#wheel-rim)" stroke="rgb(140 180 255 / 30%)" strokeWidth={1.5} />
+        <circle cx={CENTER} cy={CENTER} r={133} fill="url(#wheel-rim)" stroke="color-mix(in srgb, var(--eci-blue) 30%, transparent)" strokeWidth={1.5} />
         {BULBS.map((bulb, index) => (
           <circle
             key={index}
@@ -122,13 +122,13 @@ export function RouletteWheel({
             const b = point(end);
             const label = point(index * SEGMENT_ANGLE, 70);
             const dimmed = highlight !== null && highlight !== segment;
-            const ink = segment === 'WILDCARD' ? 'var(--eci-on-accent)' : '#fff';
+            const ink = segment === 'WILDCARD' ? 'var(--eci-on-accent)' : 'var(--color-on-strong)';
             return (
               <g key={segment} className={dimmed ? styles.segmentDim : styles.segment}>
                 <path
                   d={`M${CENTER} ${CENTER} L${a.x} ${a.y} A${RADIUS} ${RADIUS} 0 0 1 ${b.x} ${b.y} Z`}
                   fill={`url(#seg-${segment})`}
-                  stroke="rgb(4 16 31 / 85%)"
+                  stroke="color-mix(in srgb, var(--color-surface-raised) 85%, transparent)"
                   strokeWidth={2.5}
                 />
                 <g transform={`rotate(${index * SEGMENT_ANGLE} ${label.x} ${label.y})`}>
@@ -171,8 +171,8 @@ export function RouletteWheel({
 
         {/* Puntero */}
         <g className={styles.pointer}>
-          <path d="M116 -4 L144 -4 L130 24 Z" fill="var(--eci-cyan)" stroke="#04101f" strokeWidth={2} strokeLinejoin="round" />
-          <circle cx={130} cy={2} r={3} fill="#04101f" />
+          <path d="M116 -4 L144 -4 L130 24 Z" fill="var(--eci-cyan)" stroke="var(--color-text)" strokeWidth={2} strokeLinejoin="round" />
+          <circle cx={130} cy={2} r={3} fill="var(--color-text)" />
         </g>
       </svg>
     </div>

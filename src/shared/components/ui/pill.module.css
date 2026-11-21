@@ -24,7 +24,7 @@
 .cyan {
   background: var(--eci-cyan-soft);
   border-color: var(--eci-cyan-line);
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .pink {
@@ -36,7 +36,7 @@
 .yellow {
   background: var(--eci-yellow-soft);
   border-color: var(--eci-yellow-line);
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .blue {
@@ -92,7 +92,7 @@
 }
 
 .solid.neutral {
-  background: rgb(8 11 21 / 72%);
+  background: color-mix(in srgb, var(--color-surface-raised) 72%, transparent);
   color: var(--eci-text);
   backdrop-filter: blur(8px);
 }

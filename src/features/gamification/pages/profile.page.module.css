@@ -18,8 +18,8 @@
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-xl);
   background:
-    radial-gradient(60% 140% at 0% 0%, rgb(25 229 213 / 12%), transparent 70%),
-    radial-gradient(50% 140% at 100% 100%, rgb(123 92 255 / 12%), transparent 70%),
+    radial-gradient(60% 140% at 0% 0%, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 70%),
+    radial-gradient(50% 140% at 100% 100%, color-mix(in srgb, var(--eci-purple) 12%, transparent), transparent 70%),
     var(--glass);
   box-shadow: var(--glass-shine), var(--shadow-card);
 }
@@ -32,7 +32,7 @@
   border: 1px solid var(--eci-cyan-line);
   border-radius: 28px;
   background: var(--eci-cyan-soft);
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   font: 800 2.5rem/1 var(--font-display);
   box-shadow: var(--glow-cyan);
 }
@@ -48,7 +48,7 @@
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .alias {
@@ -93,12 +93,12 @@
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .rankValue {
   font: 800 2.25rem/1.1 var(--font-display);
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .rankLink {

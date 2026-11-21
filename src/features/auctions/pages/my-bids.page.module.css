@@ -58,14 +58,14 @@
 .winning {
   border-color: var(--eci-green-line);
   background:
-    radial-gradient(50% 140% at 0% 50%, rgb(47 227 154 / 12%), transparent 70%),
+    radial-gradient(50% 140% at 0% 50%, color-mix(in srgb, var(--eci-green) 12%, transparent), transparent 70%),
     var(--glass);
 }
 
 .outbid {
   border-color: var(--eci-pink-line);
   background:
-    radial-gradient(50% 140% at 0% 50%, rgb(255 79 120 / 12%), transparent 70%),
+    radial-gradient(50% 140% at 0% 50%, color-mix(in srgb, var(--eci-pink) 12%, transparent), transparent 70%),
     var(--glass);
 }
 

@@ -59,6 +59,6 @@
 }
 
 .note strong {
-  color: var(--eci-green);
+  color: var(--eci-green-text);
   font-weight: 600;
 }

@@ -17,7 +17,7 @@
 }
 
 .label {
-  font-size: 0.5625rem;
+  font-size: var(--text-2xs);
   color: var(--eci-text-dim);
 }
 
@@ -44,11 +44,11 @@
 }
 
 .cyan .value {
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .yellow .value {
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .pink .value {

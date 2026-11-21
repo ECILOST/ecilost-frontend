@@ -6,118 +6,183 @@
   border: 1px solid transparent;
   border-radius: var(--r-chip);
   font-family: var(--font-display);
-  font-weight: 700;
-  letter-spacing: -0.005em;
+  font-weight: 600;
+  letter-spacing: 0;
   text-align: center;
   text-decoration: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition:
     transform var(--t-fast) var(--ease-out),
-    filter var(--t-fast) linear,
     border-color var(--t-fast) linear,
     color var(--t-fast) linear,
-    background-color var(--t-fast) linear;
+    background-color var(--t-fast) linear,
+    box-shadow var(--t-fast) linear;
 }
 
-.button:hover {
-  transform: translateY(-1px);
-  text-decoration: none;
+/*
+ * El anillo de foco es el global de base.css (3 px navy, >= 9:1 sobre ambar y beige); aqui
+ * solo se asegura que sigue la forma de capsula y no la del radio generico.
+ */
+.button:focus-visible {
+  border-radius: var(--r-chip);
+}
+
+/* Hover solo donde hay puntero: en tactil se queda "pegado" tras tocar. */
+@media (hover: hover) {
+  .button:hover:not(:disabled, [aria-disabled='true']) {
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
 }
 
 /* El boton se hunde al pulsarlo: es el acuse de recibo mas barato que existe. */
-.button:active {
+.button:active:not(:disabled, [aria-disabled='true']) {
   transform: translateY(1px) scale(0.99);
 }
 
+/*
+ * Deshabilitado: no solo mas palido. Relleno neutro, borde punteado y cursor de prohibido,
+ * para que se distinga sin depender del color.
+ */
 .button:disabled {
-  opacity: 0.45;
+  border-style: dashed;
+  border-color: var(--color-disabled-border);
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  box-shadow: none;
+  text-shadow: none;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
+}
+
+/* Ocupado: conserva su color (la accion sigue siendo esa) y avisa con el giro. */
+.button[data-loading] {
+  cursor: progress;
+}
+
+.spinner {
+  width: 1em;
+  height: 1em;
+  flex: none;
+  border: 2px solid currentcolor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: button-spin 0.7s linear infinite;
+}
+
+@keyframes button-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Alto minimo de 44 px: el minimo tactil, sin hinchar el relleno. */
 .md {
   min-height: var(--control-h);
   padding: 8px 18px;
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
 }
 
 .lg {
   min-height: 52px;
   padding: 12px 28px;
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
 }
 
 /* Bloque: las acciones de la sala ocupan todo el ancho de su columna. */
 .block {
   width: 100%;
+  min-height: 52px;
   padding-block: 14px;
   font-size: var(--text-lg);
 }
 
+/* Primario: ambar con tinta casi negra (11.4:1) y borde ambar oscuro para tener silueta. */
 .primary {
-  background: var(--grad-cyan);
-  color: var(--eci-on-accent);
-  box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 35%),
-    var(--glow-cyan);
+  border-color: var(--color-primary-border);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  box-shadow: var(--glow-cyan);
 }
 
-.primary:hover {
-  filter: brightness(1.06);
-  color: var(--eci-on-accent);
+@media (hover: hover) {
+  .primary:hover:not(:disabled, [aria-disabled='true']) {
+    background: var(--color-primary-hover);
+    color: var(--color-on-primary);
+  }
 }
 
-/* Pujar: rosa con brillo interior; es el boton mas importante de la aplicacion. */
+.primary:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-primary-active);
+  box-shadow: none;
+}
+
+/* Pujar: coral con brillo interior; es el boton mas importante de la sala. */
 .bid {
-  background: linear-gradient(180deg, #ff6a8c, var(--eci-pink) 55%, var(--eci-pink-deep));
-  color: var(--eci-text);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--eci-pink) 75%, var(--color-highlight)), var(--eci-pink) 55%, var(--eci-pink-deep));
+  color: var(--color-text);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 30%),
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 30%, transparent),
     var(--glow-pink);
-  text-shadow: 0 1px 2px rgb(120 0 30 / 35%);
 }
 
-.bid:hover {
-  filter: brightness(1.06);
-  color: var(--eci-text);
+@media (hover: hover) {
+  .bid:hover:not(:disabled, [aria-disabled='true']) {
+    filter: brightness(1.05);
+    color: var(--color-text);
+  }
 }
 
 .secondary {
-  background: var(--glass);
-  border-color: var(--glass-edge-strong);
-  color: var(--eci-text);
-  box-shadow: var(--glass-shine);
-  backdrop-filter: var(--glass-blur);
+  background: var(--color-surface-raised);
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
 }
 
-.secondary:hover {
-  border-color: var(--eci-cyan);
-  color: var(--eci-text);
+@media (hover: hover) {
+  .secondary:hover:not(:disabled, [aria-disabled='true']) {
+    border-color: var(--color-primary-text);
+    background: var(--color-highlight);
+    color: var(--color-text);
+  }
 }
 
-/* Borrar y retirar: una accion irreversible se distingue antes de leerla. */
+.secondary:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-surface-sunken);
+}
+
+/* Borrar y retirar: una accion irreversible se distingue antes de leerla (blanco 6.2:1). */
 .danger {
-  background: var(--eci-pink-deep);
-  color: var(--eci-text);
+  background: var(--color-error);
+  color: var(--color-on-strong);
   box-shadow: var(--glow-pink);
 }
 
-.danger:hover {
-  filter: brightness(1.06);
+@media (hover: hover) {
+  .danger:hover:not(:disabled, [aria-disabled='true']) {
+    background: var(--color-error-hover);
+    color: var(--color-on-strong);
+  }
 }
 
 .quiet {
-  background: rgb(255 255 255 / 5%);
-  border-color: var(--eci-line);
-  color: var(--eci-text-soft);
+  background: transparent;
+  border-color: var(--color-border-strong);
+  color: var(--color-text-muted);
   font-family: var(--font-text);
   font-weight: 600;
 }
 
-.quiet:hover {
-  color: var(--eci-text);
+@media (hover: hover) {
+  .quiet:hover:not(:disabled, [aria-disabled='true']) {
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+}
+
+.quiet:active:not(:disabled, [aria-disabled='true']) {
+  background: var(--color-surface-sunken);
 }
 
 .icon {

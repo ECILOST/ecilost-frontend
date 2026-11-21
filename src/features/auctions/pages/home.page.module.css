@@ -65,9 +65,9 @@
   top: 54px;
   z-index: 2;
   font: italic 800 1.375rem var(--font-script);
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   text-align: center;
-  text-shadow: 0 0 18px rgb(25 229 213 / 55%);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--color-primary) 55%, transparent);
   transform: rotate(-12deg);
   pointer-events: none;
 }
@@ -142,7 +142,7 @@
   top: 14px;
   right: 16px;
   font: 800 1.375rem var(--font-display);
-  color: rgb(255 255 255 / 10%);
+  color: color-mix(in srgb, var(--color-highlight) 10%, transparent);
 }
 
 .howGuide {
@@ -153,8 +153,8 @@
   border: 1px solid var(--eci-purple-line);
   border-radius: 22px;
   background:
-    radial-gradient(80% 120% at 100% 0%, rgb(123 92 255 / 30%), transparent 70%),
-    radial-gradient(60% 100% at 0% 100%, rgb(255 79 120 / 18%), transparent 70%),
+    radial-gradient(80% 120% at 100% 0%, color-mix(in srgb, var(--eci-purple) 30%, transparent), transparent 70%),
+    radial-gradient(60% 100% at 0% 100%, color-mix(in srgb, var(--eci-pink) 18%, transparent), transparent 70%),
     var(--glass);
   color: var(--eci-text);
   text-decoration: none;
@@ -227,7 +227,7 @@
   border-radius: 28px;
   box-shadow:
     var(--glass-shine),
-    0 30px 60px -30px rgb(0 0 0 / 80%);
+    0 30px 60px -30px color-mix(in srgb, var(--color-shade) 48%, transparent);
 }
 
 .ring {
@@ -246,7 +246,7 @@
   padding: 20px;
   border: 1px solid var(--glass-edge-strong);
   border-radius: 26px;
-  background: rgb(8 24 46 / 78%);
+  background: color-mix(in srgb, var(--color-surface-raised) 78%, transparent);
   box-shadow:
     var(--glass-shine),
     var(--shadow-float);

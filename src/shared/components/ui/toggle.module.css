@@ -6,7 +6,7 @@
   padding: 0;
   border: 0;
   border-radius: 14px;
-  background: rgb(255 255 255 / 16%);
+  background: color-mix(in srgb, var(--color-highlight) 16%, transparent);
   cursor: pointer;
   transition: background-color var(--t-fast) linear;
 }

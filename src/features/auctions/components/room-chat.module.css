@@ -62,7 +62,7 @@
 
 .mine {
   justify-self: end;
-  border-color: rgb(25 229 213 / 30%);
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
   background: var(--eci-surface-glow);
 }
 

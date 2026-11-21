@@ -11,8 +11,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  /* 44 px: objetivo tactil minimo. */
+  width: var(--control-h);
+  height: var(--control-h);
   margin-left: -8px;
   border-radius: 50%;
   color: var(--eci-text);

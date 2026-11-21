@@ -13,7 +13,7 @@
   place-items: center;
   padding: var(--s-5) var(--s-4);
   border-radius: var(--r-lg);
-  background: var(--eci-night);
+  background: var(--color-surface-raised);
   overflow: hidden;
 }
 
@@ -29,7 +29,7 @@
   bottom: var(--s-4);
   left: 50%;
   transform: translateX(-50%);
-  color: var(--eci-text-dim);
+  color: var(--color-text-muted);
   font-size: var(--text-xs);
 }
 
@@ -48,13 +48,11 @@
   display: flex;
   gap: var(--s-2);
   overflow-x: auto;
-  scrollbar-width: none;
-  padding: 3px;
+  /* Barra fina visible: en el movil indica que hay mas miniaturas a la derecha. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+  padding: 3px 3px var(--s-2);
   margin: -3px;
-}
-
-.thumbs::-webkit-scrollbar {
-  display: none;
 }
 
 .thumb {
@@ -62,9 +60,9 @@
   width: 64px;
   height: 64px;
   padding: 0;
-  border: 2px solid transparent;
+  border: 2px solid var(--color-border);
   border-radius: var(--r-sm);
-  background: var(--eci-night);
+  background: var(--eci-photo-plate);
   cursor: pointer;
   overflow: hidden;
   transition:
@@ -72,8 +70,10 @@
     transform var(--t-fast) var(--ease-out);
 }
 
-.thumb:hover {
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .thumb:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .thumb img {
@@ -86,7 +86,7 @@
 
 /* La miniatura activa se marca con borde y con opacidad plena, no solo con color. */
 .selected {
-  border-color: var(--eci-cyan);
+  border-color: var(--color-focus);
 }
 
 .selected img {
@@ -97,7 +97,7 @@
   position: relative;
   border-radius: var(--r-lg);
   overflow: hidden;
-  background: var(--eci-night);
+  background: var(--color-surface-sunken);
 }
 
 .video video {

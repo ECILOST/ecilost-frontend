@@ -100,7 +100,10 @@ export function NotificationsPage() {
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : null}
         {data && data.length === 0 ? (
-          <EmptyState title="No tienes notificaciones" />
+          <EmptyState title="No tienes notificaciones">
+            Te avisaremos aquí cuando te superen, ganes un objeto o una sala
+            esté por empezar.
+          </EmptyState>
         ) : null}
 
         <ul className={styles.items}>
@@ -132,7 +135,14 @@ export function NotificationsPage() {
             return (
               <li key={entry.id}>
                 {entry.kind === 'PICKUP_READY' ? (
-                  <Link className={className} to={entry.pickupRoundId ? routes.pickup(entry.pickupRoundId) : routes.pickups}>
+                  <Link
+                    className={className}
+                    to={
+                      entry.pickupRoundId
+                        ? routes.pickup(entry.pickupRoundId)
+                        : routes.pickups
+                    }
+                  >
                     {body}
                   </Link>
                 ) : entry.roomId ? (

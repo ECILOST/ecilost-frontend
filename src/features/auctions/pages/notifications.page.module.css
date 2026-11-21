@@ -29,7 +29,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   font: 600 0.6875rem var(--font-text);
   cursor: pointer;
 }
@@ -65,9 +65,9 @@ a.item:hover {
 
 .unread {
   position: relative;
-  border-color: rgb(25 229 213 / 30%);
+  border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
   background:
-    radial-gradient(40% 140% at 0% 50%, rgb(25 229 213 / 10%), transparent 75%),
+    radial-gradient(40% 140% at 0% 50%, color-mix(in srgb, var(--color-primary) 10%, transparent), transparent 75%),
     var(--glass);
 }
 
@@ -94,22 +94,22 @@ a.item:hover {
 }
 
 .pink {
-  background: rgb(255 79 120 / 20%);
+  background: color-mix(in srgb, var(--eci-pink) 20%, transparent);
   color: var(--eci-pink-text);
 }
 
 .cyan {
-  background: rgb(25 229 213 / 20%);
-  color: var(--eci-cyan);
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  color: var(--eci-cyan-text);
 }
 
 .yellow {
-  background: rgb(255 200 74 / 20%);
-  color: var(--eci-yellow);
+  background: color-mix(in srgb, var(--eci-yellow) 20%, transparent);
+  color: var(--eci-yellow-text);
 }
 
 .blue {
-  background: rgb(43 107 255 / 25%);
+  background: color-mix(in srgb, var(--eci-blue) 25%, transparent);
   color: var(--eci-blue-text);
 }
 
@@ -174,7 +174,7 @@ a.item:hover {
   display: block;
   font-family: var(--font-display);
   font-size: var(--text-sm);
-  color: color-mix(in srgb, var(--tone) 45%, #fff);
+  color: color-mix(in srgb, var(--tone) 45%, var(--color-on-strong));
 }
 
 .legendItem small {
@@ -191,7 +191,7 @@ a.item:hover {
   border-radius: 11px;
   background: var(--tone);
   box-shadow: 0 0 16px -4px var(--tone);
-  color: #fff;
+  color: var(--color-on-strong);
 }
 
 @media (width < 900px) {

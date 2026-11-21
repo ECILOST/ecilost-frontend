@@ -59,7 +59,7 @@
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: 700;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -75,8 +75,8 @@
 .panelOn {
   border-color: var(--eci-purple-line);
   background:
-    radial-gradient(60% 120% at 100% 0%, rgb(123 92 255 / 18%), transparent 70%),
-    radial-gradient(50% 100% at 0% 100%, rgb(255 79 120 / 10%), transparent 70%),
+    radial-gradient(60% 120% at 100% 0%, color-mix(in srgb, var(--eci-purple) 18%, transparent), transparent 70%),
+    radial-gradient(50% 100% at 0% 100%, color-mix(in srgb, var(--eci-pink) 10%, transparent), transparent 70%),
     var(--glass);
   box-shadow:
     var(--glass-shine),

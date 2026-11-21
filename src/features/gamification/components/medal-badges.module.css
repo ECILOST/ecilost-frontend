@@ -11,7 +11,8 @@
   border: 1.5px solid var(--medal);
   border-radius: 50%;
   background: color-mix(in srgb, var(--medal) 14%, transparent);
-  color: var(--medal);
+  /* Acento oscurecido con la tinta: legible (AA) sobre crema. */
+  color: color-mix(in srgb, var(--medal) 40%, var(--color-text));
 }
 
 .sm .badge {
@@ -42,7 +43,8 @@
   border: 1px solid color-mix(in srgb, var(--medal) 45%, transparent);
   border-radius: var(--r-chip);
   background: color-mix(in srgb, var(--medal) 13%, transparent);
-  color: var(--medal);
+  /* Acento oscurecido con la tinta: legible (AA) sobre crema. */
+  color: color-mix(in srgb, var(--medal) 40%, var(--color-text));
   font-size: var(--text-xs);
   font-weight: 700;
 }
@@ -75,7 +77,8 @@
   height: 56px;
   border: 2px solid var(--medal);
   border-radius: 50%;
-  color: var(--medal);
+  /* Acento oscurecido con la tinta: legible (AA) sobre crema. */
+  color: color-mix(in srgb, var(--medal) 40%, var(--color-text));
 }
 
 .unlocked .medallion {
@@ -107,7 +110,8 @@
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--medal);
+  /* Acento oscurecido con la tinta: legible (AA) sobre crema. */
+  color: color-mix(in srgb, var(--medal) 40%, var(--color-text));
 }
 
 .locked .state {

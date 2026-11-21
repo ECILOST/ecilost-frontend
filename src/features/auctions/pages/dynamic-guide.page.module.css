@@ -18,8 +18,8 @@
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-xl);
   background:
-    radial-gradient(60% 80% at 85% 40%, rgb(43 107 255 / 28%), transparent 70%),
-    radial-gradient(50% 70% at 10% 0%, rgb(123 92 255 / 22%), transparent 70%),
+    radial-gradient(60% 80% at 85% 40%, color-mix(in srgb, var(--eci-blue) 28%, transparent), transparent 70%),
+    radial-gradient(50% 70% at 10% 0%, color-mix(in srgb, var(--eci-purple) 22%, transparent), transparent 70%),
     var(--glass);
   box-shadow: var(--glass-shine);
 }
@@ -42,7 +42,7 @@
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .title {
@@ -86,7 +86,7 @@
   font-family: var(--font-display);
   font-size: var(--text-sm);
   font-weight: 700;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .heroWheel {
@@ -153,9 +153,9 @@
   border-radius: 14px;
   background: var(--mode);
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 30%),
+    inset 0 1px 0 color-mix(in srgb, var(--color-highlight) 30%, transparent),
     0 0 24px -6px var(--mode);
-  color: #fff;
+  color: var(--color-on-strong);
 }
 
 .modeKind {
@@ -167,7 +167,7 @@
   font-weight: 700;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--mode) 55%, #fff);
+  color: color-mix(in srgb, var(--mode) 55%, var(--color-on-strong));
 }
 
 .modeTagline {
@@ -181,9 +181,9 @@
   padding: var(--s-4);
   border-radius: var(--r-md);
   background:
-    linear-gradient(rgb(255 255 255 / 3%) 1px, transparent 1px) 0 0 / 20px 20px,
-    linear-gradient(90deg, rgb(255 255 255 / 3%) 1px, transparent 1px) 0 0 / 20px 20px,
-    rgb(0 0 0 / 25%);
+    linear-gradient(color-mix(in srgb, var(--color-highlight) 3%, transparent) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, color-mix(in srgb, var(--color-highlight) 3%, transparent) 1px, transparent 1px) 0 0 / 20px 20px,
+    color-mix(in srgb, var(--color-shade) 15%, transparent);
 }
 
 .diagramNote {
@@ -208,7 +208,7 @@
 }
 
 .bars .barOn {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--mode) 55%, #fff), var(--mode));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--mode) 55%, var(--color-highlight)), var(--mode));
   box-shadow: 0 0 18px var(--mode);
 }
 
@@ -226,7 +226,7 @@
   border: 1px solid color-mix(in srgb, var(--mode) 35%, transparent);
   border-radius: 12px;
   background: color-mix(in srgb, var(--mode) 12%, transparent);
-  color: color-mix(in srgb, var(--mode) 60%, #fff);
+  color: color-mix(in srgb, var(--mode) 60%, var(--color-on-strong));
 }
 
 .envelopes small {
@@ -237,7 +237,7 @@
 .envelopes .envelopeMine {
   background: var(--mode);
   box-shadow: 0 0 20px -4px var(--mode);
-  color: #fff;
+  color: var(--color-on-strong);
 }
 
 .mysteryBox {
@@ -254,7 +254,7 @@
   width: 72px;
   height: 72px;
   border-radius: 20px;
-  background: linear-gradient(150deg, color-mix(in srgb, var(--mode) 70%, #fff), var(--mode));
+  background: linear-gradient(150deg, color-mix(in srgb, var(--mode) 70%, var(--color-highlight)), var(--mode));
   box-shadow: 0 0 30px -6px var(--mode);
   font-family: var(--font-display);
   font-size: 2.5rem;
@@ -276,11 +276,11 @@
   background: color-mix(in srgb, var(--mode) 18%, transparent);
   font-size: var(--text-xs);
   font-weight: 600;
-  color: color-mix(in srgb, var(--mode) 50%, #fff);
+  color: color-mix(in srgb, var(--mode) 50%, var(--color-on-strong));
 }
 
 .mysteryClues .locked {
-  background: rgb(255 255 255 / 5%);
+  background: color-mix(in srgb, var(--color-highlight) 5%, transparent);
   color: var(--eci-text-dim);
 }
 
@@ -310,7 +310,7 @@
   border: 1px solid var(--eci-yellow-line);
   border-radius: var(--r-xl);
   background:
-    radial-gradient(60% 100% at 0% 50%, rgb(255 200 74 / 16%), transparent 70%),
+    radial-gradient(60% 100% at 0% 50%, color-mix(in srgb, var(--eci-yellow) 16%, transparent), transparent 70%),
     var(--glass);
 }
 
@@ -365,7 +365,7 @@
 
 .faqItem summary svg {
   flex: none;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   transition: transform var(--t-med) var(--ease-out);
 }
 
@@ -379,7 +379,7 @@
 }
 
 .faqItem strong {
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
 }
 
 .cta {

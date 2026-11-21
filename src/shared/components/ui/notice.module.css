@@ -17,6 +17,9 @@
 }
 
 .title {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
   font-family: var(--font-display);
   font-size: var(--text-lg);
   font-weight: 700;
@@ -25,8 +28,8 @@
 }
 
 .body {
-  color: var(--eci-text-soft);
-  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
 }
 
 .list {
@@ -38,7 +41,7 @@
 
 .list li::before {
   content: '— ';
-  color: var(--eci-pink);
+  color: var(--eci-pink-text);
 }
 
 .actions {
@@ -50,23 +53,28 @@
 
 .neutral {
   border-style: dashed;
-  background: rgb(255 255 255 / 2%);
+  background: color-mix(in srgb, var(--color-highlight) 2%, transparent);
 }
 
 .alert {
-  border-color: rgb(255 61 113 / 35%);
-  background: linear-gradient(180deg, var(--eci-pink-soft), var(--eci-surface) 60%);
+  border-color: color-mix(in srgb, var(--eci-pink) 35%, transparent);
+  background: linear-gradient(180deg, var(--color-error-bg), var(--color-surface-raised) 70%);
 }
 
 .alert .title {
-  color: var(--eci-pink);
+  color: var(--color-error);
+}
+
+.title > svg {
+  flex: none;
+  margin-top: 0.1em;
 }
 
 .success {
-  border-color: rgb(47 227 154 / 30%);
+  border-color: color-mix(in srgb, var(--eci-green) 30%, transparent);
   background: linear-gradient(180deg, var(--eci-cyan-soft), var(--eci-surface) 60%);
 }
 
 .success .title {
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }

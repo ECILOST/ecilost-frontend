@@ -7,8 +7,8 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1.55fr 1fr;
-  gap: 34px;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: clamp(20px, 4vw, 34px);
 }
 
 .art {
@@ -24,6 +24,7 @@
 .name {
   font-size: var(--text-2xl);
   line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .description {
@@ -31,10 +32,12 @@
   font-size: var(--text-xs);
   line-height: 1.7;
   color: var(--eci-text-soft);
+  overflow-wrap: anywhere;
 }
 
 .priceRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
@@ -58,6 +61,7 @@
 
 .stats {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 22px;
 }
@@ -74,7 +78,7 @@
   }
 
   .art {
-    height: 300px;
+    height: clamp(220px, 70vw, 300px);
   }
 }
 
@@ -101,15 +105,16 @@
   padding: var(--s-4);
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-lg);
+  min-width: 0;
   background: var(--glass);
-  box-shadow: var(--glass-shine);
+  box-shadow: var(--glass-shine), var(--shadow-card);
   font-size: var(--text-sm);
   color: var(--eci-text-soft);
 }
 
 .tips svg {
   flex: none;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .tips strong {
@@ -121,6 +126,7 @@
 
 .guide {
   display: inline-flex;
+  min-height: var(--control-h);
   align-items: center;
   gap: 0.4rem;
   font-size: var(--text-sm);

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Icon } from './icon';
 import styles from './notice.module.css';
 
 export type NoticeTone = 'neutral' | 'alert' | 'success';
@@ -37,7 +38,11 @@ export function Notice({
 }: NoticeProps) {
   return (
     <div className={`${styles.notice} ${styles[tone]}`} role={live}>
-      <Title className={styles.title}>{title}</Title>
+      {/* En un error, icono ademas del color: el tono no se comunica solo con color. */}
+      <Title className={styles.title}>
+        {tone === 'alert' ? <Icon name="alert" size={20} /> : null}
+        {title}
+      </Title>
       {children ? <div className={styles.body}>{children}</div> : null}
       {details?.length ? (
         <ul className={styles.list}>

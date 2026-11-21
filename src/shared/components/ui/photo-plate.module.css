@@ -14,7 +14,7 @@
   /* Aro fino separado de la placa: el mismo gesto que el anillo de foco del resto del front. */
   outline: 2px solid var(--eci-line-strong);
   outline-offset: 4px;
-  box-shadow: 0 18px 32px rgb(0 0 0 / 45%);
+  box-shadow: 0 18px 32px color-mix(in srgb, var(--color-shade) 27%, transparent);
 }
 
 /* Marco cuadrado: el lado largo ocupa el 74% del marco. */
