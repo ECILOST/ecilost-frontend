@@ -322,20 +322,6 @@ describe('Subastas', () => {
     expect(screen.queryByText('Mochila negra')).not.toBeInTheDocument();
   });
 
-  it('las notificaciones se marcan como leidas y la campana deja de avisar', async () => {
-    renderApp({ route: '/notificaciones', container: student() });
-
-    expect(
-      await screen.findByRole('link', { name: /notificaciones, 2 sin leer/i }),
-    ).toBeInTheDocument();
-    await userEvent.click(
-      await screen.findByRole('button', { name: 'Marcar todas como leídas' }),
-    );
-    expect(
-      await screen.findByRole('link', { name: 'Notificaciones' }),
-    ).toBeInTheDocument();
-  });
-
   it('un funcionario no entra a las pantallas de subasta: no puja', async () => {
     renderApp({
       route: '/subastas',

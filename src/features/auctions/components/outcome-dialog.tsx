@@ -38,8 +38,6 @@ export function OutcomeDialog({
   return (
     <Dialog open={open} onClose={onClose} title={heading} tone={tone}>
       <div className={`${styles.layout} ${styles[tone]}`}>
-        <span className={styles.stain} aria-hidden="true" />
-        <span className={styles.corner} aria-hidden="true" />
         {confetti ? (
           <span className={styles.confetti} aria-hidden="true">
             <i />

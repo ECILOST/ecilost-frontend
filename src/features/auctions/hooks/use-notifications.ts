@@ -8,21 +8,21 @@ import { auctionKeys } from './auction-keys';
  * piden: la campana de la cabecera ni siquiera aparece.
  */
 export function useNotifications() {
-  const { auctions } = useContainer();
+  const { notifications } = useContainer();
   const { principal } = useSession();
   return useQuery({
     queryKey: auctionKeys.notifications(),
-    queryFn: () => auctions.notifications(),
+    queryFn: () => notifications.list(),
     enabled: principal?.canBid === true,
     refetchInterval: 10_000,
   });
 }
 
 export function useMarkNotificationsRead() {
-  const { auctions } = useContainer();
+  const { notifications } = useContainer();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => auctions.markNotificationsRead(),
+    mutationFn: () => notifications.markAllRead(),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: auctionKeys.notifications() }),
   });

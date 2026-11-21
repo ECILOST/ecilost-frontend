@@ -5,7 +5,6 @@ node_modules/
 dist/
 dist-ssr/
 *.local
-
 # Entorno: solo se versiona el ejemplo
 .env
 .env.*

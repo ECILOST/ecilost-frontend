@@ -79,6 +79,9 @@ export default defineConfig({
     },
     globals: true,
     environment: 'jsdom',
+    // Por defecto Vitest vacia el CSS. `tokens.css` se procesa para que `tokens.spec.ts` pueda
+    // leerlo (`?raw`) y comprobar el contraste de la paleta.
+    css: { include: [/tokens\.css/] },
     setupFiles: ['./test/setup.ts'],
     include: ['src/**/*.spec.{ts,tsx}', 'test/**/*.spec.{ts,tsx}'],
   },

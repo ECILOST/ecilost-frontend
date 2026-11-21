@@ -7,13 +7,11 @@ import {
 } from '../domain/room-chat';
 import { publicTotals } from '../domain/room-results';
 import type {
-  AppNotification,
   AuctionItem,
   AutoBid,
   Bid,
   LiveRoom,
   MyBid,
-  NotificationKind,
   Room,
   RoomActivity,
   RoomChat,
@@ -149,7 +147,6 @@ export function createDemoAuctionGateway(
   const id = (prefix: string) => `${prefix}-${(seq += 1)}`;
 
   const rooms = seed(now());
-  const notifications: AppNotification[] = seedNotifications(now());
   const listeners = new Map<string, Set<(state: LiveRoom) => void>>();
   let timer: ReturnType<typeof setInterval> | undefined;
 
@@ -607,82 +604,7 @@ export function createDemoAuctionGateway(
     ];
   }
 
-  function seedNotifications(t: number): AppNotification[] {
-    const note = (
-      kind: NotificationKind,
-      title: string,
-      body: string,
-      minutesAgo: number,
-      roomId: string | null,
-      read = true,
-    ): AppNotification => ({
-      id: id('ntf'),
-      kind,
-      title,
-      body,
-      at: iso(t - minutesAgo * MINUTE),
-      read,
-      roomId,
-    });
-    return [
-      note(
-        'ROOM_SOON',
-        'Subasta próxima',
-        'La Sala 05 comienza pronto. Ingresa antes del inicio para poder pujar.',
-        10,
-        'sala-05',
-        false,
-      ),
-      note(
-        'FOLLOW_ONLY',
-        'Sala en curso · solo seguimiento',
-        'La Sala 07 ya inició. Puedes seguirla, pero el ingreso está cerrado.',
-        13,
-        'sala-07',
-        false,
-      ),
-      note(
-        'WON',
-        '¡Ganaste este objeto!',
-        'Ganaste la Calculadora Casio por 220 ECICoin. La sala continúa con el siguiente objeto.',
-        19,
-        'sala-04',
-      ),
-      note(
-        'LIMIT',
-        'Alcanzaste tu límite máximo',
-        'No haremos más pujas automáticas en Mochila Totto.',
-        2 * 24 * 60 + 5,
-        'sala-02',
-      ),
-      note(
-        'ROOM_CLOSED',
-        'La sala finalizó',
-        'Sala 02 cerrada. Revisa tu resumen: 2 ganados, 2 perdidos, 1 sin ofertar.',
-        2 * 24 * 60,
-        'sala-02',
-      ),
-    ];
-  }
-
   // --- Reloj de la demo --------------------------------------------------------
-
-  function notify(
-    kind: NotificationKind,
-    title: string,
-    body: string,
-    roomId: string,
-  ) {
-    notifications.unshift({
-      id: id('ntf'),
-      kind,
-      title,
-      body,
-      at: iso(now()),
-      read: false,
-      roomId,
-    });
-  }
 
   function activity(room: DemoRoom, kind: RoomActivity['kind'], text: string) {
     room.activity.push({ id: id('act'), kind, text, at: iso(now()) });
@@ -725,14 +647,6 @@ export function createDemoAuctionGateway(
     );
     if (previous && previous !== bidderId) {
       activity(room, 'OUTBID', `${aliasOf(previous)} fue superado`);
-      if (previous === ME) {
-        notify(
-          'OUTBID',
-          '¡Te superaron!',
-          `${aliasOf(bidderId)} pujó ${amount - (lastBidOf(target, ME) ?? amount)} ECICoin más en ${target.item.name}.`,
-          room.id,
-        );
-      }
     }
   }
 
@@ -762,14 +676,6 @@ export function createDemoAuctionGateway(
         active.status = 'CLOSED';
         if (active.currentBidderId) {
           activity(room, 'AWARDED', `${active.item.name} adjudicada`);
-          if (active.currentBidderId === ME) {
-            notify(
-              'WON',
-              '¡Ganaste este objeto!',
-              `Ganaste ${active.item.name} por ${active.currentPrice.toLocaleString('es-CO')} ECICoin.`,
-              room.id,
-            );
-          }
         }
         room.autoBid.stopped = false;
         const next = room.rounds.find((r) => r.status === 'SCHEDULED');
@@ -778,13 +684,6 @@ export function createDemoAuctionGateway(
         } else {
           room.status = 'CLOSED';
           room.closedAt = t;
-          if (room.isParticipant)
-            notify(
-              'ROOM_CLOSED',
-              'La sala finalizó',
-              `${room.name} cerrada. Revisa tu resumen.`,
-              room.id,
-            );
         }
         continue;
       }
@@ -803,12 +702,6 @@ export function createDemoAuctionGateway(
           recordBid(room, active, ME, amount, t);
         } else {
           room.autoBid.stopped = true;
-          notify(
-            'LIMIT',
-            'Alcanzaste tu límite máximo',
-            `No haremos más pujas automáticas en ${active.item.name}.`,
-            room.id,
-          );
         }
         continue;
       }
@@ -1275,14 +1168,6 @@ export function createDemoAuctionGateway(
           )
           .reverse(),
       ),
-
-    notifications: () =>
-      run(() => notifications.map((entry) => ({ ...entry }))),
-
-    markNotificationsRead: () =>
-      run(() => {
-        for (const entry of notifications) entry.read = true;
-      }),
   };
 }
 

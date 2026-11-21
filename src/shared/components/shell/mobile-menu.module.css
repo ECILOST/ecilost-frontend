@@ -1,0 +1,158 @@
+/* Boton de hamburguesa: 44 x 44, solo en pantallas angostas (ver page-shell). */
+.toggle {
+  display: grid;
+  place-items: center;
+  width: var(--control-h);
+  height: var(--control-h);
+  flex: none;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.toggle:focus-visible {
+  border-radius: 50%;
+}
+
+@media (hover: hover) {
+  .toggle:hover {
+    border-color: var(--color-primary-text);
+  }
+}
+
+.toggle[aria-expanded='true'] {
+  background: var(--color-primary);
+}
+
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.layer[hidden] {
+  display: none;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim);
+  animation: scrim-in var(--t-med) var(--ease-out);
+}
+
+/*
+ * El cajon entra por la derecha, del lado del boton que lo abre. Respeta el notch y la
+ * barra de gestos con safe-area, y nunca pasa del 88 % del ancho: queda un borde de velo
+ * visible que se puede tocar para cerrar.
+ */
+.drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-5);
+  width: min(360px, 88vw);
+  padding:
+    max(var(--s-3), env(safe-area-inset-top))
+    max(var(--s-4), env(safe-area-inset-right))
+    max(var(--s-5), env(safe-area-inset-bottom))
+    var(--s-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--r-xl) 0 0 var(--r-xl);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-float);
+  animation: drawer-in var(--t-med) var(--ease-out);
+}
+
+.drawer:focus {
+  outline: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: var(--control-h);
+  height: var(--control-h);
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 50%;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.close:focus-visible {
+  border-radius: 50%;
+}
+
+/* Quien esta dentro y cuanto tiene: lo primero que se comprueba antes de pujar. */
+.account {
+  display: grid;
+  gap: var(--s-3);
+  justify-items: start;
+  padding: var(--s-4);
+  border-radius: var(--r-lg);
+  background: var(--color-surface-raised);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+.foot {
+  display: grid;
+  gap: var(--s-3);
+  margin-top: auto;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--color-border);
+}
+
+.footLink {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  min-height: var(--control-h);
+  padding: 0 14px;
+  border-radius: var(--r-sm);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.footLink:hover {
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .footLink:hover {
+    background: var(--color-surface-raised);
+    color: var(--color-text);
+  }
+}
+
+.footLink > svg {
+  color: var(--color-primary-text);
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes scrim-in {
+  from {
+    opacity: 0;
+  }
+}

@@ -1,36 +1,129 @@
-.page {
-  display: grid;
-  gap: 1.25rem;
-  margin: 0 auto;
-  max-width: 68rem;
-  padding: 1rem 0 2.5rem;
+/* Recogidas: paneles crema sobre el beige, con los tokens del tema claro. */
+.page h2,
+.page h3 {
+  margin: 0 0 var(--s-3);
 }
 
-.page h1 { margin: .65rem 0 0; }
-.page h2, .page h3 { margin: 0 0 .75rem; }
-.page small { display: block; opacity: .8; }
+.page small {
+  display: block;
+  color: var(--color-text-muted);
+}
 
 .panel {
   display: grid;
-  gap: .75rem;
-  padding: clamp(1rem, 3vw, 1.75rem);
-  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
-  border-radius: 1rem;
-  background: color-mix(in srgb, var(--eci-blue) 8%, transparent);
+  gap: var(--s-3);
+  min-width: 0;
+  padding: clamp(var(--s-4), 3vw, var(--s-5));
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  overflow-wrap: anywhere;
+}
+
+.list,
+.chat {
+  display: grid;
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row,
+.slot,
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
   min-width: 0;
 }
 
-.list, .chat { list-style: none; margin: 0; padding: 0; display: grid; gap: .65rem; }
-.row, .slot, .meta { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem; justify-content: space-between; }
-.row { padding: .75rem; border-radius: .65rem; color: inherit; text-decoration: none; border: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
-.row:hover { border-color: var(--eci-cyan); }
-.badge { border-radius: 2rem; padding: .25rem .65rem; border: 1px solid var(--eci-blue); font-size: .85rem; }
-.chat li { max-width: min(100%, 44rem); width: fit-content; padding: .8rem 1rem; overflow-wrap: anywhere; border-radius: .8rem; background: color-mix(in srgb, var(--eci-blue) 16%, transparent); }
-.chat p { margin: .35rem 0; white-space: pre-wrap; }
-.chat .own { justify-self: end; background: color-mix(in srgb, var(--eci-cyan) 17%, transparent); }
-.actions { display: grid; gap: 1.15rem; margin-top: .5rem; }
-.form { display: flex; flex-wrap: wrap; align-items: end; gap: .65rem; }
-.form label { display: grid; gap: .3rem; flex: 1 1 10rem; min-width: 0; }
-.form input, .form textarea { width: 100%; padding: .55rem; background: transparent; color: inherit; border: 1px solid color-mix(in srgb, currentColor 40%, transparent); border-radius: .45rem; font: inherit; color-scheme: dark; }
-.code { display: inline-block; padding: .25rem .5rem; margin: .25rem 0; border: 1px solid var(--eci-yellow); border-radius: .35rem; user-select: all; }
+.row > span:first-child {
+  min-width: 0;
+}
 
+/* Fila pulsable: 44 px minimo y borde visible al pasar o enfocar. */
+.row {
+  min-height: var(--control-h);
+  padding: var(--s-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-md);
+  background: var(--color-surface-raised);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--t-fast) linear;
+}
+
+.row:hover {
+  border-color: var(--eci-cyan-line);
+  text-decoration: none;
+}
+
+.slot {
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.chat li {
+  width: fit-content;
+  max-width: min(100%, 44rem);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--eci-blue-line);
+  border-radius: var(--r-md);
+  background: var(--color-info-bg);
+  overflow-wrap: anywhere;
+}
+
+.chat p {
+  margin: var(--s-1) 0;
+  white-space: pre-wrap;
+}
+
+/* Mensajes propios: a la derecha y en ambar suave. */
+.chat .own {
+  justify-self: end;
+  border-color: var(--eci-cyan-line);
+  background: var(--color-primary-soft);
+}
+
+.actions {
+  display: grid;
+  gap: var(--s-5);
+  margin-top: var(--s-2);
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  align-items: end;
+  gap: var(--s-3);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.success {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.success::before {
+  content: '✓ ';
+}
+
+.code {
+  display: inline-block;
+  margin: var(--s-1) 0;
+  padding: var(--s-1) var(--s-2);
+  border: 1px solid var(--eci-yellow-line);
+  border-radius: var(--r-sm);
+  background: var(--color-warning-bg);
+  color: var(--color-text);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  user-select: all;
+}

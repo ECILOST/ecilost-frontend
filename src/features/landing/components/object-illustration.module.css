@@ -1,0 +1,64 @@
+.art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.outline,
+.line,
+.lineThin {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.outline {
+  stroke-width: 3.5;
+}
+
+.line {
+  stroke-width: 4.5;
+}
+
+.lineThin {
+  stroke-width: 2.5;
+}
+
+.shine {
+  fill: none;
+  stroke: var(--color-highlight);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.fillPink {
+  fill: var(--deco-pink);
+}
+
+.fillYellow {
+  fill: var(--deco-yellow);
+}
+
+.fillBlue {
+  fill: var(--deco-blue);
+}
+
+.fillTeal {
+  fill: var(--deco-teal);
+}
+
+.fillPurple {
+  fill: var(--deco-purple);
+}
+
+.fillScreen {
+  fill: var(--color-success-bg);
+}
+
+.fillKey {
+  fill: var(--color-surface-raised);
+  stroke: var(--color-text);
+  stroke-width: 2;
+}

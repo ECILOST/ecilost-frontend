@@ -5,7 +5,7 @@
   border: 1px solid var(--eci-cyan-line);
   border-radius: var(--r-lg);
   background: var(--eci-surface);
-  box-shadow: 0 0 26px rgb(25 229 213 / 7%);
+  box-shadow: none;
 }
 
 .head {
@@ -79,7 +79,7 @@
   border: 0;
   border-bottom: 1px solid var(--eci-yellow-line);
   background: none;
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
   font: 800 1.25rem var(--font-display);
   outline: none;
 }
@@ -135,9 +135,9 @@
 }
 
 .on {
-  border-color: rgb(25 229 213 / 45%);
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
   background: var(--eci-cyan-soft);
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .stopped {

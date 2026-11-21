@@ -36,7 +36,7 @@ export function ItemDetailPage() {
   if (isPending) {
     return (
       <Page>
-        <Loading label="Cargando la ficha..." />
+        <Loading label="Cargando la ficha..." skeleton="detail" />
       </Page>
     );
   }

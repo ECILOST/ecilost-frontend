@@ -59,7 +59,7 @@
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: 700;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   font-variant-numeric: tabular-nums;
 }
 
@@ -74,13 +74,8 @@
 /* Con la ruleta activa el panel se enciende con los colores de las modalidades. */
 .panelOn {
   border-color: var(--eci-purple-line);
-  background:
-    radial-gradient(60% 120% at 100% 0%, rgb(123 92 255 / 18%), transparent 70%),
-    radial-gradient(50% 100% at 0% 100%, rgb(255 79 120 / 10%), transparent 70%),
-    var(--glass);
-  box-shadow:
-    var(--glass-shine),
-    0 0 50px -24px var(--eci-purple);
+  background: var(--glass);
+  box-shadow: var(--glass-shine);
 }
 
 .title {

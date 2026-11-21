@@ -19,10 +19,10 @@ const RULE_ICONS: Record<DynamicMode, [IconName, IconName, IconName]> = {
 
 const CONFETTI = [
   { color: 'var(--eci-yellow)', top: '12%', left: '9%', rotate: 30 },
-  { color: '#fff', top: '18%', left: '78%', rotate: -20 },
+  { color: 'var(--color-on-strong)', top: '18%', left: '78%', rotate: -20 },
   { color: 'var(--eci-cyan)', bottom: '16%', left: '12%', rotate: 60 },
   { color: 'var(--eci-purple)', bottom: '12%', right: '10%', rotate: 15 },
-  { color: '#fff', top: '9%', right: '30%', rotate: -40 },
+  { color: 'var(--color-on-strong)', top: '9%', right: '30%', rotate: -40 },
   { color: 'var(--eci-yellow)', bottom: '30%', right: '6%', rotate: 75 },
 ];
 

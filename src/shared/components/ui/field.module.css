@@ -18,11 +18,11 @@
 
 .required {
   margin-left: 2px;
-  color: var(--eci-pink);
+  color: var(--color-error);
 }
 
 .hint {
-  color: var(--eci-text-dim);
+  color: var(--color-text-muted);
   font-size: var(--text-sm);
 }
 
@@ -33,9 +33,11 @@
 .error {
   display: flex;
   gap: 6px;
-  color: var(--eci-pink);
+  align-items: flex-start;
+  color: var(--color-error);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .error::before {
@@ -49,10 +51,14 @@
   /* 44 px de alto: el minimo tactil, el mismo que el boton de al lado. */
   min-height: var(--control-h);
   padding: 9px var(--s-3);
-  border: 1px solid var(--eci-line-strong);
+  /*
+   * Borde derivado del texto tenue: --color-border-strong queda en ~1.6:1 sobre crema y un
+   * control necesita >= 3:1 (WCAG 1.4.11). Esta mezcla da ~3.6:1 sobre superficie.
+   */
+  border: 1px solid var(--color-border-input);
   border-radius: var(--r-sm);
-  background: var(--eci-surface);
-  color: var(--eci-text);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
   font-family: var(--font-text);
   font-size: var(--text-md);
   line-height: 1.4;
@@ -62,26 +68,34 @@
 }
 
 .control::placeholder {
-  color: var(--eci-text-dim);
+  color: var(--color-text-subtle);
 }
 
 .control:hover {
-  border-color: var(--eci-text-dim);
+  border-color: var(--color-text-muted);
 }
 
+/* Anillo propio con el token de foco: tambien al hacer clic, para saber donde se escribe. */
 .control:focus {
-  background: var(--eci-surface-high);
-  /* El anillo lo dibuja :focus-visible en base.css; aqui solo se refuerza el borde. */
-  border-color: var(--eci-cyan);
-  outline: none;
+  background: var(--eci-photo-plate);
+  border-color: var(--color-focus);
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
 }
 
 .control[aria-invalid='true'] {
-  border-color: var(--eci-pink);
+  border-color: var(--color-error);
+  border-width: 2px;
+  background: var(--eci-photo-plate);
+}
+
+.control[aria-invalid='true']:focus {
+  outline-color: var(--color-error);
 }
 
 .control:disabled {
-  opacity: 0.5;
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
   cursor: not-allowed;
 }
 
@@ -92,22 +106,22 @@
 }
 
 /*
- * La flecha va como imagen de fondo para poder quitar la del sistema, que en un tema oscuro
- * se pinta negra sobre negro en varios navegadores.
+ * La flecha va como imagen de fondo para pintarla igual en todos los navegadores. Un data URI
+ * no lee variables CSS: el trazo repite el valor de --color-text-subtle (#6b5f51).
  */
 .select {
   appearance: none;
   padding-right: var(--s-7);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238b95a9' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b5f51' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9.5l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--s-4) center;
   cursor: pointer;
 }
 
-/* El desplegable lo pinta el sistema: sin esto, sus opciones salen en blanco sobre blanco. */
+/* El desplegable lo pinta el sistema: se fija su fondo y su texto para que coincidan. */
 .select option {
-  background: var(--eci-surface-high);
-  color: var(--eci-text);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
 }
 
 .actions {

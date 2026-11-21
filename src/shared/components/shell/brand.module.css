@@ -1,18 +1,20 @@
-/* Logotipo: ECI · rayo · LOST, en Exo 2 extra negrita como en el diseño. */
+/* Logotipo: ECI · lupa · LOST, en la display redonda y en su peso mas alto. */
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.18em;
+  gap: 0.08em;
+  min-height: var(--control-h);
   font-family: var(--font-display);
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--eci-text);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: var(--color-text);
   text-decoration: none;
   white-space: nowrap;
 }
 
 .brand:hover {
-  color: var(--eci-text);
+  color: var(--color-text);
   text-decoration: none;
 }
 
@@ -21,18 +23,42 @@
 }
 
 .md {
-  font-size: 2.125rem;
+  font-size: 2rem;
 }
 
 .lg {
-  font-size: 2.625rem;
+  font-size: clamp(2.25rem, 6vw, 3rem);
 }
 
-.mark {
-  fill: var(--eci-orange);
+.lens {
+  flex: none;
+  overflow: visible;
   transition: transform var(--t-med) var(--ease-spring);
 }
 
-.brand:hover .mark {
-  transform: rotate(-10deg) scale(1.08);
+.glass {
+  fill: var(--color-primary);
+  stroke: var(--color-text);
+  stroke-width: 2.4;
 }
+
+.shine {
+  fill: none;
+  stroke: var(--color-highlight);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.handle {
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+
+@media (hover: hover) {
+  .brand:hover .lens {
+    transform: rotate(-12deg) scale(1.06);
+  }
+}
+

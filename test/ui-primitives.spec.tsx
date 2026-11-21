@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { Button } from '@/shared/components/ui/button';
 import { ConfirmDialog } from '@/shared/components/ui/confirm-dialog';
 import { Field, Input } from '@/shared/components/ui/field';
 
@@ -88,5 +89,42 @@ describe('ConfirmDialog', () => {
 
     expect(screen.getByRole('button', { name: /un momento/i })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Cancelar' })).toBeDisabled();
+  });
+});
+
+describe('Button', () => {
+  it('mientras carga se anuncia ocupado, sigue enfocable y no repite la accion', async () => {
+    const onClick = vi.fn();
+    const { rerender } = render(<Button onClick={onClick}>Guardar</Button>);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar' }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <Button onClick={onClick} loading>
+        Guardando...
+      </Button>,
+    );
+    const busy = screen.getByRole('button', { name: 'Guardando...' });
+    expect(busy).toHaveAttribute('aria-busy', 'true');
+    expect(busy).toHaveAttribute('aria-disabled', 'true');
+    expect(busy).toBeEnabled();
+
+    await userEvent.dblClick(busy);
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('cargando dentro de un formulario no lo vuelve a enviar', async () => {
+    const onSubmit = vi.fn((event: SubmitEvent) => event.preventDefault());
+    render(
+      <form onSubmit={(event) => onSubmit(event.nativeEvent as SubmitEvent)}>
+        <Button type="submit" loading>
+          Enviando...
+        </Button>
+      </form>,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Enviando...' }));
+    expect(onSubmit).not.toHaveBeenCalled();
   });
 });

@@ -6,6 +6,8 @@
  */
 export const routes = {
   login: '/login',
+  /** Portada publica: primera pantalla de quien llega sin sesion. */
+  landing: '/bienvenida',
   home: '/',
   /**
    * Destino del login en ecilost-auth-service (POST_LOGIN_REDIRECT_URL). Se conserva para
@@ -23,7 +25,8 @@ export const routes = {
   pickups: '/mis-recogidas',
   pickup: (roundId: string) => `/mis-recogidas/${encodeURIComponent(roundId)}`,
   staffPickups: '/gestion-recogidas',
-  staffPickup: (roundId: string) => `/gestion-recogidas/${encodeURIComponent(roundId)}`,
+  staffPickup: (roundId: string) =>
+    `/gestion-recogidas/${encodeURIComponent(roundId)}`,
   /** Perfil del estudiante: estadisticas, medallas y ultimas subastas. */
   profile: '/mi-perfil',
   /** Top semanal: los diez estudiantes con mas subastas ganadas desde el lunes. */

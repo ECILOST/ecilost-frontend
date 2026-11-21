@@ -1,10 +1,10 @@
 .page {
   display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   width: 100%;
-  max-width: var(--page-max);
+  /* Una sola columna de lectura: la bandeja es una lista, no un tablero. */
+  max-width: 760px;
   margin: 0 auto;
   padding: 30px var(--page-gutter) 38px;
 }
@@ -29,13 +29,18 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--eci-cyan);
-  font: 600 0.6875rem var(--font-text);
+  color: var(--color-primary-text);
+  font: 600 var(--text-sm) var(--font-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
   cursor: pointer;
+  /* Zona tactil de 44 px sin agrandar el texto. */
+  min-height: var(--control-h);
 }
 
 .markAll:disabled {
-  color: var(--eci-text-faint);
+  color: var(--color-text-subtle);
+  text-decoration: none;
   cursor: default;
 }
 
@@ -49,12 +54,11 @@
   align-items: flex-start;
   gap: 14px;
   padding: 16px;
-  border: 1px solid var(--glass-edge);
+  border: 1px solid var(--color-border);
   border-radius: 20px;
-  background: var(--glass);
-  color: var(--eci-text);
+  background: var(--color-surface);
+  color: var(--color-text);
   text-decoration: none;
-  box-shadow: var(--glass-shine);
 }
 
 a.item:hover {
@@ -65,23 +69,28 @@ a.item:hover {
 
 .unread {
   position: relative;
-  border-color: rgb(25 229 213 / 30%);
-  background:
-    radial-gradient(40% 140% at 0% 50%, rgb(25 229 213 / 10%), transparent 75%),
-    var(--glass);
+  border-color: var(--color-primary-border);
+  background: var(--color-surface-raised);
 }
 
-/* Punto de "sin leer": el color dice que es nuevo antes de leer el titulo. */
+.unread {
+  /* Espacio para el punto: sin esto se montaba sobre la hora. */
+  padding-right: 32px;
+}
+
+/*
+ * Sin leer: fondo mas claro, borde ambar oscuro y un punto plano. Sin resplandores: el
+ * halo de color competia con el texto del aviso.
+ */
 .unread::after {
   content: '';
   position: absolute;
-  top: 18px;
-  right: -4px;
+  top: 21px;
+  right: 14px;
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: var(--eci-cyan);
-  box-shadow: 0 0 10px var(--eci-cyan);
+  background: var(--color-primary-text);
 }
 
 .icon {
@@ -94,108 +103,44 @@ a.item:hover {
 }
 
 .pink {
-  background: rgb(255 79 120 / 20%);
-  color: var(--eci-pink-text);
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
-.cyan {
-  background: rgb(25 229 213 / 20%);
-  color: var(--eci-cyan);
-}
 
-.yellow {
-  background: rgb(255 200 74 / 20%);
-  color: var(--eci-yellow);
-}
 
 .blue {
-  background: rgb(43 107 255 / 25%);
-  color: var(--eci-blue-text);
+  background: var(--color-info-bg);
+  color: var(--color-info);
 }
 
 .green {
-  background: var(--eci-green-soft);
-  color: var(--eci-green-text);
+  background: var(--color-success-bg);
+  color: var(--color-success);
 }
 
 .text {
   display: grid;
   flex: 1;
   gap: 4px;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .itemTitle {
   font-family: var(--font-display);
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   font-weight: 700;
 }
 
 .body {
-  font-size: var(--text-sm);
+  font-size: var(--text-md);
   line-height: 1.5;
-  color: var(--eci-text-body);
+  color: var(--color-text-muted);
 }
 
 .time {
   flex: none;
-  font-size: var(--text-2xs);
-  color: var(--eci-text-faint);
-}
-
-/* --- Leyenda --------------------------------------------------------------------- */
-.legend {
-  display: grid;
-  gap: 14px;
-}
-
-.legendTitle {
-  font-size: 1.125rem;
-}
-
-.legendList {
-  display: grid;
-  gap: 12px;
-}
-
-.legendItem {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid color-mix(in srgb, var(--tone) 35%, transparent);
-  border-radius: 20px;
-  background:
-    radial-gradient(60% 140% at 0% 50%, color-mix(in srgb, var(--tone) 18%, transparent), transparent 75%),
-    var(--glass);
-  box-shadow: var(--glass-shine);
-}
-
-.legendItem strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  color: color-mix(in srgb, var(--tone) 45%, #fff);
-}
-
-.legendItem small {
   font-size: var(--text-xs);
-  color: var(--eci-text-soft);
-}
-
-.legendDot {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 11px;
-  background: var(--tone);
-  box-shadow: 0 0 16px -4px var(--tone);
-  color: #fff;
-}
-
-@media (width < 900px) {
-  .page {
-    grid-template-columns: 1fr;
-  }
+  color: var(--color-text-subtle);
 }

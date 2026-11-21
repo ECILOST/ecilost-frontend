@@ -209,10 +209,17 @@ export function ScheduleRoomPage() {
               Antes de cada ronda girarás una ruleta: holandesa, sobre cerrado o lote
               misterioso. Puedes activarlas después desde la sala.
             </small>
-            <span className={styles.modeChips} aria-hidden="true">
-              <Pill tone="pink">{MODE_META.DUTCH.glyph} {MODE_META.DUTCH.label}</Pill>
-              <Pill tone="blue">{MODE_META.SEALED.glyph} {MODE_META.SEALED.label}</Pill>
-              <Pill tone="purple">{MODE_META.MYSTERY.glyph} {MODE_META.MYSTERY.label}</Pill>
+            <span className={styles.modeChips}>
+              {/* Las capsulas repiten lo que ya dice el texto: decorativas. El enlace no. */}
+              <span aria-hidden="true">
+                <Pill tone="pink">{MODE_META.DUTCH.glyph} {MODE_META.DUTCH.label}</Pill>
+              </span>
+              <span aria-hidden="true">
+                <Pill tone="blue">{MODE_META.SEALED.glyph} {MODE_META.SEALED.label}</Pill>
+              </span>
+              <span aria-hidden="true">
+                <Pill tone="purple">{MODE_META.MYSTERY.glyph} {MODE_META.MYSTERY.label}</Pill>
+              </span>
               <Link to={routes.dynamicGuide} className={styles.guideLink}>
                 Ver cómo se juega
               </Link>

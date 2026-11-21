@@ -78,7 +78,7 @@ export function EditItemPage() {
   if (isPending) {
     return (
       <Page>
-        <Loading label="Cargando el objeto..." />
+        <Loading label="Cargando el objeto..." skeleton="detail" />
       </Page>
     );
   }

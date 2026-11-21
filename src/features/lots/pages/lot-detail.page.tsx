@@ -26,7 +26,7 @@ export function LotDetailPage() {
   if (isPending) {
     return (
       <Page>
-        <Loading label="Cargando el lote..." />
+        <Loading label="Cargando el lote..." skeleton="detail" />
       </Page>
     );
   }

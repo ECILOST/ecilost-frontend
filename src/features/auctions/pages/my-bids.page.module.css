@@ -1,5 +1,6 @@
 .page {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 22px;
   width: 100%;
   max-width: var(--page-max);
@@ -57,16 +58,12 @@
 
 .winning {
   border-color: var(--eci-green-line);
-  background:
-    radial-gradient(50% 140% at 0% 50%, rgb(47 227 154 / 12%), transparent 70%),
-    var(--glass);
+  background: var(--glass);
 }
 
 .outbid {
   border-color: var(--eci-pink-line);
-  background:
-    radial-gradient(50% 140% at 0% 50%, rgb(255 79 120 / 12%), transparent 70%),
-    var(--glass);
+  background: var(--glass);
 }
 
 .again {
@@ -96,9 +93,7 @@
   padding: 16px 18px;
   border: 1px solid color-mix(in srgb, var(--tone) 30%, transparent);
   border-radius: 22px;
-  background:
-    radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, var(--tone) 14%, transparent), transparent 70%),
-    var(--glass);
+  background: var(--glass);
   box-shadow: var(--glass-shine);
 }
 
@@ -125,7 +120,7 @@
 
 @media (width < 640px) {
   .summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -175,4 +170,33 @@
 /* "Ganada" va en contorno verde: ya no hay nada que hacer, solo recogerla. */
 .wonPill.wonPill {
   background: var(--eci-surface-high);
+}
+
+/*
+ * En el movil la fila no cabe en una linea (miniatura, nombre, monto y estado): el monto y
+ * la capsula bajan a una segunda linea, alineados a la derecha.
+ */
+@media (width < 560px) {
+  .row {
+    flex-wrap: wrap;
+    gap: var(--s-3);
+  }
+
+  .thumb.thumb {
+    width: 64px;
+    height: 64px;
+  }
+
+  .text {
+    flex-basis: calc(100% - 64px - var(--s-3));
+  }
+
+  .amount {
+    justify-items: start;
+    margin-left: calc(64px + var(--s-3));
+  }
+
+  .row > span:last-child {
+    margin-left: auto;
+  }
 }

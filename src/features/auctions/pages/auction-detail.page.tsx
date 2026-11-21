@@ -95,7 +95,7 @@ export function AuctionDetailPage() {
       />
 
       <div className={styles.page}>
-        {isPending ? <Loading label="Cargando el objeto..." /> : null}
+        {isPending ? <Loading label="Cargando el objeto..." skeleton="detail" /> : null}
         {isError ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : null}

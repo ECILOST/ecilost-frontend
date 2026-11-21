@@ -37,7 +37,7 @@ export function ManagedRoomsPage() {
 
       <Flash />
 
-      {isPending ? <Loading label="Cargando las salas..." /> : null}
+      {isPending ? <Loading label="Cargando las salas..." skeleton="list" /> : null}
 
       {error ? (
         <ErrorState error={error} onRetry={() => void refetch()} />
