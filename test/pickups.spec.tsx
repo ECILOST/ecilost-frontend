@@ -99,7 +99,7 @@ describe('pickup screens', () => {
     pickups.conversation.mockResolvedValue({ ...base, status: 'NEEDS_HELP' });
     pickups.message.mockRejectedValueOnce(new Error('Offline')).mockResolvedValue(undefined);
     open();
-    const input = await screen.findByLabelText('Pedir ayuda al personal');
+    const input = await screen.findByRole('textbox', { name: 'Pedir ayuda al personal' });
     await userEvent.type(input, '  ¿Dónde recojo?  ');
     await userEvent.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
     expect(await screen.findByRole('alert')).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('pickup screens', () => {
   it('lets staff reply to a request for help', async () => {
     pickups.conversation.mockResolvedValue({ ...base, status: 'NEEDS_HELP', title: undefined });
     open({ staff: true });
-    await userEvent.type(await screen.findByLabelText('Responder al ganador'), 'En recepción');
+    await userEvent.type(await screen.findByRole('textbox', { name: 'Responder al ganador' }), 'En recepción');
     await userEvent.click(screen.getByRole('button', { name: 'Enviar mensaje' }));
     await waitFor(() => expect(pickups.message).toHaveBeenCalledWith(true, 'round', 'En recepción'));
     expect(screen.getByText('Ganador')).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe('pickup screens', () => {
   it('lets staff confirm delivery with the entered code', async () => {
     pickups.conversation.mockResolvedValue({ ...base, status: 'BOOKED', slot });
     open({ staff: true });
-    await userEvent.type(await screen.findByLabelText('Código del ganador'), 'abcdefghijklmnop');
+    await userEvent.type(await screen.findByRole('textbox', { name: 'Código del ganador' }), 'abcdefghijklmnop');
     await userEvent.click(screen.getByRole('button', { name: 'Confirmar entrega' }));
     await waitFor(() => expect(pickups.deliver).toHaveBeenCalledWith('round', 'abcdefghijklmnop'));
   });
@@ -149,20 +149,20 @@ describe('pickup screens', () => {
     pickups.createSlot.mockRejectedValueOnce(new Error('Conflict')).mockResolvedValue(undefined);
     pickups.slots.mockResolvedValue([]);
     open({ staff: true, detail: false });
-    expect(await screen.findByText('Aún no hay horarios futuros.')).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText('Lugar'), { target: { value: 'Biblioteca' } });
-    fireEvent.change(screen.getByLabelText('Inicio'), { target: { value: '2035-01-01T10:00' } });
-    fireEvent.change(screen.getByLabelText('Fin'), { target: { value: '2035-01-01T11:00' } });
-    fireEvent.change(screen.getByLabelText('Cupos'), { target: { value: '4' } });
+    expect(await screen.findByText(/Aún no hay horarios futuros/)).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Lugar' }), { target: { value: 'Biblioteca' } });
+    fireEvent.change(screen.getByLabelText(/^Inicio/), { target: { value: '2035-01-01T10:00' } });
+    fireEvent.change(screen.getByLabelText(/^Fin/), { target: { value: '2035-01-01T11:00' } });
+    fireEvent.change(screen.getByRole('spinbutton', { name: 'Cupos' }), { target: { value: '4' } });
     await userEvent.click(screen.getByRole('button', { name: 'Agregar horario' }));
     expect(await screen.findByRole('alert')).toBeInTheDocument();
-    expect(screen.getByLabelText('Lugar')).toHaveValue('Biblioteca');
+    expect(screen.getByRole('textbox', { name: 'Lugar' })).toHaveValue('Biblioteca');
     await userEvent.click(screen.getByRole('button', { name: 'Agregar horario' }));
     expect(await screen.findByText('Horario guardado.')).toBeInTheDocument();
     expect(pickups.createSlot.mock.calls.at(-1)?.[0]).toEqual({
       location: 'Biblioteca', startsAt: '2035-01-01T15:00:00.000Z', endsAt: '2035-01-01T16:00:00.000Z', capacity: 4,
     });
-    expect(screen.getByLabelText('Lugar')).toHaveValue('');
+    expect(screen.getByRole('textbox', { name: 'Lugar' })).toHaveValue('');
   });
 
   it('retries staff slot errors without losing the pickup list', async () => {
