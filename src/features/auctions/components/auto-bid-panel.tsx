@@ -103,7 +103,6 @@ export function AutoBidPanel({
             <span className={styles.label}>Nuevo límite máximo</span>
             <input
               inputMode="numeric"
-              autoFocus
               value={draft}
               placeholder={String(limit)}
               aria-invalid={error ? true : undefined}

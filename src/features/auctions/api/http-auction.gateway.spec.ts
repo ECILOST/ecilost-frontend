@@ -599,6 +599,27 @@ describe('createHttpAuctionGateway', () => {
     ]);
   });
 
+  it('elige el cierre más reciente aunque las rondas no lleguen ordenadas por fecha', async () => {
+    const { gateway } = setup(room({ status: 'CLOSED', rounds: [
+      round({ closedAt: '2030-10-01T21:09:00.000Z' }),
+      round({ id: 'round-2', position: 2, closedAt: '2030-10-01T21:03:00.000Z' }),
+    ] }));
+    expect((await gateway.roomSummary('room-1')).closedAt).toBe('2030-10-01T21:09:00.000Z');
+  });
+
+  it('prefetch espera los lotes y reutiliza su portada sin consultar el detalle', async () => {
+    const { gateway, lots } = setup();
+    const list = vi.fn().mockResolvedValue([
+      { id: 'lot-1', name: 'Lote precargado', items: [], coverUrl: 'https://blob/lot.png' },
+      { id: 'unrequested', name: 'Otro lote', items: [] },
+    ]);
+    lots.list = list;
+    const result = await gateway.items();
+    expect(result[1]).toMatchObject({ name: 'Lote precargado', imageUrl: 'https://blob/lot.png' });
+    expect(list).toHaveBeenCalledWith(['lot-1']);
+    expect(lots.findById).not.toHaveBeenCalled();
+  });
+
   it('la sala en vivo trae la actividad publica de engagement, y sin ella se pinta igual', async () => {
     const detail = room({ status: 'ACTIVE', rounds: [round({ status: 'ACTIVE', hasBids: true, currentPrice: '120.00' })] });
     const base = setup(detail);
