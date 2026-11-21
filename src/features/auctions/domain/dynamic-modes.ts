@@ -39,7 +39,7 @@ export const MODE_META: Record<Exclude<RoundMode, 'CLASSIC'>, ModeMeta> = {
     rules: [
       'Puedes pujar una sola vez',
       'Nadie ve las pujas de los demás',
-      'Al cerrar, gana la puja más alta',
+      'Al sellar todos o vencer el tiempo, gana el sobre más alto',
     ],
     color: 'var(--eci-blue)',
     tone: 'blue',

@@ -43,13 +43,14 @@ export interface RoundEntry {
  * Que cerro una ronda: el vencimiento de su reloj, una compra inmediata o, en una ronda
  * holandesa, alguien que pulso "Lo quiero".
  */
-export type RoundCloseReason = 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM';
+export type RoundCloseReason = 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM' | 'ALL_SEALED';
 
 /**
  * Como se juega una ronda (subastas dinamicas). `CLASSIC` es la subasta ascendente de
  * siempre y el modo de toda ronda que no paso por la ruleta.
  */
 export type RoundMode = 'CLASSIC' | 'DUTCH' | 'SEALED' | 'MYSTERY';
+export type ScheduledRoundMode = RoundMode | 'ROULETTE';
 
 /** Lo que puede marcar la ruleta. El comodin no es un modo: obliga a girar otra vez. */
 export type SpinSegment = 'DUTCH' | 'SEALED' | 'MYSTERY' | 'WILDCARD';
@@ -160,6 +161,7 @@ export interface ScheduleRoomRequest {
   /** Subastas dinamicas: activa la ruleta de modalidades desde que se programa. */
   dynamicModes?: boolean;
   rounds: Array<{
+    mode?: ScheduledRoundMode;
     /**
      * El servicio admite varias entradas por ronda, pero la pantalla pone una sola: la sala
      * cambia de objeto en cada ronda, como la describe el deck.

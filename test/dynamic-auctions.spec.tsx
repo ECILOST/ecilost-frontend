@@ -61,6 +61,16 @@ describe('Subastas dinamicas: el dueño de la sala', () => {
     expect(screen.queryByRole('button', { name: /girar ruleta/i })).not.toBeInTheDocument();
   }, 20_000);
 
+  it('el dueño confirma el inicio anticipado y puede entrar en vivo', async () => {
+    const room = roomFixture({ isOwner: true });
+    renderApp({ route: '/programacion/room-1', container: staff(createFakeRoomGateway({ rooms: [room] })) });
+    await userEvent.click(await screen.findByRole('button', { name: 'Iniciar subasta ahora' }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText(/se cerrará el registro/i)).toBeInTheDocument();
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Iniciar ahora' }));
+    expect(await screen.findByRole('link', { name: 'Ver sala en vivo' })).toBeInTheDocument();
+  });
+
   it('otro funcionario no ve la ruleta de una sala que no programo', async () => {
     renderApp({
       route: '/programacion/room-1',
@@ -70,7 +80,7 @@ describe('Subastas dinamicas: el dueño de la sala', () => {
     expect(screen.queryByText(/subastas dinámicas/i)).not.toBeInTheDocument();
   });
 
-  it('puede activarla desde que programa la sala', async () => {
+  it('puede elegir la ruleta automática al programar la ronda', async () => {
     const scheduled: ScheduleRoomRequest[] = [];
     renderApp({ route: '/programacion/nueva', container: staff(createFakeRoomGateway({ scheduled })) });
 
@@ -79,12 +89,12 @@ describe('Subastas dinamicas: el dueño de la sala', () => {
     await userEvent.type(screen.getByLabelText(/aforo máximo/i), '25');
     await userEvent.selectOptions(screen.getByLabelText(/objeto o lote de la ronda 1/i), 'ITEM:item-1');
     await userEvent.type(screen.getByLabelText(/precio mínimo/i), '50000');
-    await userEvent.click(screen.getByRole('switch', { name: 'Subastas dinámicas' }));
+    await userEvent.selectOptions(screen.getByLabelText('Modalidad de la ronda 1'), 'ROULETTE');
     await userEvent.click(screen.getByRole('button', { name: 'Programar sala' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Programar la sala' }));
 
     await screen.findByText(/quedó programada/);
-    expect(scheduled[0]).toMatchObject({ name: 'Subasta dinámica', dynamicModes: true });
+    expect(scheduled[0]).toMatchObject({ name: 'Subasta dinámica', rounds: [expect.objectContaining({ mode: 'ROULETTE' })] });
   });
 });
 

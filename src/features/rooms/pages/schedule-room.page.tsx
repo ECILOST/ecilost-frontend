@@ -1,3 +1,5 @@
+import { MODE_META } from '@/features/auctions/domain/dynamic-modes';
+import { Pill } from '@/shared/components/ui/pill';
 import { useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { routes } from '@/app/routes';
@@ -12,7 +14,6 @@ import { Field, FormActions, Input, Select } from '@/shared/components/ui/field'
 import { Icon } from '@/shared/components/ui/icon';
 import { Notice } from '@/shared/components/ui/notice';
 import { Page, PageHeader } from '@/shared/components/ui/page';
-import { Toggle } from '@/shared/components/ui/toggle';
 import {
   hasErrors,
   toScheduleRequest,
@@ -22,13 +23,11 @@ import {
   type ScheduleErrors,
 } from '../domain/schedule-draft';
 import { AuctionableKind } from '../domain/room-status';
-import { ROOM_NAME_MAX } from '../model/room';
+import { ROOM_NAME_MAX, type ScheduledRoundMode } from '../model/room';
 import { UnavailableItemsDialog } from '../components/unavailable-items-dialog';
 import { useAuctionables, type Auctionable } from '../hooks/use-auctionables';
 import { useScheduleRoom } from '../hooks/use-schedule-room';
 import styles from './schedule-room.page.module.css';
-import { Pill } from '@/shared/components/ui/pill';
-import { MODE_META } from '@/features/auctions/domain/dynamic-modes';
 
 const NO_ERRORS: ScheduleErrors = { rounds: {} };
 
@@ -197,29 +196,14 @@ export function ScheduleRoomPage() {
         </div>
 
         <div className={styles.dynamicModes}>
-          <Toggle
-            checked={draft.dynamicModes ?? false}
-            label="Subastas dinámicas"
-            onChange={(dynamicModes) => update({ dynamicModes })}
-          />
           <span>
-            <strong>Subastas dinámicas</strong>
+            <strong>Modalidades de subasta</strong>
             <br />
-            <small>
-              Antes de cada ronda girarás una ruleta: holandesa, sobre cerrado o lote
-              misterioso. Puedes activarlas después desde la sala.
-            </small>
+            <small>Elige la modalidad en cada ronda. Con Ruleta, el sistema elige una de las tres dinámicas.</small>
             <span className={styles.modeChips}>
-              {/* Las capsulas repiten lo que ya dice el texto: decorativas. El enlace no. */}
-              <span aria-hidden="true">
-                <Pill tone="pink">{MODE_META.DUTCH.glyph} {MODE_META.DUTCH.label}</Pill>
-              </span>
-              <span aria-hidden="true">
-                <Pill tone="blue">{MODE_META.SEALED.glyph} {MODE_META.SEALED.label}</Pill>
-              </span>
-              <span aria-hidden="true">
-                <Pill tone="purple">{MODE_META.MYSTERY.glyph} {MODE_META.MYSTERY.label}</Pill>
-              </span>
+              <Pill tone="pink">{MODE_META.DUTCH.glyph} {MODE_META.DUTCH.label}</Pill>
+              <Pill tone="blue">{MODE_META.SEALED.glyph} {MODE_META.SEALED.label}</Pill>
+              <Pill tone="purple">{MODE_META.MYSTERY.glyph} {MODE_META.MYSTERY.label}</Pill>
               <Link to={routes.dynamicGuide} className={styles.guideLink}>
                 Ver cómo se juega
               </Link>
@@ -276,8 +260,26 @@ export function ScheduleRoomPage() {
                   </Field>
 
                   <Field
+                    label={`Modalidad de la ronda ${index + 1}`}
+                    hint={round.mode === 'ROULETTE'
+                      ? 'El servidor elegirá al programar entre holandesa, sobre cerrado y lote misterioso.'
+                      : undefined}
+                  >
+                    <Select
+                      value={round.mode ?? 'CLASSIC'}
+                      disabled={schedule.isPending}
+                      onChange={(event) => updateRound(round.id, { mode: event.target.value as ScheduledRoundMode })}
+                    >
+                      <option value="CLASSIC">Normal</option>
+                      <option value="SEALED">Sobre cerrado</option>
+                      <option value="DUTCH">Holandesa</option>
+                      <option value="MYSTERY">Lote misterioso</option>
+                      <option value="ROULETTE">Ruleta</option>
+                    </Select>
+                  </Field>
+                  <Field
                     label="Precio mínimo"
-                    hint="En ECICoin, sin centavos. La primera puja debe alcanzarlo; después, cada puja suma al menos 100."
+                    hint="En ECICoin, sin centavos. Es el mínimo por el que se adjudica el objeto o lote."
                     error={errors.rounds[round.id]?.startingPrice}
                     required
                   >
@@ -295,9 +297,11 @@ export function ScheduleRoomPage() {
                     />
                   </Field>
 
-                  <Field
-                    label="Compra inmediata"
-                    hint="Opcional. Mayor que el precio mínimo: quien lo pague se lleva la ronda al instante."
+                  {round.mode !== 'SEALED' && <Field
+                    label={round.mode === 'DUTCH' ? 'Precio de salida' : 'Compra inmediata'}
+                    hint={round.mode === 'DUTCH'
+                      ? 'Opcional. Si lo dejas vacío, la ronda empieza al doble del mínimo.'
+                      : 'Opcional. Debe ser mayor que el precio mínimo.'}
                     error={errors.rounds[round.id]?.buyNowPrice}
                   >
                     <Input
@@ -312,7 +316,7 @@ export function ScheduleRoomPage() {
                         })
                       }
                     />
-                  </Field>
+                  </Field>}
                 </div>
                 {draft.rounds.length > 1 ? (
                   <Button

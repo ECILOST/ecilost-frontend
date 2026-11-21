@@ -26,6 +26,9 @@ export interface RoomGateway {
    */
   schedule(request: ScheduleRoomRequest): Promise<RoomDetail>;
 
+  /** El dueño adelanta la apertura al momento actual. */
+  start(roomId: string): Promise<RoomDetail>;
+
   /**
    * Subastas dinamicas: `PATCH /rooms/:id/dynamic-modes`. Solo el dueño de la sala (quien la
    * programo); a otro funcionario el servicio le responde 403.

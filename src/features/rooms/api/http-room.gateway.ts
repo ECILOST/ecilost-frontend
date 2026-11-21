@@ -17,6 +17,8 @@ export function createHttpRoomGateway(http: HttpClient): RoomGateway {
     schedule: (request: ScheduleRoomRequest) =>
       http.post<RoomDetail>('/rooms', request),
 
+    start: (roomId: string) => http.post<RoomDetail>(`/rooms/${roomId}/start`),
+
     setDynamicModes: async (roomId: string, enabled: boolean) => {
       await http.patch(`/rooms/${roomId}/dynamic-modes`, { enabled });
     },

@@ -87,7 +87,7 @@ export function SealedResultsDialog({
                 >
                   <span className={styles.podiumWho}>
                     {row.winner ? <Icon name="trophy" size={18} /> : null}
-                    {row.mine ? 'Tú' : `Participante ${row.rank}`}
+                    {row.mine ? 'Tú' : row.winner ? 'Ganador' : `Participante ${row.rank}`}
                   </span>
                   <strong className={styles.podiumAmount}>
                     {formatCoins(row.amount)}
@@ -111,7 +111,7 @@ export function SealedResultsDialog({
                     ].join(' ')}
                   >
                     <strong>{row.rank}</strong>
-                    <span>{row.mine ? 'Tú' : `Participante ${row.rank}`}</span>
+                    <span>{row.mine ? 'Tú' : row.winner ? 'Ganador' : `Participante ${row.rank}`}</span>
                     <strong>{formatCoins(row.amount)}</strong>
                   </li>
                 ))}

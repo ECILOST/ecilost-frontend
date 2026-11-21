@@ -1,12 +1,14 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
-import { buttonClass } from '@/shared/components/ui/button';
+import { Button, buttonClass } from '@/shared/components/ui/button';
 import { Coin, CoinAmount } from '@/shared/components/ui/coin';
 import { ItemArt } from '@/shared/components/ui/item-art';
 import { Pill } from '@/shared/components/ui/pill';
 import { APP_TIME_ZONE } from '@/shared/format/date';
+import { SealedResultsDialog } from '../../components/dynamic/sealed-results-dialog';
 import { RoomChat } from '../../components/room-chat';
 import { useRoomSummary } from '../../hooks/use-room';
 import type { Room, RoomOutcome, RoomSummary } from '../../model/auction';
@@ -103,6 +105,8 @@ export function PublicRoomSummary({ summary }: { summary: RoomSummary }) {
 
 /** Resumen al cerrar la sala: que se gano, que se perdio y cuanto se gasto. */
 export function RoomFinishedView({ room }: { room: Room }) {
+  const finalRound = room.rounds[room.rounds.length - 1];
+  const [showSealedResult, setShowSealedResult] = useState(finalRound?.closeReason === 'ALL_SEALED');
   const {
     data: summary,
     isPending,
@@ -170,6 +174,14 @@ export function RoomFinishedView({ room }: { room: Room }) {
         ) : null}
       </div>
 
+      {finalRound?.mode === 'SEALED' && finalRound.status === 'CLOSED' && (
+        <>
+          <Button variant="secondary" onClick={() => setShowSealedResult(true)}>
+            Ver apertura de sobres
+          </Button>
+          {showSealedResult && <SealedResultsDialog round={finalRound} onClose={() => setShowSealedResult(false)} />}
+        </>
+      )}
       <h2 className={styles.resumeTitle}>Resumen de la sala</h2>
       <ul className={styles.resume}>
         {summary.rows.map((row) => {

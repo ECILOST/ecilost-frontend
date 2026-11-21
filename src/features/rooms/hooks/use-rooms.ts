@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { auctionKeys } from '@/features/auctions/hooks/auction-keys';
 import { useContainer } from '@/app/providers/container-provider';
 import type { RoomDetail, RoomSummary } from '../model/room';
 
@@ -40,6 +41,20 @@ export function useSetDynamicModes(roomId: string) {
   return useMutation({
     mutationFn: (enabled: boolean) => rooms.setDynamicModes(roomId, enabled),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: roomKeys.detail(roomId) }),
+  });
+}
+
+/** Actualiza la ficha y las vistas de subasta cuando el dueño adelanta el inicio. */
+export function useStartRoom(roomId: string) {
+  const { rooms } = useContainer();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => rooms.start(roomId),
+    onSuccess: (room) => {
+      queryClient.setQueryData(roomKeys.detail(roomId), room);
+      void queryClient.invalidateQueries({ queryKey: roomKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: auctionKeys.all });
+    },
   });
 }
 

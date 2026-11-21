@@ -72,7 +72,7 @@ export interface Round {
    * Solo cerrada: `BUY_NOW` si alguien la compro de inmediato (HU-25), `DUTCH_CLAIM` si en una
    * holandesa alguien pulso "Lo quiero".
    */
-  closeReason: 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM' | null;
+  closeReason: 'EXPIRED' | 'BUY_NOW' | 'DUTCH_CLAIM' | 'ALL_SEALED' | null;
   /** Solo cerrada: si se adjudico o quedo desierta. Es publico: no dice a quien. */
   result: 'AWARDED' | 'DESERTED' | null;
   /** Subastas dinamicas: como se juega. Sin ruleta, siempre `CLASSIC`. */

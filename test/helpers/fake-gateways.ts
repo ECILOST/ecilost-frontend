@@ -566,6 +566,7 @@ export function createFakeRoomGateway(fake: FakeRooms = {}): RoomGateway {
           ...roomFixture().rounds[0],
           id: `round-${index + 1}`,
           position: index + 1,
+          mode: round.mode === 'ROULETTE' ? 'MYSTERY' : round.mode ?? 'CLASSIC',
           startingPrice: `${round.startingPrice}.00`,
           currentPrice: `${round.startingPrice}.00`,
           entries: round.entries,
@@ -574,6 +575,12 @@ export function createFakeRoomGateway(fake: FakeRooms = {}): RoomGateway {
       rooms.push(room);
 
       return Promise.resolve(room);
+    },
+    start: async (roomId) => {
+      const room = rooms.find((candidate) => candidate.id === roomId);
+      if (!room) throw new Error('La sala no existe.');
+      room.status = RoomStatus.ACTIVE;
+      return room;
     },
     setDynamicModes: (roomId: string, enabled: boolean) => {
       const room = rooms.find((candidate) => candidate.id === roomId);

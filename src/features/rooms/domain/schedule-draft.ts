@@ -1,6 +1,6 @@
 import { isValidAmount } from '@/features/wallet/domain/ecicoin';
 import { parseBogotaLocal } from '@/shared/format/date';
-import { ROOM_NAME_MAX, type RoundEntry, type ScheduleRoomRequest } from '../model/room';
+import { ROOM_NAME_MAX, type RoundEntry, type ScheduledRoundMode, type ScheduleRoomRequest } from '../model/room';
 
 /**
  * El formulario de programar sala tal como lo escribe el funcionario: todo texto, porque asi
@@ -11,6 +11,7 @@ export interface RoundDraft {
   id: string;
   /** `KIND:catalogId` de la opcion elegida, o vacio. */
   entry: string;
+  mode?: ScheduledRoundMode;
   /** Precio minimo en ECICoin, tal como se escribio. */
   startingPrice: string;
   /** Precio de compra inmediata (HU-24), opcional: vacio si la ronda no la ofrece. */
@@ -79,7 +80,7 @@ export function validateDraft(draft: ScheduleDraft, now = new Date()): ScheduleE
 
     // Como en el servicio: entero, y mayor que el minimo para que comprar no salga mas
     // barato que pujar.
-    const buyNow = round.buyNowPrice?.trim() ?? '';
+    const buyNow = round.mode === 'SEALED' ? '' : round.buyNowPrice?.trim() ?? '';
     if (buyNow && !isValidAmount(buyNow))
       roundErrors.buyNowPrice = 'Escribe un precio entero mayor que cero, sin centavos.';
     else if (buyNow && isValidAmount(round.startingPrice) && Number(buyNow) <= Number(round.startingPrice.trim()))
@@ -102,7 +103,8 @@ export function toScheduleRequest(draft: ScheduleDraft): ScheduleRoomRequest {
       entries: [parseEntry(round.entry)],
       startingPrice: Number(round.startingPrice.trim()),
       // Solo viaja si se escribio: sin el campo, la ronda no ofrece compra inmediata.
-      ...(round.buyNowPrice?.trim() ? { buyNowPrice: Number(round.buyNowPrice.trim()) } : {}),
+      ...(round.mode && round.mode !== 'CLASSIC' ? { mode: round.mode } : {}),
+      ...(round.mode !== 'SEALED' && round.buyNowPrice?.trim() ? { buyNowPrice: Number(round.buyNowPrice.trim()) } : {}),
     })),
     // Solo se manda si se activo: un servicio anterior no conoce el campo y lo rechazaria.
     ...(draft.dynamicModes ? { dynamicModes: true } : {}),

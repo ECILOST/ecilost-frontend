@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { formatEcicoin } from '@/features/wallet/domain/ecicoin';
 import { ErrorState } from '@/shared/components/error-state';
 import { Flash } from '@/shared/components/flash';
 import { Loading } from '@/shared/components/loading';
-import { buttonClass } from '@/shared/components/ui/button';
+import { Button, buttonClass } from '@/shared/components/ui/button';
+import { ConfirmDialog } from '@/shared/components/ui/confirm-dialog';
+import { MODE_META } from '@/features/auctions/domain/dynamic-modes';
 import { Pill } from '@/shared/components/ui/pill';
 import { BackLink, Page, PageHeader } from '@/shared/components/ui/page';
 import { formatDateTime } from '@/shared/format/date';
@@ -15,19 +18,20 @@ import {
   AUCTIONABLE_KIND_LABELS,
   ROUND_STATUS_LABELS,
 } from '../domain/room-status';
-import { useRoomDetail } from '../hooks/use-rooms';
+import { useRoomDetail, useStartRoom } from '../hooks/use-rooms';
 import styles from './managed-room-detail.page.module.css';
 
 /**
  * Ficha de una sala programada (HU-15): cuando empieza, cuanto cupo le queda y que se
  * subasta en cada ronda, en orden y con su precio minimo.
  *
- * No hay acciones: el servicio no publica forma de editar ni de cancelar una sala, y la sala
- * avanza sola por sus estados (HU-18).
+ * El dueño puede adelantar el inicio y seguir la sala en vivo.
  */
 export function ManagedRoomDetailPage() {
   const { id = '' } = useParams<{ id: string }>();
   const { data: room, isPending, error, refetch } = useRoomDetail(id);
+  const start = useStartRoom(id);
+  const [confirmStart, setConfirmStart] = useState(false);
 
   if (isPending) {
     return (
@@ -60,13 +64,31 @@ export function ManagedRoomDetailPage() {
         <div className={styles.chips}>
           <RoomStatusBadge status={room.status} />
           <span className={styles.meta}>
-            Inicia el {formatDateTime(room.startsAt)}
+            {room.status === 'SCHEDULED' ? 'Inicia el' : 'Inicio de la sala'} {formatDateTime(room.startsAt)}
           </span>
           <span className={styles.meta}>
             {room.admittedCount} de {room.maximumCapacity} cupos ocupados
           </span>
         </div>
       </div>
+
+      {room.isOwner && room.status === 'SCHEDULED' && (
+        <div>
+          <Button onClick={() => { start.reset(); setConfirmStart(true); }}>Iniciar subasta ahora</Button>
+          <ConfirmDialog
+            open={confirmStart}
+            title="¿Iniciar la subasta ahora?"
+            confirmLabel="Iniciar ahora"
+            tone="primary"
+            busy={start.isPending}
+            onCancel={() => setConfirmStart(false)}
+            onConfirm={() => start.mutate(undefined, { onSuccess: () => setConfirmStart(false) })}
+          >
+            La primera ronda empezará y se cerrará el registro. Solo podrán pujar los estudiantes ya admitidos.
+            {start.isError && <ErrorState error={start.error} />}
+          </ConfirmDialog>
+        </div>
+      )}
 
       {/* El dueño sigue su sala en vivo, y despues relee el chat. */}
       {room.isOwner &&
@@ -83,7 +105,8 @@ export function ManagedRoomDetailPage() {
         </Link>
       ) : null}
 
-      {room.isOwner ? <DynamicModesPanel room={room} /> : null}
+      {room.isOwner && (room.dynamicModesEnabled || !room.rounds.some((round) => round.mode && round.mode !== 'CLASSIC'))
+        ? <DynamicModesPanel room={room} /> : null}
 
       <div className={styles.section}>
         <h2 className={styles.sectionTitle}>Rondas ({room.rounds.length})</h2>
@@ -104,6 +127,9 @@ export function ManagedRoomDetailPage() {
                     <EntryName entry={entry} />
                   </p>
                 ))}
+                {round.mode && round.mode !== 'CLASSIC' && (
+                  <Pill tone={MODE_META[round.mode].tone}>{MODE_META[round.mode].label}</Pill>
+                )}
                 <p className={styles.price}>
                   Precio mínimo{' '}
                   <strong className="u-numeric">
@@ -120,8 +146,7 @@ export function ManagedRoomDetailPage() {
       </div>
 
       <p className={styles.note}>
-        Una sala programada no se puede editar ni cancelar desde aquí: se abre
-        sola a su hora, cierra el registro y avanza ronda por ronda.
+        La sala se abre a su hora o cuando su dueño adelanta el inicio. Al abrirse se cierra el registro y empieza la primera ronda.
       </p>
     </Page>
   );
