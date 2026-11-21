@@ -171,6 +171,13 @@
 
   --grad-cyan: linear-gradient(180deg, var(--palette-amber-300), var(--palette-amber-400));
   --grad-coin: linear-gradient(135deg, var(--eci-yellow), var(--eci-orange));
+
+  /* Moneda ECICoin (componente Coin): canto, borde, cara, letra y brillo. */
+  --coin-edge: #9a5f05;
+  --coin-rim: #d9930f;
+  --coin-face: #f8c947;
+  --coin-ink: #7a4f00;
+  --coin-shine: #fff6d6;
   --grad-avatar: linear-gradient(135deg, #f08a3a, var(--palette-orange));
 
   /* Tintes de capsula: mismo color, fondo suave. */

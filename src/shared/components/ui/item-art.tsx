@@ -1,5 +1,6 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import styles from './item-art.module.css';
+import { ObjectIllustration, objectKindFor } from './object-illustration';
 import { PhotoPlate } from './photo-plate';
 
 /**
@@ -44,11 +45,13 @@ function initial(label: string): string {
   return (match ? match[0] : label.charAt(0) || '?').toUpperCase();
 }
 
-export type ItemArtVariant = 'card' | 'hero' | 'thumb' | 'plain';
+export type ItemArtVariant = 'card' | 'object' | 'hero' | 'thumb' | 'plain';
 
 /**
  * El objeto sobre su collage de manchas.
  *
+ * - `object`: como los ejemplos de la portada (catalogo "ECI LOST"): tres manchas planas y
+ *   el objeto en un plato blanco con aro. Para las tarjetas de subasta.
  * - `card`: dos manchas grandes, para las tarjetas del catalogo.
  * - `hero`: cuatro manchas, para el objeto en subasta y la ficha.
  * - `thumb`: dos degradados radiales, para miniaturas de listas.
@@ -66,6 +69,7 @@ export function ItemArt({
   className,
   children,
   colors,
+  hint,
 }: {
   seed: string;
   label: string;
@@ -78,6 +82,8 @@ export function ItemArt({
   children?: ReactNode;
   /** Colores fijos en vez de los del hash: el lote misterioso se pinta siempre en violeta. */
   colors?: [string, string, string, string];
+  /** Categoria del objeto: ayuda a elegir su dibujo cuando no tiene fotografia. */
+  hint?: string | null;
 }) {
   const [c1, c2, c3, c4] = colors ?? artColors(seed);
   // Un enlace firmado vencido responde 403: en vez de una imagen rota se pinta el marcador.
@@ -90,6 +96,44 @@ export function ItemArt({
     '--c3': c3,
     '--c4': c4,
   } as CSSProperties;
+
+  // Sin foto, el dibujo del objeto si se reconoce por su nombre o categoria. El lote
+  // misterioso ('?') nunca: dibujarlo revelaria lo que esta oculto.
+  const placeholderKind = image || label === '?' ? null : objectKindFor(label, hint);
+
+  if (variant === 'object') {
+    const kind = placeholderKind;
+    return (
+      <div
+        className={[styles.art, styles.object, dimmed ? styles.dimmed : '', className]
+          .filter(Boolean)
+          .join(' ')}
+        style={style}
+      >
+        <span className={`${styles.blob} ${styles.b1}`} aria-hidden="true" />
+        <span className={`${styles.blob} ${styles.b2}`} aria-hidden="true" />
+        <span className={`${styles.blob} ${styles.b3}`} aria-hidden="true" />
+        <span className={styles.dish}>
+          {image ? (
+            <img
+              className={styles.dishPhoto}
+              src={image}
+              alt={label}
+              loading="lazy"
+              onError={() => setFailedSrc(image)}
+            />
+          ) : kind ? (
+            <ObjectIllustration kind={kind} />
+          ) : (
+            <span className={styles.dishInitial} aria-hidden="true">
+              {initial(label)}
+            </span>
+          )}
+        </span>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -131,7 +175,13 @@ export function ItemArt({
       ) : variant === 'thumb' ? null : (
         // Decorativo: el nombre del objeto siempre esta escrito al lado, en su titulo.
         <span className={styles.placeholder} aria-hidden="true">
-          <span className={styles.token}>{initial(label)}</span>
+          <span className={styles.token}>
+            {placeholderKind ? (
+              <ObjectIllustration kind={placeholderKind} />
+            ) : (
+              initial(label)
+            )}
+          </span>
           <span className={styles.placeholderLabel}>{label}</span>
         </span>
       )}

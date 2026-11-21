@@ -3,7 +3,7 @@ import { routes } from '@/app/routes';
 import { Brand } from '@/shared/components/shell/brand';
 import { buttonClass } from '@/shared/components/ui/button';
 import { ObjectCard, type ExampleObject } from '../components/object-card';
-import { ObjectIllustration } from '../components/object-illustration';
+import { ObjectIllustration } from '@/shared/components/ui/object-illustration';
 import styles from './landing.page.module.css';
 
 const MAIN_ID = 'contenido';

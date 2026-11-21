@@ -13,33 +13,56 @@ export function formatCoins(amount: number | string): string {
   return SHORT.format(value);
 }
 
-/** La moneda amarilla. Decorativa: la cifra de al lado es la que informa. */
+/**
+ * El ECICoin: una moneda de verdad y no un circulo amarillo. Canto dorado oscuro, cara
+ * dorada, aro grabado y la "E" de ECICoin en relieve (sin barras: con ellas se leia como el
+ * simbolo del euro). Decorativa: la cifra de al lado es la que informa.
+ *
+ * En tamaños pequeños (`flat`) se quitan el aro grabado y el brillo: a 13 px solo ensucian,
+ * y lo que se reconoce es el canto y la letra.
+ */
 export function Coin({
   size = 16,
   flat = false,
+  className,
 }: {
   size?: number;
   flat?: boolean;
+  className?: string;
 }) {
   return (
-    <span
-      className={[styles.coin, flat ? styles.flat : '']
-        .filter(Boolean)
-        .join(' ')}
-      style={{ width: size, height: size }}
+    <svg
+      className={[styles.coin, className].filter(Boolean).join(' ')}
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
       aria-hidden="true"
-    />
+      focusable="false"
+    >
+      {/* Canto: el grosor de la moneda asoma abajo. */}
+      <circle className={styles.edge} cx="16" cy="17" r="15" />
+      <circle className={styles.rim} cx="16" cy="15.5" r="14.5" />
+      <circle className={styles.face} cx="16" cy="15.5" r="11.5" />
+      {flat ? null : (
+        <>
+          <circle className={styles.groove} cx="16" cy="15.5" r="9.6" />
+          <path className={styles.shine} d="M8.6 10.2a9 9 0 0 1 5.2-4" />
+        </>
+      )}
+      {/* "E" de ECICoin. */}
+      <path className={styles.glyph} d="M20 9.8h-7.4v11.4H20M12.6 15.5h6" />
+    </svg>
   );
 }
 
 export type CoinAmountSize = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
 const COIN_SIZE: Record<CoinAmountSize, number> = {
-  sm: 13,
-  md: 15,
-  lg: 20,
-  xl: 26,
-  hero: 28,
+  sm: 16,
+  md: 18,
+  lg: 22,
+  xl: 28,
+  hero: 34,
 };
 
 /**
