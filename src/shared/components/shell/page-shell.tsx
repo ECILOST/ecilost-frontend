@@ -7,6 +7,8 @@ import { useSession } from '@/features/auth/hooks/use-session';
 import { EcicoinBalance } from '@/features/wallet/components/ecicoin-balance';
 import { RouteBoundary } from '../route-boundary';
 import { Brand } from './brand';
+import { MobileMenu } from './mobile-menu';
+import { OfflineBanner } from './offline-banner';
 import { SectionNav } from './section-nav';
 import styles from './page-shell.module.css';
 
@@ -15,6 +17,11 @@ const MAIN_ID = 'contenido';
 
 /**
  * Marco comun de las pantallas con sesion: marca, secciones, saldo, campana y cuenta.
+ *
+ * En escritorio (>= 1024 px) todo va en la barra superior: logo a la izquierda, secciones
+ * agrupadas por prioridad y, a la derecha, saldo, campana y el menu de la cuenta. En pantallas
+ * angostas las secciones, el saldo y la cuenta pasan a un cajon detras de la hamburguesa y en
+ * la barra quedan solo el logo, la campana y el boton del menu. No hay barra inferior.
  *
  * El menu se arma con las banderas de `GET /auth/me` y no con el rol: el servicio las
  * publica justamente para eso. Ocultar una entrada no autoriza nada: cada servicio sigue
@@ -53,14 +60,25 @@ export function PageShell({ focus = false }: { focus?: boolean }) {
       {focus ? null : (
         <header className={styles.header}>
           <Brand to={canBid ? routes.home : routes.items} />
-          <SectionNav variant="top" principal={principal} />
+          <div className={styles.wide}>
+            <SectionNav variant="bar" principal={principal} />
+          </div>
           <div className={styles.tools}>
-            <EcicoinBalance />
+            <span className={styles.wide}>
+              <EcicoinBalance />
+            </span>
             {canBid ? <NotificationBell /> : null}
-            <Account />
+            <span className={styles.wide}>
+              <Account />
+            </span>
+            <span className={styles.narrow}>
+              <MobileMenu />
+            </span>
           </div>
         </header>
       )}
+
+      <OfflineBanner />
 
       {/* `tabIndex={-1}` para poder recibir el foco sin entrar en el orden de tabulacion. */}
       <main className={styles.main} id={MAIN_ID} ref={main} tabIndex={-1}>
@@ -68,8 +86,6 @@ export function PageShell({ focus = false }: { focus?: boolean }) {
           <Outlet />
         </RouteBoundary>
       </main>
-
-      {focus ? null : <SectionNav variant="bottom" principal={principal} />}
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import type {
-  AppNotification,
   AuctionItem,
   LiveRoom,
   MyBid,
@@ -69,6 +68,4 @@ export interface AuctionGateway {
 
   roomSummary(id: string): Promise<RoomSummary>;
   myBids(): Promise<MyBid[]>;
-  notifications(): Promise<AppNotification[]>;
-  markNotificationsRead(): Promise<void>;
 }

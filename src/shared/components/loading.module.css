@@ -16,7 +16,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--eci-cyan);
+  background: var(--deco-yellow);
   animation: pulse 1s var(--ease-out) infinite;
 }
 
@@ -26,12 +26,12 @@
  */
 .dot:nth-child(2) {
   animation-delay: 0.12s;
-  background: var(--eci-blue);
+  background: var(--deco-blue);
 }
 
 .dot:nth-child(3) {
   animation-delay: 0.24s;
-  background: var(--eci-purple);
+  background: var(--deco-purple);
 }
 
 @keyframes pulse {
@@ -45,4 +45,19 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.block {
+  display: grid;
+  gap: var(--s-3);
+}
+
+/* El aviso sigue existiendo para el lector de pantalla; a la vista lo dice el esqueleto. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

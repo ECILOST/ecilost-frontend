@@ -106,7 +106,7 @@ describe('Catalogo', () => {
     renderApp({ route: '/items', container });
 
     expect(
-      await screen.findByRole('button', { name: /entrar con google/i }),
+      await screen.findByRole('button', { name: /continuar con google/i }),
     ).toBeInTheDocument();
   });
 

@@ -16,6 +16,7 @@ import { modeLook } from '../domain/modes';
 import { useMyProfile } from '../hooks/use-gamification';
 import type { ProfileAuction, StudentProfile } from '../model/gamification';
 import styles from './profile.page.module.css';
+import { inkOf } from '../domain/ink';
 
 const DATE = new Intl.DateTimeFormat('es-CO', {
   day: 'numeric',
@@ -115,7 +116,7 @@ function RecentRow({ auction }: { auction: ProfileAuction }) {
         <span className={styles.recentText}>
           <span className={styles.recentName}>{auction.itemName}</span>
           <span className={styles.recentMeta}>
-            <span style={{ color: mode.color }}>{mode.label}</span> ·{' '}
+            <span style={{ color: inkOf(mode.color) }}>{mode.label}</span> ·{' '}
             {DATE.format(new Date(auction.at))}
           </span>
         </span>
@@ -137,7 +138,7 @@ export function ProfilePage() {
   const { data: profile, isPending, isError, error, refetch } = useMyProfile();
   const { data: account } = useProfile();
 
-  if (isPending) return <Loading label="Cargando tu perfil..." />;
+  if (isPending) return <Loading label="Cargando tu perfil..." skeleton="detail" />;
   if (isError)
     return (
       <div className={styles.page}>

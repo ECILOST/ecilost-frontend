@@ -16,12 +16,11 @@ body,
 }
 
 /*
- * Hueco para la cabecera pegajosa y para la barra inferior del movil. Sin esto, tabular
- * hacia un elemento cercano a un borde lo deja debajo de una de las dos: el foco esta
- * puesto, pero no se ve donde.
+ * Hueco para la cabecera pegajosa. Sin esto, tabular hacia un elemento cercano al borde
+ * superior lo deja debajo de ella: el foco esta puesto, pero no se ve donde.
  */
 html {
-  scroll-padding-block: 64px 84px;
+  scroll-padding-block: calc(var(--header-h) + 8px) 16px;
 }
 
 body {
@@ -39,7 +38,7 @@ h2,
 h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: var(--tracking-tight);
   line-height: 1.1;
 }
@@ -58,12 +57,14 @@ p {
 }
 
 a {
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 img,
@@ -94,8 +95,8 @@ button {
  * con el teclado.
  */
 :focus-visible {
-  outline: 2px solid var(--eci-cyan);
-  outline-offset: 3px;
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
   border-radius: var(--r-sm);
 }
 

@@ -568,27 +568,6 @@ describe('createHttpAuctionGateway', () => {
     expect(http.get).not.toHaveBeenCalledWith('/rooms/ajena');
   });
 
-  it('la bandeja viene de engagement, con sus avisos traducidos', async () => {
-    const base = setup();
-    const engagement = {
-      get: vi.fn().mockResolvedValue({
-        items: [
-          { id: 'n2', kind: 'ROUND_WON', roomId: 'room-1', payload: { position: 1, currentPrice: '200.00' }, createdAt: '2030-10-01T21:05:00.000Z', readAt: null },
-          { id: 'n1', kind: 'OUTBID', roomId: 'room-1', payload: { position: 1, currentPrice: '150.00' }, createdAt: '2030-10-01T21:04:00.000Z', readAt: '2030-10-01T21:04:30.000Z' },
-        ],
-      }),
-      post: vi.fn().mockResolvedValue(undefined),
-    } as unknown as HttpClient & { post: ReturnType<typeof vi.fn> };
-    const gateway = createHttpAuctionGateway({ http: base.http, items: base.items, lots: base.lots, engagement });
-
-    const inbox = await gateway.notifications();
-    expect(inbox.map((n) => [n.kind, n.read])).toEqual([['WON', false], ['OUTBID', true]]);
-    expect(inbox[0].body).toContain('200');
-
-    await gateway.markNotificationsRead();
-    expect(engagement.post).toHaveBeenCalledWith('/notifications/read');
-  });
-
   it('el resumen dice que se gano, que se perdio y que quedo desierto, con lo gastado', async () => {
     const { gateway } = setup(
       room({

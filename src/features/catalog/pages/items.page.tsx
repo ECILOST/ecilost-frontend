@@ -103,7 +103,7 @@ export function ItemsPage() {
           el servicio no informa de cuantos hay, y un numero a secas se leeria como el total
           cuando no lo es.
         */}
-        {isPending ? null : (
+        {isPending || error ? null : (
           <p className={styles.count} aria-live="polite">
             {hasNextPage
               ? `Mostrando ${items.length}`

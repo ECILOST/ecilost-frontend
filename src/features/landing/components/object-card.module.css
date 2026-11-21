@@ -1,0 +1,140 @@
+.card {
+  display: grid;
+  gap: var(--s-2);
+  align-content: start;
+  padding: var(--s-2) var(--s-2) var(--s-4);
+  border-radius: var(--r-xl);
+  background: var(--color-surface-raised);
+  box-shadow:
+    inset 0 0 0 1px var(--color-border),
+    var(--shadow-card);
+}
+
+/* El escenario: un cuadrado donde las manchas asoman por detras del plato. */
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: var(--color-surface);
+}
+
+/*
+ * Manchas planas y saturadas, sin desenfoque: son la firma visual de la referencia. Se
+ * quedan en los bordes del escenario para que el plato blanco, en el centro, sea lo que
+ * se mira primero.
+ */
+.blob {
+  position: absolute;
+  z-index: 0;
+}
+
+.blobA {
+  top: -12%;
+  left: -14%;
+  width: 72%;
+  height: 72%;
+  border-radius: var(--blob-a);
+  background: var(--tone-a);
+}
+
+.blobB {
+  right: -16%;
+  bottom: -14%;
+  width: 66%;
+  height: 66%;
+  border-radius: var(--blob-b);
+  background: var(--tone-b);
+}
+
+.blobC {
+  top: 12%;
+  right: 10%;
+  width: 16%;
+  height: 16%;
+  border-radius: var(--blob-d);
+  background: var(--tone-c);
+}
+
+.violet {
+  --tone-a: var(--deco-purple);
+  --tone-b: var(--deco-teal);
+  --tone-c: var(--deco-yellow);
+}
+
+.teal {
+  --tone-a: var(--deco-teal);
+  --tone-b: var(--deco-blue);
+  --tone-c: var(--deco-pink);
+}
+
+.blue {
+  --tone-a: var(--deco-blue);
+  --tone-b: var(--deco-yellow);
+  --tone-c: var(--deco-purple);
+}
+
+.pink {
+  --tone-a: var(--deco-pink);
+  --tone-b: var(--deco-purple);
+  --tone-c: var(--deco-teal);
+}
+
+/* El plato: blanco, redondeado y con sombra calida, para que el objeto resalte. */
+.plate {
+  position: relative;
+  z-index: 1;
+  width: 64%;
+  aspect-ratio: 1;
+  padding: 12%;
+  border-radius: 28%;
+  background: var(--eci-photo-plate);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--color-highlight) 55%, transparent),
+    0 18px 30px -14px color-mix(in srgb, var(--color-shade) 55%, transparent);
+}
+
+.name {
+  margin-top: var(--s-2);
+  padding-inline: var(--s-2);
+  font-size: clamp(var(--text-lg), 0.9rem + 0.6vw, var(--text-xl));
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.meta {
+  padding-inline: var(--s-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/*
+ * Movil: fila con el escenario a la izquierda. En dos columnas de 160 px el dibujo, el
+ * nombre y el lugar quedaban amontonados.
+ */
+@media (width < 560px) {
+  .card {
+    grid-template-columns: clamp(104px, 34vw, 136px) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: var(--s-3);
+    row-gap: var(--s-1);
+    padding: var(--s-2);
+  }
+
+  .stage {
+    grid-row: 1 / span 2;
+  }
+
+  .name {
+    align-self: end;
+    margin-top: 0;
+  }
+
+  .meta {
+    align-self: start;
+  }
+}

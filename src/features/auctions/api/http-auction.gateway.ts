@@ -28,7 +28,6 @@ import {
 } from '../domain/room-chat';
 import { publicTotals } from '../domain/room-results';
 import type {
-  AppNotification,
   AutoBid,
   AuctionItem,
   AuctionItemStatus,
@@ -85,7 +84,7 @@ export function createHttpAuctionGateway(deps: {
   lots: LotGateway;
   /** Canal en vivo de engagement. Sin el, la sala se consulta cada pocos segundos. */
   realtime?: RealtimeChannel;
-  /** API HTTP de engagement, para la bandeja de notificaciones. */
+  /** API HTTP de engagement, para la actividad publica de la sala. */
   engagement?: HttpClient;
 }): AuctionGateway {
   const { http } = deps;
@@ -551,19 +550,9 @@ export function createHttpAuctionGateway(deps: {
       );
       return Promise.all(bids);
     },
-
-    /** La bandeja que engagement proyecta de los eventos de auction (HU-27, HU-29). */
-    async notifications() {
-      if (!deps.engagement) return [];
-      const { items } = await deps.engagement.get<{ items: InboxNotification[] }>('/notifications');
-      return items.map(toAppNotification);
-    },
-
-    async markNotificationsRead() {
-      if (deps.engagement) await deps.engagement.post('/notifications/read');
-    },
   };
 }
+
 /**
  * Nombre, descripcion y foto de cada entrada, pedidos a catalog y guardados unos minutos: la
  * sala en vivo se relee cada pocos segundos y no tiene sentido volver a pedir lo mismo. Una
@@ -702,7 +691,7 @@ function createEntryResolver({
   return Object.assign(resolveEntry, { prefetch });
 }
 
-/** Tope de ids por peticion: el mismo `MAX_PAGE_SIZE` de catalog. */
+/** Tope de ids por peticion: el maximo de pagina que acepta catalog (200). */
 const IDS_PER_REQUEST = 200;
 
 function chunks<T>(values: T[], size: number): T[][] {
@@ -878,33 +867,3 @@ function coalesce(task: () => Promise<void>): () => Promise<void> {
   return run;
 }
 
-/** Una notificacion tal como la guarda engagement. */
-interface InboxNotification {
-  id: string;
-  kind: 'OUTBID' | 'ROUND_CLOSED' | 'ROUND_WON' | 'PICKUP_READY';
-  roomId: string;
-  payload: { position?: number; currentPrice?: string; roundId?: string };
-  createdAt: string;
-  readAt: string | null;
-}
-
-function toAppNotification(entry: InboxNotification): AppNotification {
-  const price = Number(entry.payload.currentPrice ?? 0).toLocaleString('es-CO');
-  const item = entry.payload.position ? `el objeto ${entry.payload.position}` : 'la ronda';
-  const base = { id: entry.id, at: entry.createdAt, read: entry.readAt !== null, roomId: entry.roomId };
-
-  if (entry.kind === 'PICKUP_READY') {
-    return {
-      ...base, kind: 'PICKUP_READY', pickupRoundId: entry.payload.roundId,
-      title: 'Coordina tu recogida', body: 'El pago está confirmado. Abre el asistente para elegir un horario.',
-    };
-  }
-
-  if (entry.kind === 'ROUND_WON') {
-    return { ...base, kind: 'WON', title: '¡Ganaste este objeto!', body: `Ganaste ${item} por ${price} ECICoin.` };
-  }
-  if (entry.kind === 'OUTBID') {
-    return { ...base, kind: 'OUTBID', title: '¡Te superaron!', body: `Alguien pujó ${price} ECICoin en ${item}.` };
-  }
-  return { ...base, kind: 'ROOM_CLOSED', title: 'La ronda cerró', body: `Se cerró ${item} en ${price} ECICoin.` };
-}

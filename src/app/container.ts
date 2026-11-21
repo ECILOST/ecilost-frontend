@@ -2,6 +2,8 @@ import { config, type AppConfig } from '@/config/env';
 import { createHttpAuctionGateway } from '@/features/auctions/api/http-auction.gateway';
 import { createLazyAuctionGateway } from '@/features/auctions/api/lazy-auction.gateway';
 import { createSocketRealtimeChannel } from '@/features/auctions/api/realtime-channel';
+import { createHttpNotificationGateway } from '@/features/auctions/api/http-notification.gateway';
+import type { NotificationGateway } from '@/features/auctions/ports/notification.gateway';
 import type { AuctionGateway } from '@/features/auctions/ports/auction.gateway';
 import { createHttpAuthGateway } from '@/features/auth/api/http-auth.gateway';
 import type { AuthGateway } from '@/features/auth/ports/auth.gateway';
@@ -43,12 +45,17 @@ export interface Container {
   media: MediaGateway;
   wallet: WalletGateway;
   /**
-   * Salas, pujas y notificaciones de quien puja. Contra ecilost-auction-service
+   * Salas y pujas de quien puja. Contra ecilost-auction-service
    * (`createHttpAuctionGateway`), o en memoria (`createDemoAuctionGateway`) con
    * `VITE_AUCTIONS_DEMO=true`. El canal en vivo y la bandeja vienen de
    * ecilost-engagement-service.
    */
   auctions: AuctionGateway;
+  /**
+   * Bandeja de notificaciones, siempre contra ecilost-engagement-service: el modo demo no
+   * la reemplaza, asi que nunca se muestran avisos inventados.
+   */
+  notifications: NotificationGateway;
   /** Programacion de salas por el funcionario, ya contra ecilost-auction-service. */
   rooms: RoomGateway;
   /**
@@ -133,6 +140,7 @@ export function createContainer(appConfig: AppConfig = config): Container {
             requestSessionRecovery: sessionLost.emit,
           }),
         }),
+    notifications: createHttpNotificationGateway(engagementHttp),
     rooms: createHttpRoomGateway(auctionHttp),
     pickups: createPickupGateway(engagementHttp, itemGateway, lotGateway),
     gamification: appConfig.auctionsDemo

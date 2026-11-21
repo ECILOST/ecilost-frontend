@@ -1,0 +1,90 @@
+/*
+ * Guia de marca de Google Sign-In (tema claro, forma de pastilla). Los colores salen de los
+ * tokens --google-*, que son los de la guia y no los de la paleta de ECI Lost.
+ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 0 16px 0 12px;
+  border: 1px solid var(--google-border);
+  border-radius: var(--r-chip);
+  background: var(--google-bg);
+  color: var(--google-text);
+  font-family: var(--font-google);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.0125em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--t-fast) linear,
+    box-shadow var(--t-fast) linear;
+}
+
+.button:focus-visible {
+  border-radius: var(--r-chip);
+}
+
+@media (hover: hover) {
+  .button:hover:not([aria-disabled='true']) {
+    background: var(--google-bg-hover);
+    box-shadow: 0 1px 3px color-mix(in srgb, var(--color-shade) 30%, transparent);
+  }
+}
+
+.button:active:not([aria-disabled='true']) {
+  background: var(--google-bg-active);
+}
+
+.button[data-loading] {
+  cursor: progress;
+}
+
+/* La G va siempre sobre blanco y con su tamaño de 20 px, sin recortes. */
+.icon {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+
+.logo {
+  display: block;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--google-border);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: google-spin 0.7s linear infinite;
+}
+
+@keyframes google-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.label {
+  white-space: nowrap;
+}
+
+/* Deshabilitado (sin conexion): la guia lo pinta translucido; aqui ademas borde punteado. */
+.button:disabled {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--google-text) 30%, transparent);
+  background: color-mix(in srgb, var(--google-bg) 60%, transparent);
+  color: color-mix(in srgb, var(--google-text) 62%, transparent);
+  cursor: not-allowed;
+}
+
+.button:disabled .logo {
+  opacity: 0.5;
+}

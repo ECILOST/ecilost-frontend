@@ -1,171 +1,139 @@
+/*
+ * Entrada. Una sola columna centrada: la tarjeta con el boton es lo unico que hay que hacer
+ * aqui. Las manchas de color asoman por las esquinas, lejos del texto.
+ */
 .screen {
   position: relative;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   min-height: 100dvh;
   overflow: hidden;
-  background: var(--eci-night);
   isolation: isolate;
+  background: var(--color-bg);
+}
+
+.decor {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .blob {
   position: absolute;
-  z-index: -2;
-  filter: blur(80px);
-  opacity: 0.6;
 }
 
-.blue {
-  right: -120px;
-  top: 8%;
-  width: 480px;
-  height: 430px;
-  background: var(--eci-blue);
+.violet {
+  top: -90px;
+  right: -110px;
+  width: clamp(220px, 34vw, 460px);
+  aspect-ratio: 1;
   border-radius: var(--blob-a);
+  background: var(--deco-purple);
 }
 
-.cyan {
-  right: 12%;
-  bottom: -150px;
-  width: 420px;
-  height: 360px;
-  background: var(--eci-cyan);
-  border-radius: 62% 38% 45% 55% / 40% 58% 42% 60%;
+.teal {
+  bottom: -120px;
+  left: -100px;
+  width: clamp(220px, 32vw, 440px);
+  aspect-ratio: 1.1;
+  border-radius: var(--blob-b);
+  background: var(--deco-teal);
 }
 
 .pink {
-  right: 28%;
-  top: -70px;
-  width: 220px;
-  height: 200px;
-  background: var(--eci-pink);
-  border-radius: 52% 48% 38% 62% / 58% 42% 58% 42%;
+  top: 18%;
+  left: -40px;
+  width: clamp(70px, 9vw, 130px);
+  aspect-ratio: 1;
+  border-radius: var(--blob-c);
+  background: var(--deco-pink);
 }
 
 .yellow {
-  right: 38%;
-  top: 48%;
-  width: 140px;
-  height: 130px;
-  background: var(--eci-yellow);
+  right: 8%;
+  bottom: 10%;
+  width: clamp(60px, 8vw, 120px);
+  aspect-ratio: 1;
   border-radius: var(--blob-d);
+  background: var(--deco-yellow);
 }
 
-/* Veladura: la mitad izquierda se lee sobre fondo liso, las manchas asoman a la derecha. */
-/* Oscurece la mitad del texto sin cortar la luz: un degradado, no un bloque con borde. */
-.fade {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(90deg, var(--eci-night) 30%, rgb(6 21 40 / 55%) 60%, transparent 85%);
+.top {
+  padding: max(var(--s-3), env(safe-area-inset-top)) max(var(--page-gutter), env(safe-area-inset-right)) 0
+    max(var(--page-gutter), env(safe-area-inset-left));
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  width: 100%;
-  max-width: 1160px;
-  margin: 0 auto;
-}
-
-.intro,
-.panel {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px 50px;
-}
-
-.panel {
+.back {
+  display: inline-flex;
   align-items: center;
+  gap: var(--s-2);
+  min-height: var(--control-h);
+  padding: 0 16px 0 12px;
+  border-radius: var(--r-chip);
+  background: var(--color-surface-raised);
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
 }
 
-.tagline {
-  margin-top: 22px;
-  font: italic 800 2.625rem/1.18 var(--font-display);
-  color: #e6eeff;
+.back:hover {
+  text-decoration: none;
 }
 
-.lead {
-  max-width: 400px;
-  margin-top: 20px;
-  font-size: var(--text-md);
-  line-height: 1.7;
-  color: var(--eci-text-soft);
+@media (hover: hover) {
+  .back:hover {
+    box-shadow: inset 0 0 0 1px var(--color-primary-text);
+    color: var(--color-text);
+  }
 }
 
-.features {
+.main {
   display: grid;
-  gap: 12px;
-  margin: 30px 0 0;
-}
-
-.features li {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-size: var(--text-sm);
-  color: var(--eci-text-soft);
-}
-
-.features svg {
-  flex: none;
-  box-sizing: content-box;
-  padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--tone) 35%, transparent);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--tone) 16%, transparent);
-  color: var(--tone);
-}
-
-.features strong {
-  display: block;
-  font-family: var(--font-display);
-  color: var(--eci-text);
+  flex: 1;
+  place-items: center;
+  padding: var(--s-5) max(var(--page-gutter), env(safe-area-inset-right)) max(var(--s-7), env(safe-area-inset-bottom))
+    max(var(--page-gutter), env(safe-area-inset-left));
 }
 
 .card {
   display: grid;
-  gap: 20px;
-  padding: 34px;
-  border: 1px solid rgb(25 229 213 / 30%);
+  gap: var(--s-5);
+  justify-items: stretch;
+  width: 100%;
+  max-width: 460px;
+  padding: clamp(var(--s-5), 5vw, 40px);
   border-radius: var(--r-xl);
-  background: rgb(10 28 52 / 72%);
+  background: var(--color-surface-raised);
   box-shadow:
-    var(--glass-shine),
-    0 30px 60px -30px rgb(0 0 0 / 80%),
-    0 0 50px -10px rgb(25 229 213 / 22%);
-  backdrop-filter: blur(20px);
+    inset 0 0 0 1px var(--color-border),
+    var(--shadow-float);
 }
 
-.cardTitle {
-  font-size: var(--text-xl);
+.card > :first-child {
+  justify-self: start;
+}
+
+.heading {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.title {
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.05;
+  text-wrap: balance;
 }
 
 .hint {
-  padding: 15px 17px;
-  border: 1px solid var(--glass-edge);
-  border-radius: var(--r-md);
-  background: rgb(0 0 0 / 25%);
-  font-size: var(--text-sm);
+  color: var(--color-text-muted);
   line-height: 1.6;
-  color: var(--eci-text-label);
 }
 
-.hint strong {
-  color: var(--eci-text);
-}
-
-@media (width < 860px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .fade {
-    background: rgb(6 21 40 / 70%);
-  }
-
-  .intro,
-  .panel {
-    padding: 40px var(--page-gutter);
-  }
+.errorHint {
+  margin-top: var(--s-2);
+  font-weight: 600;
+  color: var(--color-text);
 }

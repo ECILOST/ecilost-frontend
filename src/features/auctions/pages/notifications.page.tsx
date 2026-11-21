@@ -1,4 +1,3 @@
-import type { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { routes } from '@/app/routes';
 import { EmptyState } from '@/shared/components/empty-state';
@@ -13,65 +12,14 @@ import {
 import type { NotificationKind } from '../model/auction';
 import styles from './notifications.page.module.css';
 
-/* Un color por significado, el mismo de la sala: verde ganar, rosa te superaron, amarillo
- * tiempo, azul informacion. */
+/* Un color por significado, el mismo de la sala: verde ganar, rojo te superaron, azul
+ * informacion. Siempre con icono y titulo: el color nunca informa solo. */
 const KIND: Record<NotificationKind, { icon: IconName; tone: string }> = {
   OUTBID: { icon: 'arrow-up', tone: styles.pink },
-  ROOM_SOON: { icon: 'timer', tone: styles.yellow },
-  FOLLOW_ONLY: { icon: 'eye', tone: styles.blue },
   WON: { icon: 'trophy', tone: styles.green },
   PICKUP_READY: { icon: 'check', tone: styles.green },
-  LIMIT: { icon: 'minus', tone: styles.pink },
   ROOM_CLOSED: { icon: 'check', tone: styles.blue },
 };
-
-/**
- * La leyenda de estados del diseño: el mismo color significa lo mismo en la sala, en las
- * notificaciones y en mis pujas.
- */
-const LEGEND: Array<{
-  title: string;
-  text: string;
-  color: string;
-  icon: IconName;
-}> = [
-  {
-    title: '¡Vas ganando!',
-    text: 'Tu oferta es la más alta',
-    color: 'var(--eci-green)',
-    icon: 'check',
-  },
-  {
-    title: '¡Te superaron!',
-    text: 'Pujaremos por ti si hay margen',
-    color: 'var(--eci-pink)',
-    icon: 'arrow-up',
-  },
-  {
-    title: '¡Últimos segundos!',
-    text: 'La subasta se extendió',
-    color: 'var(--eci-yellow)',
-    icon: 'timer',
-  },
-  {
-    title: '¡Alcanzaste tu límite!',
-    text: 'Puja automática detenida',
-    color: 'var(--eci-pink)',
-    icon: 'minus',
-  },
-  {
-    title: '¡Ganaste este objeto!',
-    text: 'La sala sigue con el siguiente',
-    color: 'var(--eci-green)',
-    icon: 'trophy',
-  },
-  {
-    title: 'La sala finalizó',
-    text: 'Resumen de la sala',
-    color: 'var(--eci-blue)',
-    icon: 'check',
-  },
-];
 
 export function NotificationsPage() {
   const { data, isPending, isError, error, refetch } = useNotifications();
@@ -95,12 +43,15 @@ export function NotificationsPage() {
           </button>
         </div>
 
-        {isPending ? <Loading label="Cargando notificaciones..." /> : null}
+        {isPending ? <Loading label="Cargando notificaciones..." skeleton="list" /> : null}
         {isError ? (
           <ErrorState error={error} onRetry={() => void refetch()} />
         ) : null}
         {data && data.length === 0 ? (
-          <EmptyState title="No tienes notificaciones" />
+          <EmptyState title="No tienes notificaciones">
+            Te avisaremos aquí cuando te superen, ganes un objeto o una sala
+            esté por empezar.
+          </EmptyState>
         ) : null}
 
         <ul className={styles.items}>
@@ -132,7 +83,14 @@ export function NotificationsPage() {
             return (
               <li key={entry.id}>
                 {entry.kind === 'PICKUP_READY' ? (
-                  <Link className={className} to={entry.pickupRoundId ? routes.pickup(entry.pickupRoundId) : routes.pickups}>
+                  <Link
+                    className={className}
+                    to={
+                      entry.pickupRoundId
+                        ? routes.pickup(entry.pickupRoundId)
+                        : routes.pickups
+                    }
+                  >
                     {body}
                   </Link>
                 ) : entry.roomId ? (
@@ -147,29 +105,6 @@ export function NotificationsPage() {
           })}
         </ul>
       </section>
-
-      <aside className={styles.legend} aria-labelledby="estados">
-        <h2 id="estados" className={styles.legendTitle}>
-          Estados de la subasta
-        </h2>
-        <ul className={styles.legendList}>
-          {LEGEND.map((entry) => (
-            <li
-              key={entry.title}
-              className={styles.legendItem}
-              style={{ '--tone': entry.color } as CSSProperties}
-            >
-              <span className={styles.legendDot} aria-hidden="true">
-                <Icon name={entry.icon} size={16} />
-              </span>
-              <span>
-                <strong>{entry.title}</strong>
-                <small>{entry.text}</small>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </aside>
     </div>
   );
 }

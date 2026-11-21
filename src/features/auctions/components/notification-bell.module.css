@@ -2,8 +2,8 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: var(--control-h);
+  height: var(--control-h);
   border: 1px solid var(--eci-line);
   border-radius: 50%;
   background: var(--eci-surface-alt);

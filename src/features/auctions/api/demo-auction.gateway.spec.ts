@@ -92,7 +92,7 @@ describe('Adaptador de demostracion de subastas', () => {
     await expect(gateway.joinRoom('sala-07')).rejects.toThrow('Sala cerrada.');
   });
 
-  it('la puja automatica se detiene al pasar el limite y lo notifica', async () => {
+  it('la puja automatica se detiene al pasar el limite', async () => {
     const time = clock();
     const gateway = createDemoAuctionGateway({
       rivals: true,
@@ -112,7 +112,5 @@ describe('Adaptador de demostracion de subastas', () => {
 
     expect(state.round?.leading).toBe(false);
     expect(state.autoBid.stopped).toBe(true);
-    const notifications = await gateway.notifications();
-    expect(notifications[0]).toMatchObject({ kind: 'LIMIT', read: false });
   });
 });

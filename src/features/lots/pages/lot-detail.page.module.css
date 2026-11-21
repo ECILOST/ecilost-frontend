@@ -67,7 +67,7 @@
 
 .itemGo {
   flex: none;
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .note {
@@ -82,6 +82,6 @@
 }
 
 .photoLink {
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
   font-weight: 600;
 }

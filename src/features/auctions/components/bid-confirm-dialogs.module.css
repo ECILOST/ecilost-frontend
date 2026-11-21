@@ -29,7 +29,7 @@
 
 .body {
   display: grid;
-  grid-template-columns: 1fr 1.05fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 22px;
   padding: 22px;
 }
@@ -37,13 +37,14 @@
 .art {
   height: 190px;
   border-radius: 22px;
-  background: rgb(18 53 102 / 35%);
+  background: color-mix(in srgb, var(--color-surface-raised) 35%, transparent);
 }
 
 .side {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
 }
 
 .box {
@@ -58,7 +59,7 @@
 }
 
 .boxPink {
-  border-color: rgb(255 79 120 / 32%);
+  border-color: color-mix(in srgb, var(--eci-pink) 32%, transparent);
 }
 
 .boxTitle {
@@ -77,6 +78,10 @@
   color: var(--eci-text-soft);
 }
 
+.line span {
+  min-width: 0;
+}
+
 .line strong {
   font-family: var(--font-display);
   font-weight: 800;
@@ -92,16 +97,16 @@
 }
 
 .yellow.yellow {
-  color: var(--eci-yellow);
+  color: var(--eci-yellow-text);
   font-size: var(--text-md);
 }
 
 .cyan.cyan {
-  color: var(--eci-cyan);
+  color: var(--eci-cyan-text);
 }
 
 .pink.pink {
-  color: var(--eci-pink);
+  color: var(--eci-pink-text);
 }
 
 .big.big {
@@ -124,16 +129,24 @@
   text-align: center;
 }
 
+/* Lado a lado cuando caben; en 320 px uno sobre otro, con el primario abajo y a mano. */
 .actions {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
+  grid-template-columns: repeat(auto-fit, minmax(min(9.5rem, 100%), 1fr));
   gap: 12px;
   margin-top: 6px;
 }
 
 @media (width < 640px) {
   .body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .art {
+    height: auto;
+    aspect-ratio: 16 / 7;
   }
 }
 

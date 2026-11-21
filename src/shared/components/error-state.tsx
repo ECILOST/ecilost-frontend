@@ -1,13 +1,17 @@
-import { ApiError } from '@/shared/api/problem-details';
+import {
+  friendlyError,
+  isOfflineError,
+  logTechnicalError,
+} from '@/shared/api/error-messages';
 import { Button } from './ui/button';
 import { Notice } from './ui/notice';
 
 /**
- * Muestra un error del servicio con lo que el servicio dijo.
+ * Muestra un error del servicio con un mensaje humano y una salida (Reintentar).
  *
  * Los servicios responden Problem Details con `title`, `detail` y, en las validaciones, la
- * lista de campos que fallaron. Reemplazarlo por un "ocurrio un error" tira justo la parte
- * que le dice a la persona que hacer.
+ * lista de campos que fallaron; eso se conserva porque le dice a la persona que hacer. Lo
+ * tecnico se traduce en `friendlyError`.
  */
 export function ErrorState({
   error,
@@ -16,14 +20,15 @@ export function ErrorState({
   error: unknown;
   onRetry?: () => void;
 }) {
-  const problem = error instanceof ApiError ? error.problem : null;
+  const message = friendlyError(error);
+  logTechnicalError('ErrorState', error);
 
   return (
     <Notice
-      tone="alert"
+      tone={isOfflineError(error) ? 'offline' : 'alert'}
       live="alert"
-      title={problem?.title ?? 'No se pudo completar la operación'}
-      details={problem?.errors}
+      title={message.title}
+      details={message.details}
       actions={
         onRetry ? (
           <Button variant="secondary" onClick={onRetry}>
@@ -32,7 +37,7 @@ export function ErrorState({
         ) : null
       }
     >
-      {problem?.detail ?? 'Vuelve a intentarlo en unos segundos.'}
+      {message.detail}
     </Notice>
   );
 }

@@ -11,7 +11,7 @@ import styles from './dialog.module.css';
  *
  * Se pinta en un portal sobre `document.body` y no donde se declara: dentro de una pantalla,
  * que tiene su propia animacion de entrada y por tanto su propio contexto de apilamiento, el
- * velo quedaba por debajo de la cabecera y de la barra inferior y las tapaba a medias.
+ * velo quedaba por debajo de la cabecera y de la navegacion y las tapaba a medias.
  */
 export function Dialog({
   open,

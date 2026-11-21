@@ -122,7 +122,7 @@
   background: linear-gradient(
     90deg,
     var(--eci-surface-high) 25%,
-    rgb(255 255 255 / 9%) 37%,
+    color-mix(in srgb, var(--color-highlight) 9%, transparent) 37%,
     var(--eci-surface-high) 63%
   );
   background-size: 400% 100%;

@@ -12,6 +12,11 @@ export interface Session {
   status: SessionStatus;
   /** Quien es y que puede hacer. Null mientras no haya sesion confirmada. */
   principal: Principal | null;
+  /**
+   * Habia sesion y se perdio sin que la persona pidiera salir (la cookie vencio o fue
+   * revocada). El login lo usa para explicar por que se volvio a pedir la entrada.
+   */
+  expired: boolean;
   /** Manda a Google. Navegacion completa: la aplicacion se descarta y vuelve despues. */
   login: () => void;
   logout: () => Promise<void>;

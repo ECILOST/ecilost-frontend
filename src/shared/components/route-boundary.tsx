@@ -22,7 +22,7 @@ export function RouteBoundary({
 }) {
   return (
     <ErrorBoundary key={resetKey}>
-      <Suspense fallback={<Loading label="Cargando la pantalla..." />}>
+      <Suspense fallback={<Loading label="Cargando la pantalla..." skeleton="list" />}>
         {children}
       </Suspense>
     </ErrorBoundary>

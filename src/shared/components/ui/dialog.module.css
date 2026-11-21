@@ -5,7 +5,7 @@
   display: grid;
   place-items: center;
   padding: var(--page-gutter);
-  background: rgb(2 8 18 / 72%);
+  background: var(--color-scrim);
   backdrop-filter: blur(6px);
   animation: fade var(--t-med) var(--ease-out);
 }
@@ -28,7 +28,7 @@
   border: 1px solid var(--eci-line);
   border-radius: 26px;
   background: var(--eci-night);
-  box-shadow: 0 30px 70px rgb(0 0 0 / 60%);
+  box-shadow: 0 30px 70px color-mix(in srgb, var(--color-shade) 36%, transparent);
   animation: rise var(--t-med) var(--ease-spring);
 }
 
@@ -41,19 +41,19 @@
 }
 
 .cyan {
-  border-color: rgb(25 229 213 / 32%);
+  border-color: color-mix(in srgb, var(--color-primary) 32%, transparent);
 }
 
 .pink {
-  border-color: rgb(255 79 120 / 32%);
+  border-color: color-mix(in srgb, var(--eci-pink) 32%, transparent);
 }
 
 .yellow {
-  border-color: rgb(255 200 74 / 35%);
+  border-color: color-mix(in srgb, var(--eci-yellow) 35%, transparent);
 }
 
 .green {
-  border-color: rgb(47 227 154 / 35%);
+  border-color: color-mix(in srgb, var(--eci-green) 35%, transparent);
 }
 
 @keyframes fade {

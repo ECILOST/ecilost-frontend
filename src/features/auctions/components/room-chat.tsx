@@ -95,32 +95,31 @@ export function RoomChat({
             </p>
           ) : null}
           {chat.messages.length > 0 ? (
-            <ol
-              ref={listRef}
-              className={styles.list}
-              role="log"
-              aria-live="polite"
-            >
-              {chat.messages.map((message) => (
-                <li
-                  key={message.id}
-                  className={[styles.message, message.mine ? styles.mine : '']
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <span className={styles.meta}>
-                    <span className={styles.alias}>
-                      {message.mine ? 'Tú' : message.alias}
+            // `role="log"` va en un envoltorio y no en la lista: sobre el `<ol>` le quitaba
+            // su rol de lista y los `<li>` quedaban huerfanos para el lector de pantalla.
+            <div role="log" aria-live="polite" aria-label="Mensajes de la sala">
+              <ol ref={listRef} className={styles.list}>
+                {chat.messages.map((message) => (
+                  <li
+                    key={message.id}
+                    className={[styles.message, message.mine ? styles.mine : '']
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    <span className={styles.meta}>
+                      <span className={styles.alias}>
+                        {message.mine ? 'Tú' : message.alias}
+                      </span>
+                      <MedalBadges medals={message.badges} />
+                      <time dateTime={message.at}>
+                        {TIME.format(new Date(message.at))}
+                      </time>
                     </span>
-                    <MedalBadges medals={message.badges} />
-                    <time dateTime={message.at}>
-                      {TIME.format(new Date(message.at))}
-                    </time>
-                  </span>
-                  <span className={styles.body}>{message.body}</span>
-                </li>
-              ))}
-            </ol>
+                    <span className={styles.body}>{message.body}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
           ) : null}
         </>
       )}
