@@ -387,7 +387,7 @@ export function createHttpAuctionGateway(deps: {
       const closings = detail.rounds
         .map((round) => round.closedAt ?? round.endsAt)
         .filter((value): value is string => value !== null)
-        .sort();
+        .sort((left, right) => left.localeCompare(right));
 
       return {
         roomId: detail.id,
@@ -669,7 +669,7 @@ function createEntryResolver({
       ...chunks(itemIds, IDS_PER_REQUEST).map(async (ids) => {
         try {
           for (const item of await items.list({ ids, limit: ids.length })) {
-            store(
+            await store(
               `ITEM:${item.id}`,
               Promise.resolve(fromItem(item, item.coverUrl)),
             );
@@ -684,7 +684,7 @@ function createEntryResolver({
           // Un catalog que no conoce `ids` devuelve todos los lotes: se toman los pedidos.
           for (const lot of await lots.list(ids)) {
             if (wanted.has(lot.id))
-              store(`LOT:${lot.id}`, Promise.resolve(fromLot(lot)));
+              await store(`LOT:${lot.id}`, Promise.resolve(fromLot(lot)));
           }
         } catch {
           // Igual que arriba.
