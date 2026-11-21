@@ -1,13 +1,41 @@
 .coin {
   display: inline-block;
   flex: none;
-  border-radius: 50%;
-  background: var(--grad-coin);
+  overflow: visible;
 }
 
-/* En tamaños pequeños el diseño usa la moneda plana, sin degradado. */
-.flat {
-  background: var(--eci-yellow);
+.edge {
+  fill: var(--coin-edge);
+}
+
+.rim {
+  fill: var(--coin-rim);
+}
+
+.face {
+  fill: var(--coin-face);
+}
+
+.groove {
+  fill: none;
+  stroke: var(--coin-rim);
+  stroke-width: 1;
+  stroke-dasharray: 1.4 1.6;
+}
+
+.shine {
+  fill: none;
+  stroke: var(--coin-shine);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.glyph {
+  fill: none;
+  stroke: var(--coin-ink);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .amount {

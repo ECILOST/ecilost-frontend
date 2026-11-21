@@ -82,6 +82,14 @@
   }
 }
 
+/* En el movil las tarjetas pasan a fila (ver auction-card): una por linea. */
+@media (width < 560px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-3);
+  }
+}
+
 /* --- Secciones por urgencia ------------------------------------------------------------ */
 .section {
   display: grid;

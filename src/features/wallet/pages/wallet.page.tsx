@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { ErrorState } from '@/shared/components/error-state';
 import { Loading } from '@/shared/components/loading';
-import { formatCoins } from '@/shared/components/ui/coin';
+import { Coin, formatCoins } from '@/shared/components/ui/coin';
 import { Icon } from '@/shared/components/ui/icon';
 import { TransactionHistory } from '../components/transaction-history';
 import { useWallet } from '../hooks/use-wallet';
@@ -34,9 +34,7 @@ export function WalletPage() {
           <div className={styles.top}>
             <section className={styles.balance} aria-label="Saldo ECICoin">
               <div className={styles.balanceHead}>
-                <span className={styles.badge} aria-hidden="true">
-                  EC
-                </span>
+                <Coin size={58} className={styles.badge} />
                 <div>
                   <span className={styles.caption}>Saldo ECICoin</span>
                   <span className={styles.total}>{formatCoins(total)}</span>

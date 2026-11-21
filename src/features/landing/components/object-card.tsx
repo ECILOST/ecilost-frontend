@@ -1,4 +1,7 @@
-import { ObjectIllustration, type ObjectKind } from './object-illustration';
+import {
+  ObjectIllustration,
+  type ObjectKind,
+} from '@/shared/components/ui/object-illustration';
 import styles from './object-card.module.css';
 
 export interface ExampleObject {

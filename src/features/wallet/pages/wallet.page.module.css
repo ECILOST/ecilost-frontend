@@ -52,15 +52,7 @@
 }
 
 .badge {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: var(--grad-coin);
-  box-shadow: var(--shadow-card);
-  font: 800 1.125rem var(--font-display);
-  color: var(--eci-on-accent);
+  filter: drop-shadow(0 6px 8px rgb(90 64 28 / 25%));
 }
 
 .caption {

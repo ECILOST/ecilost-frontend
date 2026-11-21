@@ -584,9 +584,7 @@
   width: 70px;
   height: 70px;
   border-radius: 16px;
-  background: var(--grad-coin);
-  font: 800 1.125rem var(--font-display);
-  color: var(--eci-on-accent);
+  background: var(--color-warning-bg);
 }
 
 .finishedActions {
